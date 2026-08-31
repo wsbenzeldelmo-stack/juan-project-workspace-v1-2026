@@ -1,0 +1,15 @@
+/*
+ * JUAN PROJECT WORKSPACE — payments-invoice-urgency.css
+ * ------------------------------------------------------------------
+ * PURPOSE: Payments, detailed invoices, urgency theme, deadline/payment separation and progress colors.
+ * CASCADE ORDER: 9 of 11. Keep these stylesheets in this order.
+ * NOTE: This project was modularized from the working single-file app.
+ */
+
+/* V6.4 — deadline/payment separation, invoice detail, payment balance, urgency theme */
+.project-data-rush-live{display:flex;justify-content:space-between;gap:10px;margin-top:7px;font-size:11px;color:var(--text-tertiary)}.project-data-rush-live strong{font-weight:650;color:var(--text-secondary)}.project-data-rush-live .rush-live-active{color:var(--status-orange)}
+#projectOverallProgress .progress-bar-fill,.table-progress .progress-bar-fill,.current-project-progress .progress-bar-fill{background:var(--primary-mint-dark)!important}
+.payment-overview-balanced{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.payment-overview-balanced .payment-status-card{grid-column:1/-1;display:flex;align-items:center;gap:12px}.payment-overview-balanced .payment-metric-card{display:flex;align-items:center;gap:12px;min-height:94px}.payment-overview-balanced .payment-metric-card>div,.payment-overview-balanced .payment-status-card>div{display:flex;flex-direction:column;gap:3px}.payment-metric-icon{width:34px;height:34px;display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:var(--bg-subtle);color:var(--text-secondary);flex:0 0 auto}.payment-metric-icon .icon-svg{width:17px;height:17px}.payment-transaction-icon.gcash-icon{background:#eef5ff;color:#1677ff;border-color:#dce9ff;font-weight:800}.payment-transaction-icon.gcash-icon span{font-size:14px;letter-spacing:-.04em}
+.invoice-detailed-table th:nth-child(n+2),.invoice-detailed-table td:nth-child(n+2){white-space:nowrap}.invoice-detailed-table td:first-child{padding-right:18px}
+body.dashboard-urgency-theme #overviewKpis .kpi-card{transition:background-color .18s ease,border-color .18s ease}body.dashboard-urgency-theme #overviewKpis .urgency-active{background:rgba(25,186,117,.08);border-color:rgba(25,186,117,.20)}body.dashboard-urgency-theme #overviewKpis .urgency-notdone{background:rgba(142,142,147,.08);border-color:rgba(142,142,147,.18)}body.dashboard-urgency-theme #overviewKpis .urgency-due{background:rgba(255,149,0,.08);border-color:rgba(255,149,0,.22)}body.dashboard-urgency-theme #overviewKpis .urgency-overdue{background:rgba(255,59,48,.08);border-color:rgba(255,59,48,.22)}
+@media(max-width:720px){.payment-overview-balanced{grid-template-columns:1fr}.payment-overview-balanced .payment-status-card{grid-column:auto}}

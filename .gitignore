@@ -1,0 +1,31 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+
+# Logs / temporary files
+*.log
+*.tmp
+*.bak
+
+# Local environment / secrets
+.env
+.env.*
+!.env.example
+
+# Dependencies/builds if you add tooling later
+node_modules/
+dist/
+build/
+.vercel/

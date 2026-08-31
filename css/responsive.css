@@ -1,0 +1,11 @@
+/*
+ * JUAN PROJECT WORKSPACE — responsive.css
+ * ------------------------------------------------------------------
+ * PURPOSE: Small responsive override for package/catalog grids.
+ * CASCADE ORDER: 3 of 11. Keep these stylesheets in this order.
+ * NOTE: This project was modularized from the working single-file app.
+ */
+
+@media (max-width: 720px) {
+  .catalog-grid.package-grid { grid-template-columns: 1fr; }
+}

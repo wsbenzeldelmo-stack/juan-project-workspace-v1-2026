@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta content="juan-project-workspace-v1-2026 modular build" name="juan-project-source"/>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>JUAN PROJECT WORKSPACE — Your Creative Business Command Center</title>
+<!-- Supabase Client JS (Global UMD Bundle) -->
+
+<meta content="JUAN PROJECT" name="application-name"/>
+<meta content="JUAN PROJECT" name="apple-mobile-web-app-title"/>
+<meta content="yes" name="apple-mobile-web-app-capable"/>
+<meta content="default" name="apple-mobile-web-app-status-bar-style"/>
+<meta content="#2cf39e" name="theme-color"/>
+<link href="./manifest.webmanifest" rel="manifest"/>
+<link href="./assets/apple-touch-icon.png" rel="apple-touch-icon"/>
+<link href="./assets/favicon-64.png" rel="icon" sizes="64x64" type="image/png"/>
+<link href="./css/core.css" rel="stylesheet"/><link href="./css/visual-language.css" rel="stylesheet"/><link href="./css/responsive.css" rel="stylesheet"/><link href="./css/overview-assistant.css" rel="stylesheet"/><link href="./css/management-layout.css" rel="stylesheet"/><link href="./css/interactions-scroll.css" rel="stylesheet"/><link href="./css/project-catalog.css" rel="stylesheet"/><link href="./css/items-security-performance.css" rel="stylesheet"/><link href="./css/payments-invoice-urgency.css" rel="stylesheet"/><link href="./css/catalog-calendar-receipts.css" rel="stylesheet"/><link href="./css/typography-guided-assistant.css" rel="stylesheet"/></head>
+<body>
+<!--
+  JUAN PROJECT WORKSPACE — MODULAR BUILD
+  ======================================
+  HTML: page structure only
+  CSS:  ./css/
+  JS:   ./js/
+  Docs: ./docs/CODE_MAP.md and ./docs/TUTORIAL.md
+
+  IMPORTANT: Keep element IDs intact. JavaScript uses them to connect UI and data.
+-->
+<div class="app-container">
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+<div class="brand">
+<div class="brand-title">JUAN PROJECT</div>
+<div class="brand-subtitle-large">WORKSPACE</div>
+<div class="connection-status status-connected" id="connectionStatusIndicator">
+<span class="status-dot"></span> <span id="statusText">OFFLINE · LOCAL</span>
+</div>
+</div>
+<nav class="nav-menu">
+<div class="nav-section-label">WORKSPACE</div>
+<a class="nav-item active" data-view="my-works" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg></span>Overview</a>
+<a class="nav-item" data-view="assistant" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4A7 7 0 0 1 3 13V9a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg></span>AI Assistant</a>
+<a class="nav-item" data-view="projects" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><rect height="16" rx="2" width="18" x="3" y="4"></rect><path d="M7 8h10M7 12h7M7 16h5"></path></svg></span>Projects</a>
+<a class="nav-item" data-view="clients" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>Clients</a>
+<a class="nav-item" data-view="new-order" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><line x1="12" x2="12" y1="8" y2="16"></line><line x1="8" x2="16" y1="12" y2="12"></line></svg></span>New Order</a>
+<div class="nav-divider"></div>
+<div class="nav-section-label">FINANCE</div>
+<a class="nav-item" data-view="payments" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="5"></rect><line x1="2" x2="22" y1="10" y2="10"></line></svg></span>Invoices &amp; Payments</a>
+<a class="nav-item" data-view="reports" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"></line><line x1="12" x2="12" y1="20" y2="4"></line><line x1="6" x2="6" y1="20" y2="14"></line></svg></span>Reports</a>
+<div class="nav-divider"></div>
+<div class="nav-section-label">OPERATIONS</div>
+<a class="nav-item" data-view="calendar" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><rect height="16" rx="2" width="18" x="3" y="5"></rect><path d="M16 3v4M8 3v4M3 10h18"></path></svg></span>Calendar</a>
+<div class="nav-divider"></div>
+<div class="nav-section-label">CATALOG</div>
+<a class="nav-item" data-view="pricelist" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg></span>Pricelist</a>
+<div class="nav-divider"></div>
+<a class="nav-item" data-view="settings" href="#"><span class="icon"><svg class="icon-svg" viewbox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33A1.65 1.65 0 0 0 14 21v.09a2 2 0 0 1-4 0V21a1.65 1.65 0 0 0-1.51-1.6 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.23 15H4a2 2 0 0 1 0-4h.23a1.65 1.65 0 0 0 1.51-1.6 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 10 4.23V4a2 2 0 0 1 4 0v.23a1.65 1.65 0 0 0 1.51 1.51l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.77 11H20a2 2 0 0 1 0 4h-.23a1.65 1.65 0 0 0-1.51 0z"></path></svg></span>Settings</a>
+</nav>
+<div class="user-profile">
+<img alt="Profile Photo" class="user-avatar" id="sidebarAvatar" src="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' width='38' height='38' viewBox='0 0 38 38'&gt;&lt;rect width='38' height='38' fill='%2319ba75'/&gt;&lt;text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='sans-serif' font-size='14' font-weight='bold'&gt;BD&lt;/text&gt;&lt;/svg&gt;"/>
+<div class="user-info">
+<div class="user-name" id="sidebarUserName">Your Business Name</div>
+<div class="user-role">Account Owner</div>
+</div>
+</div>
+</aside>
+<!-- MAIN VIEW CONTAINER -->
+<main class="main-content">
+<!-- VIEW 1: CURRENT WORKS / DASHBOARD -->
+<section class="view active" id="view-my-works">
+<header class="page-header">
+<div>
+<div class="greeting-subtitle">Project Command Center</div>
+<h1 class="page-title">Overview</h1>
+</div>
+<div style="display: flex; gap: 12px; align-items: center;">
+<button class="btn btn-primary" onclick="app.navigateTo('new-order')">
+<svg class="icon-svg" viewbox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+              New Order
+            </button>
+</div>
+</header>
+<div id="overviewDashboard">
+<div class="kpi-grid" id="overviewKpis"></div>
+<div class="overview-priority-grid">
+<div class="card">
+<div class="overview-section-heading">
+<div><button class="overview-title-link" onclick="app.navigateTo('projects')" title="Open Projects" type="button"><h2>Current Projects</h2></button><p>Nearest deadlines first</p></div>
+<div class="overview-heading-actions">
+<button aria-label="Expand current projects" class="icon-action-button" onclick="app.openOverviewListModal('current')" title="Expand current projects">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="15 3 21 3 21 9"></polyline><line x1="14" x2="21" y1="10" y2="3"></line><polyline points="9 21 3 21 3 15"></polyline><line x1="10" x2="3" y1="14" y2="21"></line></svg>
+</button>
+</div>
+</div>
+<div class="current-projects-stack" id="overviewCurrentProjects"></div>
+</div>
+<div style="display:grid;gap:20px">
+<div class="card">
+<div class="overview-section-heading"><div><h2>Upcoming Deadlines</h2><p>What needs attention next</p></div><div class="overview-heading-actions"><button aria-label="Expand upcoming deadlines" class="icon-action-button" onclick="app.openOverviewListModal('deadlines')" title="Expand upcoming deadlines"><svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="15 3 21 3 21 9"></polyline><line x1="14" x2="21" y1="10" y2="3"></line><polyline points="9 21 3 21 3 15"></polyline><line x1="10" x2="3" y1="14" y2="21"></line></svg></button></div></div>
+<div class="attention-list" id="overviewUpcomingDeadlines"></div>
+</div>
+<div class="card">
+<div class="overview-section-heading">
+<div><h2 id="overviewCalendarTitle">Calendar</h2><p>Project deadline overview</p></div>
+<button aria-label="Open full calendar" class="icon-action-button" onclick="app.navigateTo('calendar')" title="Open full calendar"><svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="15 3 21 3 21 9"></polyline><line x1="14" x2="21" y1="10" y2="3"></line><polyline points="9 21 3 21 3 15"></polyline><line x1="10" x2="3" y1="14" y2="21"></line></svg></button>
+</div>
+<div class="overview-calendar-shell"><div class="overview-calendar" id="overviewMiniCalendar"></div></div>
+<div class="overview-upcoming-events" id="overviewUpcomingEvents"></div>
+</div>
+</div>
+</div>
+<div class="card overview-task-card">
+<div class="card-header">
+<h2 class="card-title">Current Deliverables</h2>
+<button class="btn btn-secondary btn-sm" onclick="app.navigateTo('deliverables')">View all</button>
+</div>
+<div id="overviewTaskTracker"></div>
+</div>
+</div>
+<div class="mb-6" id="paymentOverdueAlerts"></div>
+<!-- Legacy containers retained for compatibility but hidden from the project-first Overview -->
+<div class="works-grouped-list hidden" id="worksContainer"></div>
+<div class="mt-6 hidden" id="paymentDueSection">
+<h2 class="card-title mb-4">Payment Due / Unpaid Delivered Projects</h2>
+<div id="paymentDueContainer"></div>
+</div>
+</section>
+<!-- NEW VIEW: FINANCIAL ANALYTICS -->
+<section class="view" id="view-analytics">
+<header class="page-header">
+<div>
+<div class="greeting-subtitle">Financial Performance</div>
+<h1 class="page-title">Financial Analytics</h1>
+</div>
+</header>
+<div class="analytics-grid">
+<div class="metric-card">
+<div class="metric-label">Total Revenue</div>
+<div class="metric-value" id="analyticsTotalRevenue">₱ 0.00</div>
+</div>
+<div class="metric-card">
+<div class="metric-label">Total Payments Received</div>
+<div class="metric-value" id="analyticsTotalPaid" style="color:var(--primary-mint-dark);">₱ 0.00</div>
+</div>
+<div class="metric-card">
+<div class="metric-label">Outstanding Balance</div>
+<div class="metric-value" id="analyticsOutstanding" style="color:var(--status-red);">₱ 0.00</div>
+</div>
+<div class="metric-card">
+<div class="metric-label">Current Month Income</div>
+<div class="metric-value" id="analyticsMonthlyIncome">₱ 0.00</div>
+</div>
+</div>
+<div class="card mb-6">
+<h2 class="card-title mb-4">Revenue Breakdown by Month</h2>
+<div class="table-responsive">
+<table class="data-table">
+<thead>
+<tr>
+<th>Month</th>
+<th>Orders Created</th>
+<th>Payments Received</th>
+<th class="text-right">Total Monthly Amount</th>
+</tr>
+</thead>
+<tbody id="analyticsMonthlyTableBody"></tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- VIEW 2: NEW ORDER -->
+<section class="view" id="view-new-order">
+<header class="page-header">
+<div>
+<div class="greeting-subtitle">Workflow</div>
+<h1 class="page-title">New Order Entry</h1>
+</div>
+<div style="display: flex; gap: 12px; align-items: center;">
+<select class="form-control" id="templateSelectDropdown" onchange="app.loadProjectTemplate(this.value)" style="max-width: 220px;">
+<option value="">-- Load Template --</option>
+</select>
+</div>
+</header>
+<div class="order-grid">
+<div class="order-main-col">
+<div class="card mb-6">
+<div class="card-header">
+<h2 class="card-title">Client Information</h2>
+<div class="segmented-control">
+<button class="segment active" id="segExistingClientBtn" onclick="app.setClientMode('existing')">Existing</button>
+<button class="segment" id="segNewClientBtn" onclick="app.setClientMode('new')">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+                    New
+                  </button>
+</div>
+</div>
+<!-- PROJECT NAME -->
+<div class="form-group">
+<label class="form-label">Project Name *</label>
+<input class="form-control" id="orderProjectName" placeholder="Enter project name" type="text"/>
+<span class="inline-error" id="orderProjectNameError"></span>
+</div>
+<div id="clientSelectMode">
+<div class="form-group">
+<label class="form-label">Select Existing Client *</label>
+<div class="typeahead-wrap" id="orderClientTypeahead">
+<input autocomplete="off" class="form-control" id="orderClientSearch" onfocus="app.showClientSuggestions()" oninput="app.filterExistingClientOptions(this.value)" placeholder="Type a client name or email..." type="text"/>
+<input id="orderClientSelect" type="hidden"/>
+<div class="typeahead-menu" id="orderClientSuggestions"></div>
+</div>
+<span class="inline-error" id="orderClientSelectError"></span>
+</div>
+</div>
+<div class="hidden" id="clientNewMode">
+<div class="form-grid">
+<div class="form-group">
+<label class="form-label">Client Name *</label>
+<input class="form-control" id="newClientName" placeholder="Client / Business Name" type="text"/>
+<span class="inline-error" id="newClientNameError"></span>
+</div>
+<div class="form-group">
+<label class="form-label">Gmail / Email *</label>
+<input class="form-control" id="newClientEmail" placeholder="client@gmail.com" type="email"/>
+<span class="inline-error" id="newClientEmailError"></span>
+</div>
+<div class="form-group">
+<label class="form-label">Phone Number</label>
+<input class="form-control" id="newClientPhone" placeholder="+63 900 000 0000" type="text"/>
+</div>
+<div class="form-group">
+<label class="form-label">Address</label>
+<input class="form-control" id="newClientAddress" placeholder="City, Province" type="text"/>
+</div>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<h2 class="card-title">Service Catalog</h2>
+<button class="btn btn-secondary btn-sm" onclick="app.openCustomProductModal()">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+                  Custom Service
+                </button>
+</div>
+<!-- Catalog Segmented Filter -->
+<div class="segmented-control mt-4 mb-4" id="catalogSegmentControl">
+<button class="segment active" onclick="app.switchCatalogTab('SOLO')">Services</button>
+<button class="segment" onclick="app.switchCatalogTab('PACKAGE')">Packages</button>
+</div>
+<div class="catalog-grid" id="serviceCatalogGrid"></div>
+</div>
+</div>
+<div class="order-side-col">
+<div class="card sticky-card">
+<h2 class="card-title mb-4">Your Order</h2>
+<div class="cart-items-list" id="cartItemsContainer"></div>
+<div class="divider"></div>
+<div class="cart-options">
+<div class="form-group">
+<label class="form-label">Discount</label>
+<div class="input-group">
+<input class="form-control" id="cartDiscountVal" min="0" oninput="app.updateCartCalculations()" type="number" value="0"/>
+<select class="form-control" id="cartDiscountType" onchange="app.updateCartCalculations()" style="width: 80px;">
+<option value="fixed">₱</option>
+<option value="percent">%</option>
+</select>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Start Date *</label>
+<input class="form-control" id="orderStartDate" onchange="app.handleStartDateChange()" type="date"/>
+</div>
+<div class="form-group">
+<label class="form-label">Deadline Date *</label>
+<input class="form-control" id="orderDeadlineDate" onchange="app.handleDeadlineDateChange()" type="date"/>
+<span class="inline-error" id="orderDeadlineError"></span>
+</div>
+<div class="rush-fee-simple mt-3" id="rushFeeDisplayBox" style="display:none;">
+<div class="rush-summary-top">
+<span class="rush-duration">Duration: <strong id="orderDurationDays">14 days</strong></span>
+<span class="rush-simple-label" id="rushFeeBadge">STANDARD</span>
+</div>
+<div class="rush-fee-amount">Rush Fee: <strong id="orderRushFeeText">₱0.00</strong></div>
+</div>
+<div class="divider"></div>
+<div class="cart-summary-rows">
+<div class="summary-row"><span>Subtotal</span><span id="summarySubtotal">₱ 0.00</span></div><div class="summary-row" id="summaryItemDiscountRow" style="display:none"><span>Item Discounts</span><span id="summaryItemDiscount">- ₱ 0.00</span></div>
+<div class="summary-row text-danger" id="summaryDiscountRow"><span>Discount</span><span id="summaryDiscount">-₱ 0.00</span></div>
+<div class="summary-row" id="summaryRushRow"><span>Rush Fee</span><span id="summaryRushFee">+₱ 0.00</span></div>
+<div class="summary-row" id="summaryFileDeliveryRow"><span>File Delivery</span><span id="summaryFileDelivery">+₱ 0.00</span></div>
+<div class="divider"></div>
+<div class="summary-row summary-total"><span>Total</span><span id="summaryTotal">₱ 0.00</span></div>
+</div>
+<button class="btn btn-primary btn-block mt-6" onclick="app.showOrderConfirmation()">Review &amp; Create Order</button>
+</div>
+</div>
+</div>
+</div></section>
+<!-- VIEW: AI ASSISTANT -->
+<section class="view" id="view-assistant">
+<div class="assistant-page-shell">
+<aside class="assistant-page-sidebar">
+<div class="assistant-page-brand"><span class="assistant-page-brand-icon"><svg class="icon-svg" viewbox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4A7 7 0 0 1 3 13V9a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg></span><div><strong>JUAN AI</strong><span>Workspace guide</span></div></div>
+<button class="assistant-side-action" onclick="juanAI.newChat()"><svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>New conversation</button>
+<div class="assistant-side-section">SHORTCUTS</div>
+<button class="assistant-history-item" onclick="juanAI.topicProjects()">Projects</button>
+<button class="assistant-history-item" onclick="juanAI.topicDeadlines()">Deadlines &amp; Today</button>
+<button class="assistant-history-item" onclick="juanAI.topicFinance()">Finance</button>
+<div class="assistant-side-spacer"></div>
+<div class="assistant-side-foot">Local workspace assistant<br/>Guided actions only</div>
+</aside>
+<div class="assistant-page-main">
+<header class="assistant-page-header"><div><div class="greeting-subtitle">Workspace Assistant</div><h1 class="page-title">JUAN AI Assistant</h1></div><span class="assistant-local-pill">LOCAL · GUIDED</span></header>
+<div class="assistant-chat-stage">
+<div class="assistant-page-messages" id="assistantPageMessages"></div>
+<div class="assistant-suggestion-row" id="assistantSuggestions"></div>
+<div class="assistant-composer is-locked" id="assistantComposer">
+<textarea id="assistantPageInput" onkeydown="if(event.key==='Enter'&amp;&amp;!event.shiftKey){event.preventDefault();juanAI.send();}" placeholder="Choose an option above to continue." readonly="" rows="6"></textarea>
+<div class="assistant-composer-meta"><span id="assistantComposerHint"><svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M12 3v18M3 12h18"></path></svg> Guided assistant</span><button aria-label="Send" class="assistant-send-btn" disabled="" id="assistantSendBtn" onclick="juanAI.send()"><svg class="icon-svg" viewbox="0 0 24 24"><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg></button></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- VIEW: PROJECTS -->
+<section class="view" id="view-projects">
+<header class="page-header"><div><div class="greeting-subtitle">Workspace</div><h1 class="page-title">Projects</h1></div><button class="btn btn-primary" onclick="app.navigateTo('new-order')">+ New Order</button></header>
+<div class="view-toolbar unified-toolbar projects-toolbar">
+<input class="form-control" id="projectsSearch" oninput="app.queueViewRender('projects')" placeholder="Search Project ID, project name, client, or category..."/>
+<div class="toolbar-actions"><select class="compact-sort" id="projectsSort" onchange="app.setListSort('projects',this.value)"><option value="default">Default</option><option value="az">A to Z</option><option value="za">Z to A</option><option value="date">By Date</option></select><div class="filter-pills" id="projectFilters"></div></div>
+</div>
+<div class="card table-card">
+<div class="table-responsive">
+<table class="data-table unified-table projects-table">
+<thead><tr><th>Project ID</th><th>Project Name</th><th>Client</th><th>Category</th><th>Balance</th><th>Priority</th><th>Progress</th><th>Deadline</th><th>Status</th><th class="table-actions-col"></th></tr></thead>
+<tbody id="projectsTableBody"></tbody>
+</table>
+</div>
+</div>
+</section>
+<!-- VIEW: INVOICES & PAYMENTS -->
+<section class="view" id="view-payments">
+<header class="page-header"><div><div class="greeting-subtitle">Finance</div><h1 class="page-title">Invoices &amp; Payments</h1></div></header>
+<div class="view-toolbar unified-toolbar payments-toolbar">
+<input class="form-control" id="paymentsSearch" oninput="app.queueViewRender('payments')" placeholder="Search Project ID, project name, or client..."/>
+<div class="toolbar-actions"><div class="filter-pills" id="paymentFilters"></div></div>
+</div>
+<div class="card table-card"><div class="table-responsive"><table class="data-table unified-table"><thead><tr><th>Project ID</th><th>Project Name</th><th>Client</th><th>Total</th><th>Paid</th><th>Balance</th><th>Due Date</th><th>Status</th></tr></thead><tbody id="paymentsTableBody"></tbody></table></div></div>
+</section>
+<!-- VIEW: REPORTS -->
+<section class="view" id="view-reports">
+<header class="page-header"><div><div class="greeting-subtitle">Finance &amp; Insights</div><h1 class="page-title">Reports</h1></div></header>
+<div id="reportsContent"></div>
+</section>
+<!-- VIEW: CLIENT PROFILE -->
+<section class="view" id="view-client-profile">
+<header class="page-header"><div><button class="btn-text mb-2" onclick="app.navigateTo('clients')">← Back to Clients</button><div class="greeting-subtitle" id="clientProfileEmail"></div><h1 class="page-title" id="clientProfileName">Client</h1></div><button class="btn btn-secondary" id="clientProfileEditBtn">Edit Client</button></header>
+<div id="clientProfileContent"></div>
+</section>
+<!-- VIEW 3: PROJECT DETAILS -->
+<section class="view" id="view-project-details">
+<header class="page-header">
+<div>
+<button class="btn-text mb-2" onclick="app.navigateTo('projects')">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="19" x2="5" y1="12" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+              Back to Projects
+            </button>
+<h1 class="page-title" id="projDetailTitle">Project Title</h1>
+<div class="project-detail-inline-meta" id="projDetailClient">JP-000  |  email@example.com</div>
+</div>
+<div class="action-buttons-group project-primary-actions">
+<button class="btn btn-primary" id="btnMarkDeliveredHeader" onclick="app.promptMarkAsDelivered()">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              Mark as Delivered
+            </button>
+<button class="btn btn-primary" onclick="app.openRecordPaymentModal()">
+<svg class="icon-svg" viewbox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+              Record Payment
+            </button>
+<div class="popover-wrap" id="projectDetailMenu">
+<button aria-label="Project options" class="icon-more-button project-header-more vertical-more" onclick="app.togglePopover('projectDetailMenu',event)" title="Project options">⋮</button>
+<div class="popover-panel project-detail-menu">
+<button class="popover-action" onclick="app.openProjectData()">Edit Project</button>
+<button class="popover-action text-danger" onclick="app.deleteCurrentProject()">Delete Project</button>
+</div>
+</div>
+</div>
+</header>
+<div class="project-overall-progress" id="projectOverallProgress">
+<div class="project-overall-progress-head">
+<div><span>Project Progress</span><strong id="projectOverallProgressPercent">0%</strong></div>
+<span id="projectOverallProgressCount">0 / 0</span>
+</div>
+<div class="progress-bar-track"><div class="progress-bar-fill" id="projectOverallProgressBar" style="width:0%"></div></div>
+</div>
+<div class="tabs-nav project-details-tabs">
+<button class="tab-btn" data-project-tab="project-data" onclick="app.switchProjectTab('project-data', event)">Project Data</button>
+<button class="tab-btn active" data-project-tab="deliverables" onclick="app.switchProjectTab('deliverables', event)">Deliverables</button>
+<button class="tab-btn" data-project-tab="payment-tracker" onclick="app.switchProjectTab('payment-tracker', event)">Payment Monitoring</button>
+<button class="tab-btn" data-project-tab="invoice" onclick="app.switchProjectTab('invoice', event)">Invoice</button>
+<button class="tab-btn" data-project-tab="notes" onclick="app.switchProjectTab('notes', event)">Notes</button>
+</div>
+<div class="tab-content" id="projTab-project-data">
+<div class="project-data-grid">
+<div class="card project-data-card">
+<div class="card-header"><div><div class="section-kicker">CLIENT</div><h3 class="card-title">Client Information</h3></div></div>
+<div class="project-data-form-grid">
+<div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="projectDataClientName" oninput="app.scheduleProjectDataAutosave()"/></div>
+<div class="form-group"><label class="form-label">Email Address</label><input class="form-control" id="projectDataClientEmail" oninput="app.scheduleProjectDataAutosave()" type="email"/></div>
+<div class="form-group"><label class="form-label">Phone Number</label><input class="form-control" id="projectDataClientPhone" oninput="app.scheduleProjectDataAutosave()"/></div>
+<div class="form-group"><label class="form-label">Address</label><input class="form-control" id="projectDataClientAddress" oninput="app.scheduleProjectDataAutosave()"/></div>
+</div>
+</div>
+<div class="card project-data-card project-data-project-card">
+<div class="card-header"><div><div class="section-kicker">PROJECT</div><h3 class="card-title">Project Information</h3></div></div>
+<div class="project-data-form-grid">
+<div class="form-group"><label class="form-label">Project ID</label><input class="form-control" id="projectDataProjectId" readonly=""/></div>
+<div class="form-group"><label class="form-label">Project Name</label><input class="form-control" id="projectDataProjectName" oninput="app.scheduleProjectDataAutosave()"/></div>
+<div class="form-group"><label class="form-label">Project Start Date</label><input class="form-control" id="projectDataStartDate" onchange="app.handleProjectDataStartDateChange();app.scheduleProjectDataAutosave()" type="date"/></div>
+<div class="form-group"><label class="form-label">Project Deadline</label><input class="form-control" id="projectDataDeadline" onchange="app.handleProjectDataDeadlineChange();app.scheduleProjectDataAutosave()" type="date"/><div class="project-data-rush-live" id="projectDataRushLive"></div></div>
+</div>
+<div class="project-priority-toggle-row">
+<div><strong>Priority</strong></div>
+<label class="toggle-switch"><input id="projectDataPriority" onchange="app.scheduleProjectDataAutosave()" type="checkbox"/><span class="toggle-slider"></span></label>
+</div>
+</div>
+</div>
+<div class="card project-items-receipt-card">
+<div class="card-header">
+<div><div class="section-kicker">ORDER</div><h3 class="card-title">Items</h3><div class="text-sm text-muted mt-1">Items added here are reflected automatically in Deliverables.</div></div>
+<button class="btn btn-secondary btn-sm" onclick="app.openProjectOrderBatchModal()">Add Items</button>
+</div>
+<div id="projectOrderItemsList"></div>
+</div>
+</div>
+<div class="tab-content active" id="projTab-deliverables">
+<div class="card deliverables-main-card">
+<div class="card-header deliverables-header-row">
+<div><div class="section-kicker">PRODUCTION</div><h3 class="card-title">Deliverables</h3><div class="deliverables-overall-copy"><span id="projDetailProgressCount">0 / 0 completed</span><strong id="projDetailProgressPercent">0%</strong></div></div>
+</div>
+<div class="progress-bar-track deliverables-overall-progress"><div class="progress-bar-fill" id="projDetailProgressBar" style="width:0%"></div></div>
+<div class="deliverables-list" id="projectDeliverablesList"></div>
+</div>
+</div>
+<div class="tab-content" id="projTab-payment-tracker">
+<div class="card mb-6">
+<div class="card-header">
+<h3 class="card-title">Payment Overview &amp; Calculations</h3>
+<button class="btn btn-primary btn-sm" onclick="app.openRecordPaymentModal()">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+                Record Payment
+              </button>
+</div>
+<div id="paymentCalculationsOverview"></div>
+</div>
+<div class="card">
+<div class="card-header"><h3 class="card-title">Payment History</h3></div>
+<div id="paymentHistoryList"></div>
+</div>
+</div>
+<div class="tab-content" id="projTab-invoice">
+<div class="invoice-actions-bar mb-4">
+<button class="btn btn-secondary btn-sm" onclick="app.saveInvoicePDF()">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect height="8" width="12" x="6" y="14"></rect></svg>
+              Save as PDF
+            </button>
+<button class="btn btn-secondary btn-sm" onclick="app.saveInvoiceImage()">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
+              Save as Image
+            </button>
+<button class="btn btn-secondary btn-sm" onclick="app.sendDeadlineReminderEmail()">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              Send Deadline Reminder
+            </button>
+<button class="btn btn-primary btn-sm" onclick="app.sendBalanceReminderEmail()">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+              Send Balance Email
+            </button>
+</div>
+<div class="invoice-paper" id="invoicePaperPrintable"></div>
+</div>
+<div class="tab-content" id="projTab-notes">
+<div class="card">
+<h3 class="card-title mb-3">Project Notes</h3>
+<textarea class="form-control" id="projectNotesTextarea" placeholder="Add specific client requests, asset URLs, or technical constraints..." rows="6"></textarea>
+<div class="mt-3 text-right">
+<button class="btn btn-primary btn-sm" onclick="app.saveProjectNotes()">Save Notes</button>
+</div>
+</div>
+</div>
+</section>
+<!-- VIEW 4: CALENDAR -->
+<section class="view" id="view-calendar">
+<header class="page-header">
+<div>
+<div class="greeting-subtitle">Schedule</div>
+<h1 class="page-title">Deadline Calendar</h1>
+</div>
+<div class="calendar-controls">
+<button class="btn btn-secondary btn-sm" onclick="app.changeCalendarMonth(-1)">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              Prev
+            </button>
+<button class="btn btn-secondary btn-sm" onclick="app.resetCalendarToToday()">Today</button>
+<button class="btn btn-secondary btn-sm" onclick="app.changeCalendarMonth(1)">
+              Next
+              <svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="9 18 15 12 9 6"></polyline></svg>
+</button>
+</div>
+</header>
+<div class="card">
+<div class="calendar-header-title mb-4" id="calendarMonthYearHeader">August 2026</div>
+<div class="calendar-grid-header">
+<div>SUN</div><div>MON</div><div>TUE</div><div>WED</div><div>THU</div><div>FRI</div><div>SAT</div>
+</div>
+<div class="calendar-grid-cells" id="calendarGridCells"></div>
+</div>
+</section>
+<!-- VIEW 6: CLIENTS -->
+<section class="view" id="view-clients">
+<header class="page-header"><div><div class="greeting-subtitle">Directory</div><h1 class="page-title">Clients Directory</h1></div></header>
+<div class="view-toolbar unified-toolbar"><input class="form-control" id="clientsSearch" oninput="app.queueViewRender('clients')" placeholder="Search client name, email, number, or address..." type="text"/><div class="toolbar-actions"><select class="compact-sort" id="clientsSort" onchange="app.setListSort('clients',this.value)"><option value="az">A to Z</option><option value="za">Z to A</option></select></div></div>
+<div id="clientsListGrid"></div>
+</section>
+<!-- VIEW 7: PRICELIST -->
+<section class="view" id="view-pricelist">
+<header class="page-header">
+<div><div class="greeting-subtitle">Seller Catalog</div><h1 class="page-title">Catalog</h1></div>
+<div class="action-buttons-group"><button class="btn btn-secondary" onclick="app.openCatalogCategoryModal()">+ Category</button><button class="btn btn-primary" onclick="app.openCatalogPackageModal()">+ Create Package</button></div>
+</header>
+<div class="view-toolbar unified-toolbar catalog-toolbar"><input class="form-control" id="catalogManagerSearch" oninput="app.queueViewRender('catalog')" placeholder="Search services, categories, packages, or inclusions..." type="text"/><div class="toolbar-actions"><select class="compact-sort" id="catalogSort" onchange="app.setListSort('catalog',this.value)"><option value="az">A to Z</option><option value="za">Z to A</option></select><div class="filter-pills" id="catalogManagerFilters"></div></div></div>
+<div class="catalog-seller-layout">
+<aside class="card catalog-category-panel"><div class="catalog-panel-heading"><div><h2 class="card-title">Categories</h2></div><button class="btn btn-secondary btn-sm" onclick="app.openCatalogCategoryModal()">Add</button></div><div class="catalog-category-list" id="catalogCategoryList"></div></aside>
+<div class="catalog-manager-main">
+<div class="card table-card" id="catalogServicesCard"><div class="catalog-panel-heading catalog-table-heading"><div><div class="section-kicker">SERVICES</div><h2 class="card-title" id="catalogSelectedCategoryTitle">All Services</h2></div><div class="catalog-heading-actions"><button class="btn btn-primary btn-sm" onclick="app.openCatalogServiceModal()">+ Add Service</button><button aria-label="Expand pricelist" class="icon-action-button" onclick="app.openCatalogFullView()" title="Expand pricelist"><svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="15 3 21 3 21 9"></polyline><line x1="14" x2="21" y1="10" y2="3"></line><polyline points="9 21 3 21 3 15"></polyline><line x1="10" x2="3" y1="14" y2="21"></line></svg></button></div></div><div class="table-responsive"><table class="data-table unified-table catalog-services-table"><thead><tr><th>Service</th><th>Category</th><th>Description</th><th>Price</th><th></th></tr></thead><tbody id="catalogServicesBody"></tbody></table></div></div>
+<div class="card table-card" id="catalogPackagesCard"><div class="catalog-panel-heading catalog-table-heading"><div><div class="section-kicker">BUNDLES</div><h2 class="card-title">Packages</h2></div><button class="btn btn-secondary btn-sm" onclick="app.openCatalogPackageModal()">Create Package</button></div><div class="table-responsive"><table class="data-table unified-table catalog-packages-table"><thead><tr><th>Package</th><th>Category</th><th>Inclusions</th><th>Original Price</th><th>Offer Price</th><th></th></tr></thead><tbody id="catalogPackagesBody"></tbody></table></div></div>
+</div>
+</div>
+</section>
+<!-- VIEW 8: POLISHED APPLE-STYLE SETTINGS -->
+<section class="view" id="view-settings">
+<header class="page-header">
+<div>
+<div class="greeting-subtitle">Preferences</div>
+<h1 class="page-title">Settings</h1>
+</div>
+</header>
+<div class="settings-grid">
+<!-- Profile Section -->
+<div class="card">
+<h2 class="card-title mb-4">Profile</h2>
+<div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+<img alt="Profile Photo" class="user-avatar" id="settingsAvatarPreview" src="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'&gt;&lt;rect width='64' height='64' fill='%2319ba75'/&gt;&lt;text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='sans-serif' font-size='22' font-weight='bold'&gt;BD&lt;/text&gt;&lt;/svg&gt;" style="width: 64px; height: 64px; font-size: 20px;"/>
+<div>
+<input accept="image/jpeg,image/png,image/webp" id="profilePhotoFileInput" onchange="app.handleProfilePhotoUpload(event)" style="display:none;" type="file"/>
+<div class="action-buttons-group">
+<button class="btn btn-secondary btn-sm" onclick="document.getElementById('profilePhotoFileInput').click()">Change Photo</button>
+<button class="btn btn-text text-danger" onclick="app.removeProfilePhoto()">Remove</button>
+</div>
+<div class="text-sm text-muted mt-2">JPG, PNG, or WEBP up to 5MB</div>
+</div>
+</div>
+<div class="form-group">
+<label class="form-label">Account Owner Name</label>
+<input class="form-control" id="ownerNameInput" onblur="app.updateOwnerName(this.value)" type="text" value="Your Business Name"/>
+</div>
+<div class="form-group">
+<label class="form-label">Billing Address</label>
+<textarea class="form-control" id="ownerAddressInput" onblur="app.updateOwnerAddress(this.value)" rows="2">Your Address Here</textarea>
+</div>
+<div class="form-grid">
+<div class="form-group">
+<label class="form-label">Phone Number</label>
+<input class="form-control" id="ownerPhoneInput" onblur="app.updateOwnerPhone(this.value)" type="text" value="Your Phone Number"/>
+</div>
+<div class="form-group">
+<label class="form-label">Email (Gmail)</label>
+<input class="form-control" id="ownerEmailInput" onblur="app.updateOwnerEmail(this.value)" type="email" value="your.email@example.com"/>
+</div>
+</div>
+<div class="form-group mt-2">
+<label class="form-label">Role</label>
+<input class="form-control" disabled="" style="background:var(--bg-subtle);" type="text" value="Workspace Owner"/>
+</div>
+</div>
+<!-- Appearance & Dark Mode Toggle Section -->
+<div class="card">
+<h2 class="card-title mb-4">Appearance &amp; Theme</h2>
+<div class="form-group">
+<label class="form-label">Theme Mode</label>
+<select class="form-control" id="themeModeSelect" onchange="app.setThemeMode(this.value)">
+<option value="light">Light Mode</option>
+<option value="dark">Dark Mode</option>
+</select>
+</div>
+<div class="form-group mt-4">
+<label class="form-label">Project Command Center Theme</label>
+<select class="form-control" id="dashboardThemeSelect" onchange="app.setDashboardTheme(this.value)">
+<option value="standard">Standard</option>
+<option value="urgency">Urgency</option>
+</select>
+<div class="text-sm text-muted mt-2">Urgency adds restrained status colors to the four Overview KPI cards only.</div>
+</div>
+<div class="toggle-row mt-4 assistant-bubble-setting">
+<div><div class="form-label" style="margin:0">Assistant Bubble</div><div class="text-sm text-muted mt-1">Show deadline reminders and a shortcut to the AI Assistant.</div></div>
+<label class="toggle-switch"><input id="assistantBubbleToggle" onchange="juanAI.setBubbleEnabled(this.checked)" type="checkbox"/><span class="toggle-slider"></span></label>
+</div>
+<div class="form-group mt-4">
+<label class="form-label">Accent Color</label>
+<div style="display:flex; align-items:center; gap:12px;">
+<div style="width:28px; height:28px; border-radius:50%; background:var(--primary-mint); border:1px solid var(--border-medium);"></div>
+<span class="font-semibold text-sm">Mint Green (Default)</span>
+</div>
+</div>
+</div>
+<!-- Data Backup & Recovery Section -->
+<div class="card">
+<h2 class="card-title mb-4">Data Backup &amp; Restore</h2>
+<p class="text-sm text-secondary mb-4">Export your complete database backup or restore previously saved data safely.</p>
+<div class="action-buttons-group">
+<button class="btn btn-primary btn-sm" onclick="app.exportDataBackup()">Export JSON Backup</button>
+<input accept=".json" id="backupFileInput" onchange="app.importDataBackup(event)" style="display:none;" type="file"/>
+<button class="btn btn-secondary btn-sm" onclick="document.getElementById('backupFileInput').click()">Restore / Import Data</button>
+</div>
+</div>
+<!-- Protected Workspace Reset -->
+<div class="card reset-data-card">
+<div class="reset-data-row">
+<div>
+<h2 class="card-title">Reset Data</h2>
+<p class="text-sm text-secondary mt-2">Reset projects, clients, payments, catalog changes, and other operational workspace data back to the preloaded dataset. Your owner profile, theme, and connection settings are kept.</p>
+</div>
+<button class="btn btn-danger btn-sm" onclick="app.openResetDataModal()">Reset Data</button>
+</div>
+</div>
+<div class="card">
+<h2 class="card-title mb-4">Import Historical Records</h2>
+<p class="text-sm text-secondary mb-4">Import old project records from CSV, or paste rows directly below. Existing matching references are skipped.</p>
+<div class="action-buttons-group mb-4">
+<input accept=".csv,text/csv" id="legacyCSVInput" onchange="app.handleLegacyCSVImport(event)" style="display:none;" type="file"/>
+<button class="btn btn-primary btn-sm" onclick="document.getElementById('legacyCSVInput').click()">Import CSV</button>
+</div>
+<textarea class="form-control" id="legacyPasteData" placeholder="Paste historical rows here, including the header row..." rows="5"></textarea>
+<div class="mt-3 text-right">
+<button class="btn btn-secondary btn-sm" onclick="app.importPastedSheetData()">Import Pasted Data</button>
+</div>
+<div class="text-sm text-muted mt-3">Recognized columns: Date/Reference, Client Name, Project Name, Project Type, Amount Due, Amount Received, Payment Status, Pending Amount.</div>
+</div>
+<!-- About Section -->
+<div class="card">
+<h2 class="card-title mb-4">About</h2>
+<div class="font-bold">JUAN PROJECT WORKSPACE</div>
+<div class="text-sm text-muted mt-1">Juan Project Management System V6.9.2, 2026</div>
+<div class="text-sm text-secondary mt-3">Offline-first command center for projects, clients, deliverables, invoices, payments, reports, and historical record imports.</div>
+</div>
+</div>
+</section>
+</main>
+</div>
+<div class="modal-backdrop" id="editProjectModal">
+<div class="modal-card modal-wide">
+<div class="modal-header">
+<div><h3 class="modal-title">Edit Project Record</h3><div class="text-sm text-muted">Update project, client, financial, and completion details.</div></div>
+<button class="modal-close" onclick="app.closeModal('editProjectModal')">×</button>
+</div>
+<div class="modal-body">
+<div class="modal-section-title">Record &amp; project</div>
+<div class="edit-grid">
+<div class="form-group"><label class="form-label">Record Reference</label><input class="form-control" id="editProjectLegacyRef"/></div>
+<div class="form-group"><label class="form-label">Record Date</label><input class="form-control" id="editProjectRecordDate" type="date"/></div>
+<div class="form-group"><label class="form-label">Project Name</label><input class="form-control" id="editProjectTitle"/></div>
+<div class="form-group"><label class="form-label">Category</label><input class="form-control" id="editProjectType" list="editProjectCategorySuggestions" placeholder="Enter category"/><datalist id="editProjectCategorySuggestions"></datalist></div>
+</div>
+<div class="modal-section">
+<div class="modal-section-title">Client</div>
+<div class="edit-grid">
+<div class="form-group"><label class="form-label">Client Name</label><input class="form-control" id="editProjectClientName"/></div>
+<div class="form-group"><label class="form-label">Client Email</label><input class="form-control" id="editProjectClientEmail" type="email"/></div>
+</div>
+</div>
+<div class="modal-section">
+<div class="modal-section-title">Financial details</div>
+<div class="edit-grid">
+<div class="form-group"><label class="form-label">Amount Due</label><input class="form-control" id="editProjectAmount" min="0" step="0.01" type="number"/></div>
+<div class="form-group"><label class="form-label">Amount Received</label><input class="form-control" id="editProjectAmountReceived" min="0" step="0.01" type="number"/></div>
+<div class="form-group"><label class="form-label">Payment Status</label><input class="form-control" id="editProjectPaymentStatus" placeholder="Completed, Downpayment, Pending…"/></div>
+<div class="form-group"><label class="form-label">Pending Amount</label><input class="form-control" id="editProjectPendingAmount" min="0" step="0.01" type="number"/></div>
+</div>
+</div>
+<div class="modal-section">
+<div class="modal-section-title">Schedule &amp; completion</div>
+<div class="edit-grid">
+<div class="form-group"><label class="form-label">Start Date</label><input class="form-control" id="editProjectStartDate" type="date"/></div>
+<div class="form-group"><label class="form-label">Deadline / Completion Date</label><input class="form-control" id="editProjectDeadline" type="date"/></div>
+<div class="form-group"><label class="form-label">Priority</label><select class="form-control" id="editProjectPriority"><option value="NO">No</option><option value="YES">Yes</option></select><div class="text-sm text-muted mt-2">Automatically treated as Yes when there is a rush fee or the timeline is under 14 days.</div></div>
+</div>
+<div class="toggle-row">
+<div><div class="font-semibold">Completed project</div><div class="text-sm text-muted">Turn off to return this record to Current Projects.</div></div>
+<label class="toggle-switch"><input id="editProjectCompletedToggle" type="checkbox"/><span class="toggle-slider"></span></label>
+</div>
+</div>
+</div>
+<div class="modal-footer"><button class="btn btn-secondary" onclick="app.closeModal('editProjectModal')">Cancel</button><button class="btn btn-primary" onclick="app.submitEditProject()">Save Changes</button></div>
+</div>
+</div>
+<!-- MODAL: EDIT CLIENT -->
+<div class="modal-backdrop" id="editClientModal">
+<div class="modal-card">
+<div class="modal-header">
+<h3 class="modal-title">Edit Client Details</h3>
+<button class="modal-close" onclick="app.closeModal('editClientModal')">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+</div>
+<div class="modal-body">
+<input id="editClientId" type="hidden"/>
+<div class="form-group">
+<label class="form-label">Client Name *</label>
+<input class="form-control" id="editClientName" placeholder="Client Name" type="text"/>
+<span class="inline-error" id="editClientNameError"></span>
+</div>
+<div class="form-group">
+<label class="form-label">Email *</label>
+<input class="form-control" id="editClientEmail" placeholder="client@gmail.com" type="email"/>
+<span class="inline-error" id="editClientEmailError"></span>
+</div>
+<div class="form-group">
+<label class="form-label">Phone Number *</label>
+<input class="form-control" id="editClientPhone" placeholder="+63 900 000 0000" type="text"/>
+<span class="inline-error" id="editClientPhoneError"></span>
+</div>
+<div class="form-group">
+<label class="form-label">Address</label>
+<input class="form-control" id="editClientAddress" placeholder="City, Province" type="text"/>
+</div>
+<div class="form-group">
+<label class="form-label">Notes</label>
+<textarea class="form-control" id="editClientNotes" placeholder="Client notes..." rows="3"></textarea>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" onclick="app.closeModal('editClientModal')">Cancel</button>
+<button class="btn btn-primary" onclick="app.submitEditClient()">Save</button>
+</div>
+</div>
+</div>
+<!-- MODAL: RECORD PAYMENT -->
+<div class="modal-backdrop" id="recordPaymentModal">
+<div class="modal-card">
+<div class="modal-header">
+<h3 class="modal-title" id="recordPaymentModalTitle">Record Payment</h3>
+<button class="modal-close" onclick="app.closeModal('recordPaymentModal')">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+</div>
+<div class="modal-body">
+<div class="form-group">
+<label class="form-label">Amount Paid (₱) *</label>
+<input class="form-control" id="paymentAmountInput" placeholder="2000.00" step="0.01" type="number"/>
+<span class="inline-error" id="paymentAmountError"></span>
+</div>
+<div class="form-group">
+<label class="form-label">Payment Date *</label>
+<input class="form-control" id="paymentDateInput" type="date"/>
+<span class="inline-error" id="paymentDateError"></span>
+</div>
+<div class="form-group">
+<label class="form-label">Payment Method *</label>
+<select class="form-control" id="paymentMethodInput">
+<option value="GCash">GCash</option>
+<option value="Bank Transfer">Bank Transfer</option>
+<option value="Other">Other</option>
+</select>
+</div>
+<div class="form-group">
+<label class="form-label">Reference Number</label>
+<input class="form-control" id="paymentRefInput" placeholder="Ref / Txn ID" type="text"/>
+</div>
+<div class="form-group">
+<label class="form-label">Notes</label>
+<input class="form-control" id="paymentNotesInput" placeholder="Optional payment notes" type="text"/>
+</div>
+<div class="form-group">
+<label class="form-label">Receipt Attachment</label>
+<input accept="image/*,application/pdf" class="form-control" id="paymentReceiptInput" type="file"/><div class="receipt-ocr-status" id="paymentOcrStatus">Attach an image receipt to detect its reference number locally.</div>
+<div class="text-sm text-muted mt-2" id="paymentReceiptCurrent"></div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" onclick="app.closeModal('recordPaymentModal')">Cancel</button>
+<button class="btn btn-primary" id="recordPaymentSaveBtn" onclick="app.submitPaymentRecord()">Continue</button>
+</div>
+</div>
+</div>
+<!-- MODAL: ORDER CONFIRMATION -->
+<div class="modal-backdrop" id="orderSummaryModal">
+<div class="modal-card">
+<div class="modal-header">
+<h3 class="modal-title">Order Summary</h3>
+<button class="modal-close" onclick="app.closeModal('orderSummaryModal')">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+</div>
+<div class="modal-body" id="orderSummaryModalBody"></div>
+<div class="modal-footer">
+<button class="btn btn-secondary" onclick="app.closeModal('orderSummaryModal')">Back</button>
+<button class="btn btn-primary" onclick="app.confirmAndCreateOrder()">Confirm</button>
+</div>
+</div>
+</div>
+<!-- MODAL: CUSTOM PRODUCT -->
+<div class="modal-backdrop" id="customProductModal">
+<div class="modal-card">
+<div class="modal-header">
+<h3 class="modal-title">Add Custom Service</h3>
+<button class="modal-close" onclick="app.closeModal('customProductModal')">
+<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+</div>
+<div class="modal-body">
+<div class="form-group">
+<label class="form-label">Service Name *</label>
+<input class="form-control" id="customProdName" placeholder="Custom Service Name" type="text"/>
+<span class="inline-error" id="customProdNameError"></span>
+</div>
+<div class="form-grid">
+<div class="form-group">
+<label class="form-label">Price (₱) *</label>
+<input class="form-control" id="customProdPrice" type="number" value="1000"/>
+<span class="inline-error" id="customProdPriceError"></span>
+</div>
+<div class="form-group">
+<label class="form-label">Quantity</label>
+<input class="form-control" id="customProdQty" min="1" type="number" value="1"/>
+</div>
+</div>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" onclick="app.closeModal('customProductModal')">Cancel</button>
+<button class="btn btn-primary" onclick="app.addCustomProductToCart()">Save</button>
+</div>
+</div>
+</div>
+<input id="taskStatusInput" type="hidden" value="Not Started"/>
+<!-- MODAL: BATCH ADD PROJECT ORDER ITEMS -->
+<div class="modal-backdrop" id="projectOrderBatchModal">
+<div class="modal-card modal-wide project-batch-modal">
+<div class="modal-header">
+<div><div class="section-kicker">ORDER ITEMS</div><h3 class="modal-title">Add Items</h3><div class="text-sm text-muted">Select catalog items in one pass. Standalone services may receive an item discount; packages already use their offer price.</div></div>
+<button class="modal-close" onclick="app.closeModal('projectOrderBatchModal')">×</button>
+</div>
+<div class="modal-body">
+<div class="form-group"><label class="form-label">Find Services or Packages</label><input autocomplete="off" class="form-control" id="projectOrderBatchSearch" oninput="app.renderProjectOrderBatchChoices(this.value)" placeholder="Type to search available items..."/></div>
+<div class="project-batch-picker" id="projectOrderBatchChoices"></div>
+<div class="project-batch-custom">
+<div class="project-batch-custom-head"><strong>Custom item</strong><span>Use only when it is not in the catalog.</span></div>
+<div class="project-batch-custom-grid"><input class="form-control" id="projectBatchCustomName" placeholder="Item name"/><input aria-label="Quantity" class="form-control" id="projectBatchCustomQty" min="1" type="number" value="1"/><input class="form-control" id="projectBatchCustomPrice" min="0" placeholder="Price" step="0.01" type="number"/><button class="btn btn-secondary" onclick="app.addCustomProjectBatchItem()" type="button">Add</button></div>
+</div>
+<div class="project-batch-selected" id="projectOrderBatchSelected"></div>
+<div class="project-batch-summary"><div><span>Selected</span><strong id="projectOrderBatchCount">0 items</strong></div><div><span>Added item total</span><strong id="projectOrderBatchTotal">₱ 0.00</strong></div></div>
+</div>
+<div class="modal-footer"><button class="btn btn-secondary" onclick="app.closeModal('projectOrderBatchModal')">Cancel</button><button class="btn btn-primary" disabled="" id="projectOrderBatchAddBtn" onclick="app.commitProjectOrderBatch()">Add Selected Items</button></div>
+</div>
+</div>
+<!-- MODAL: EDIT PROJECT ORDER ITEM -->
+<div class="modal-backdrop" id="projectOrderItemModal">
+<div class="modal-card">
+<div class="modal-header"><h3 class="modal-title" id="projectOrderItemModalTitle">Edit Order Item</h3><button class="modal-close" onclick="app.closeModal('projectOrderItemModal')">×</button></div>
+<div class="modal-body">
+<input id="projectOrderItemIndex" type="hidden"/>
+<div class="form-group typeahead-wrap"><label class="form-label">Item / Service Name</label><input autocomplete="off" class="form-control" id="projectOrderItemName" onfocus="app.renderProjectOrderItemSuggestions(this.value)" oninput="app.renderProjectOrderItemSuggestions(this.value)" placeholder="Type to search catalog or enter a custom item" type="text"/><div class="typeahead-menu project-item-suggestions" id="projectOrderItemSuggestions"></div></div>
+<div class="form-grid">
+<div class="form-group"><label class="form-label">Type</label><div class="segmented-control" id="projectOrderItemTypeSegments"><button class="segment active" data-order-type="SOLO" onclick="app.setProjectOrderItemType('SOLO')" type="button">Service</button><button class="segment" data-order-type="PACKAGE" onclick="app.setProjectOrderItemType('PACKAGE')" type="button">Package</button></div><input id="projectOrderItemType" type="hidden" value="SOLO"/></div>
+<div class="form-group"><label class="form-label">Quantity</label><input class="form-control" id="projectOrderItemQty" min="1" step="1" type="number" value="1"/></div>
+</div>
+<div class="form-group"><label class="form-label">Unit Price (₱)</label><input class="form-control" id="projectOrderItemPrice" min="0" step="0.01" type="number" value="0"/></div><div class="form-group" id="projectOrderItemDiscountGroup"><label class="form-label">Item Discount (₱)</label><input class="form-control" id="projectOrderItemDiscount" min="0" step="0.01" type="number" value="0"/><div class="text-sm text-muted mt-2">Available for standalone services only. Packages already use their offer price.</div></div>
+</div>
+<div class="modal-footer"><button class="btn btn-secondary" onclick="app.closeModal('projectOrderItemModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveProjectOrderItem()">Save Item</button></div>
+</div>
+</div>
+<div class="modal-backdrop" id="projectDeliverableModal">
+<div class="modal-card">
+<div class="modal-header"><div><div class="section-kicker">PROJECT</div><h3 class="modal-title">Add Deliverable</h3></div><button class="modal-close" onclick="app.closeModal('projectDeliverableModal')">×</button></div>
+<div class="modal-body">
+<div class="form-group typeahead-wrap"><label class="form-label">Deliverable</label><input autocomplete="off" class="form-control" id="projectDeliverableName" onfocus="app.renderProjectDeliverableSuggestions(this.value)" oninput="app.renderProjectDeliverableSuggestions(this.value)" placeholder="Type to search catalog or enter manually"/><div class="typeahead-menu" id="projectDeliverableSuggestions"></div></div>
+</div>
+<div class="modal-footer"><button class="btn btn-secondary" onclick="app.closeModal('projectDeliverableModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveProjectDeliverable()">Add Deliverable</button></div>
+</div>
+</div>
+<!-- UNIFIED CONFIRMATION / PROCESSING MODALS -->
+<div class="modal-backdrop" id="confirmationModal">
+<div class="modal-card compact-validation-modal">
+<div class="validation-graphic validation-question" id="confirmModalGraphic"><svg class="icon-svg lg" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9a2.8 2.8 0 0 1 5.1 1.6c0 2-2.6 2.2-2.6 4"></path><path d="M12 18h.01"></path></svg></div>
+<div class="validation-copy"><h3 class="modal-title" id="confirmModalTitle">Confirm Action</h3><p id="confirmModalDescription">Please confirm this action.</p></div>
+<div class="modal-footer validation-actions"><button class="btn btn-secondary" onclick="app.closeModal('confirmationModal')">Cancel</button><button class="btn btn-primary" id="confirmModalActionBtn">Confirm</button></div>
+</div>
+</div>
+<div class="modal-backdrop" id="actionStatusModal">
+<div class="modal-card compact-validation-modal action-status-card">
+<div class="action-status-graphic" id="actionStatusGraphic"><span class="action-spinner"></span></div>
+<div class="validation-copy"><h3 class="modal-title" id="actionStatusTitle">Processing</h3><p id="actionStatusMessage">Please wait…</p></div>
+</div>
+</div>
+<!-- PIN-PROTECTED DESTRUCTIVE ACTIONS -->
+<div class="modal-backdrop" id="destructivePinModal">
+<div class="modal-card compact-validation-modal reset-pin-modal">
+<div class="validation-graphic reset-lock-graphic"><svg class="icon-svg lg" viewbox="0 0 24 24"><rect height="10" rx="2" width="14" x="5" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path><path d="M12 14v2"></path></svg></div>
+<div class="validation-copy"><h3 class="modal-title" id="destructivePinTitle">Confirm deletion</h3><p id="destructivePinDescription">Enter your 6-digit PIN to continue.</p></div>
+<div class="form-group reset-pin-field"><label class="form-label" for="destructivePinInput">PIN Code</label><input autocomplete="off" class="form-control reset-pin-input" id="destructivePinInput" inputmode="numeric" maxlength="6" onkeydown="if(event.key==='Enter'){event.preventDefault();app.confirmDestructivePin();}" placeholder="••••••" type="password"/><span class="inline-error hidden" id="destructivePinError">Incorrect PIN.</span></div>
+<div class="modal-footer validation-actions"><button class="btn btn-secondary" onclick="app.closeModal('destructivePinModal')">Cancel</button><button class="btn btn-danger" onclick="app.confirmDestructivePin()">Continue</button></div>
+</div>
+</div>
+<!-- PIN-PROTECTED RESET DATA -->
+<div class="modal-backdrop" id="resetDataPinModal">
+<div class="modal-card compact-validation-modal reset-pin-modal">
+<div class="validation-graphic reset-lock-graphic">
+<svg class="icon-svg lg" viewbox="0 0 24 24"><rect height="10" rx="2" width="14" x="5" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path><path d="M12 14v2"></path></svg>
+</div>
+<div class="validation-copy">
+<h3 class="modal-title">Reset Workspace Data</h3>
+<p>Enter your 6-digit PIN to continue.</p>
+</div>
+<div class="form-group reset-pin-field">
+<label class="form-label" for="resetDataPinInput">PIN Code</label>
+<input autocomplete="off" class="form-control reset-pin-input" id="resetDataPinInput" inputmode="numeric" maxlength="6" onkeydown="if(event.key==='Enter') app.confirmResetDataPin()" pattern="[0-9]*" placeholder="••••••" type="password"/>
+<div class="inline-error hidden" id="resetDataPinError">Incorrect PIN. Please try again.</div>
+</div>
+<div class="modal-footer validation-actions">
+<button class="btn btn-secondary" onclick="app.closeModal('resetDataPinModal')">Cancel</button>
+<button class="btn btn-danger" onclick="app.confirmResetDataPin()">Continue</button>
+</div>
+</div>
+</div>
+<!-- CATALOG MANAGER MODALS -->
+<div class="modal-backdrop" id="catalogCategoryModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CATALOG</div><h3 class="modal-title" id="catalogCategoryModalTitle">Add Category</h3></div><button class="modal-close" onclick="app.closeModal('catalogCategoryModal')">×</button></div><div class="modal-body"><input id="catalogCategoryOldName" type="hidden"/><div class="form-group"><label class="form-label">Category Name</label><input class="form-control" id="catalogCategoryName" placeholder="Category name"/></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogCategoryDeleteBtn" onclick="app.deleteCatalogCategory()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogCategoryModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogCategory()">Save Category</button></div></div></div>
+<div class="modal-backdrop" id="catalogServiceModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CATALOG</div><h3 class="modal-title" id="catalogServiceModalTitle">Add Service</h3></div><button class="modal-close" onclick="app.closeModal('catalogServiceModal')">×</button></div><div class="modal-body"><input id="catalogServiceCode" type="hidden"/><div class="form-group"><label class="form-label">Service Name</label><input class="form-control" id="catalogServiceName" placeholder="Service name"/></div><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="catalogServiceCategory"></select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control" id="catalogServiceDescription" placeholder="What is included or produced" rows="3"></textarea></div><div class="form-group"><label class="form-label">Price (₱)</label><input class="form-control" id="catalogServicePrice" min="0" step="0.01" type="number"/></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogServiceDeleteBtn" onclick="app.deleteCatalogService()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogServiceModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogService()">Save Service</button></div></div></div>
+<div class="modal-backdrop" id="catalogPackageModal"><div class="modal-card modal-wide"><div class="modal-header"><div><div class="section-kicker">PACKAGE BUILDER</div><h3 class="modal-title" id="catalogPackageModalTitle">Create Package</h3></div><button class="modal-close" onclick="app.closeModal('catalogPackageModal')">×</button></div><div class="modal-body"><input id="catalogPackageCode" type="hidden"/><div class="form-grid"><div class="form-group"><label class="form-label">Package Name</label><input class="form-control" id="catalogPackageName" placeholder="Package name"/></div><div class="form-group"><label class="form-label">Category</label><select class="form-control" id="catalogPackageCategory" onchange="app.renderPackageServiceChoices(document.getElementById('catalogPackageServiceSearch').value)"></select></div></div><div class="form-group"><label class="form-label">Find Services</label><input class="form-control" id="catalogPackageServiceSearch" oninput="app.renderPackageServiceChoices(this.value)" placeholder="Type to search available services..."/></div><div class="package-service-picker" id="catalogPackageServiceChoices"></div><div class="package-builder-summary"><div><span>Original service total</span><strong id="catalogPackageOriginalTotal">₱0.00</strong></div><div class="form-group" style="margin:0"><label class="form-label">Offer / Discounted Price (₱)</label><input class="form-control" id="catalogPackageSellingPrice" min="0" step="0.01" type="number"/></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogPackageDeleteBtn" onclick="app.deleteCatalogPackage()">Delete</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogPackageModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogPackage()">Save Package</button></div></div></div>
+<!-- JUAN ASSISTANT BUBBLE: optional shortcut + due-today reminder -->
+<div class="assistant-bubble-wrap" id="assistantBubbleWrap">
+<div class="assistant-deadline-nudge" hidden="" id="assistantDeadlineNudge"></div>
+<button aria-label="Open JUAN Assistant" class="assistant-fab" id="assistantFab" onclick="app.navigateTo('assistant')">
+<svg class="icon-svg" viewbox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4A7 7 0 0 1 3 13V9a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg>
+<span class="assistant-fab-badge" hidden="" id="assistantFabBadge">0</span>
+</button>
+</div>
+<div class="toast-container" id="toastContainer"></div>
+<!-- SINGLE JAVASCRIPT LOGIC ENGINE -->
+<!-- MODAL: FULL PRICELIST -->
+<div class="modal-backdrop" id="catalogFullViewModal">
+<div class="modal-card catalog-full-modal">
+<div class="modal-header">
+<div><div class="section-kicker">PRICELIST</div><h3 class="modal-title" id="catalogFullViewTitle">Catalog</h3></div>
+<button class="modal-close" onclick="app.closeModal('catalogFullViewModal')">×</button>
+</div>
+<div class="modal-body catalog-full-modal-body" id="catalogFullViewBody"></div>
+</div>
+</div>
+<!-- MODAL: REVENUE MILESTONE -->
+<div class="modal-backdrop" id="revenueMilestoneModal">
+<div class="modal-card milestone-celebration-modal">
+<button class="modal-close milestone-close" onclick="app.closeModal('revenueMilestoneModal')">×</button>
+<div class="milestone-confetti" id="milestoneConfetti"></div>
+<div class="milestone-celebration-icon"><svg class="icon-svg lg" viewbox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z"></path><path d="M7 6H4v2a4 4 0 0 0 4 4M17 6h3v2a4 4 0 0 1-4 4"></path></svg></div>
+<div class="section-kicker">REVENUE MILESTONE</div>
+<h3 class="milestone-celebration-title" id="milestoneCelebrationTitle">Milestone reached</h3>
+<p class="milestone-celebration-copy" id="milestoneCelebrationCopy"></p>
+<div class="milestone-share-actions">
+<button class="btn btn-primary" onclick="app.shareRevenueMilestone()">Share</button>
+<button class="btn btn-secondary" onclick="app.shareRevenueMilestoneToFacebook()">Facebook</button>
+<button class="btn btn-secondary" onclick="app.shareRevenueMilestoneToX()">X</button>
+<button class="btn btn-secondary" onclick="app.copyRevenueMilestone()">Copy Caption</button>
+</div>
+</div>
+</div>
+<script src="./js/app.js"></script>
+<div class="modal-backdrop" id="overviewListModal">
+<div class="modal-card modal-wide overview-list-modal-card">
+<div class="modal-header"><div><div class="section-kicker">OVERVIEW</div><h3 class="modal-title" id="overviewListModalTitle">Projects</h3></div><button class="modal-close" onclick="app.closeModal('overviewListModal')">×</button></div>
+<div class="overview-modal-list" id="overviewListModalBody"></div>
+</div>
+</div>
+<script defer="" src="./ocr/tesseract.min.js"></script>
+<script src="./js/assistant-bridge.js"></script>
+<script src="./js/assistant.js"></script>
+<script src="./js/pwa.js"></script>
+</body>
+</html>
