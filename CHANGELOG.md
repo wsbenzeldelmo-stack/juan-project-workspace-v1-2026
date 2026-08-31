@@ -1,16 +1,31 @@
-# v1.1.3 — Mobile Companion + Quick Payment OCR
+# JUAN PROJECT WORKSPACE v1.1.4
 
-- Rebuilt the phone UI around the final companion model: Overview, AI, Finance.
-- Upcoming Deadlines now appear first on Overview.
-- Current Projects use simple cards with one progress bar along the bottom edge.
-- Tapping a project opens a read-only mobile viewer with only Deliverables and Invoice.
-- Replaced the old mobile navigation with a fixed iOS-style translucent dock.
-- Added a raised green center `+` quick action for Record Payment.
-- Added phone-friendly payment entry for project, amount, method, date and reference number.
-- Added Take Photo / Choose Photo receipt actions.
-- Added local receipt OCR to suggest a reference/transaction number when the bundled OCR engine is available.
-- Reference number remains editable if OCR is wrong or unavailable.
-- Added a green swipe-to-record interaction; the swipe itself is the payment confirmation on mobile.
-- Finance mobile view now emphasizes Outstanding, Collected, Receivables and Recent Payments.
-- Layout uses dynamic viewport units and iOS safe-area insets, so it works in Safari and installed web-app mode without hard-coding one iPhone size.
-- Desktop workspace remains unchanged.
+## Mobile workflow
+- Final five-slot mobile navigation: Overview · Projects · + · AI · Finance.
+- Floating iPhone-style navigation capsule with maximum pill radius, safe-area handling, larger touch targets, and fixed high z-index.
+- Quick Access center button: Create Order, Edit Order, Record Payment.
+- Upcoming Deadlines moved to the top with horizontal scrolling and soft feather edges.
+- Compact Project Status strip: Active, Remaining deliverables, Due.
+- Current Projects header opens a full active-project sheet with deadline tags and progress.
+- Projects list reduced to Project ID, name, progress, deadline, tags, and a vertical action menu.
+- Project detail sheet prioritizes deadline/status/progress, then Deliverables and Payment Monitoring.
+- Deliverables can be checked/un-checked on mobile.
+- Add Item reuses the existing Service Catalog / batch-add project-item workflow.
+- Payment Monitoring shows balance, paid, total, recent payment activity, and receipt thumbnails.
+- Mobile receipt capture supports Camera / Photos, local OCR when available, editable reference number, and receipt attachment.
+- Swipe to Record Payment uses the existing payment engine and its success state.
+- AI returns to the existing guided project encoding/editing workflow.
+- Finance remains intentionally compact.
+
+## Fees and invoice
+- System Maintenance is system-defined at PHP 1.00 once per project whenever any package is present, including restored/older package projects.
+- Rush Production Fee now considers Project Timeline and Project Workload using system-defined tiers.
+- Current Workload Adjustment retains the existing workload snapshot rules for projects starting at project 052.
+- Existing production standards remain: one standalone service = 7 days; two or more standalone services = 14 days; any package = 14 days.
+- Invoice totals section simplified to Subtotal, Discount, Additional Fees, TOTAL, Amount Paid, and Balance.
+- Additional Fees list Rush Production Fee, Current Workload Adjustment, and System Maintenance with compact info explanations.
+
+## Visual language
+- Retains JUAN fonts, green palette, white surfaces, neutral metadata, and existing status colors.
+- Project/finance mobile pages use rows for lists and cards only for summaries to maximize usable screen area.
+- Desktop toolbar filters are grouped into a quieter segmented control; primary header action uses a compact pill treatment.

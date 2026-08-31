@@ -13,3 +13,42 @@
 .invoice-detailed-table th:nth-child(n+2),.invoice-detailed-table td:nth-child(n+2){white-space:nowrap}.invoice-detailed-table td:first-child{padding-right:18px}
 body.dashboard-urgency-theme #overviewKpis .kpi-card{transition:background-color .18s ease,border-color .18s ease}body.dashboard-urgency-theme #overviewKpis .urgency-active{background:rgba(25,186,117,.08);border-color:rgba(25,186,117,.20)}body.dashboard-urgency-theme #overviewKpis .urgency-notdone{background:rgba(142,142,147,.08);border-color:rgba(142,142,147,.18)}body.dashboard-urgency-theme #overviewKpis .urgency-due{background:rgba(255,149,0,.08);border-color:rgba(255,149,0,.22)}body.dashboard-urgency-theme #overviewKpis .urgency-overdue{background:rgba(255,59,48,.08);border-color:rgba(255,59,48,.22)}
 @media(max-width:720px){.payment-overview-balanced{grid-template-columns:1fr}.payment-overview-balanced .payment-status-card{grid-column:auto}}
+
+/* v1.1.4 — predefined rush factors + simplified invoice totals */
+.rush-factors-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.rush-factors-summary span{display:grid;gap:2px;padding:8px 10px;border-radius:10px;background:var(--bg-subtle);color:var(--text-tertiary);font-size:10px;line-height:1.25}.rush-factors-summary b{font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-secondary);font-weight:700}.invoice-simple-summary{margin-top:22px;margin-left:auto;width:min(100%,430px);border-top:1px solid var(--border-light)}.invoice-simple-row{display:flex;justify-content:space-between;gap:20px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border-light);font-size:12px}.invoice-simple-row>span{color:var(--text-secondary)}.invoice-simple-row>strong{text-align:right;font-variant-numeric:tabular-nums}.invoice-simple-section{padding:16px 0 6px;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:750;color:var(--text-tertiary)}.invoice-fee-row{padding:8px 0;border-bottom:0}.invoice-fee-row .mini-info{margin-left:4px}.invoice-additional-total{margin-top:6px;border-top:1px solid var(--border-light);font-weight:650}.invoice-grand-total{margin-top:8px;padding:15px 0;font-size:16px;border-top:2px solid var(--text-primary)}.invoice-grand-total>span,.invoice-grand-total>strong{color:var(--text-primary)}.invoice-balance-row{font-size:14px;font-weight:700}.invoice-thankyou{margin-top:22px}
+@media(max-width:720px){.rush-factors-summary{grid-template-columns:1fr}.invoice-simple-summary{width:100%}}
+
+/* v1.1.4 — quieter action hierarchy / unified toolbar controls */
+.page-header > .btn.btn-primary{
+  min-height:40px;
+  padding:0 16px;
+  border-radius:999px!important;
+  font-size:13px;
+  box-shadow:none!important;
+}
+.unified-toolbar .filter-pills{
+  gap:2px!important;
+  padding:3px!important;
+  border:1px solid var(--border-subtle);
+  border-radius:12px;
+  background:var(--bg-subtle);
+}
+.unified-toolbar .filter-pill{
+  min-height:32px!important;
+  padding:0 11px!important;
+  border:0!important;
+  border-radius:9px!important;
+  background:transparent!important;
+  color:var(--text-secondary);
+  box-shadow:none!important;
+}
+.unified-toolbar .filter-pill.active{
+  background:var(--bg-card)!important;
+  color:var(--primary-mint-dark)!important;
+  box-shadow:0 1px 4px rgba(0,0,0,.06)!important;
+}
+.unified-toolbar .compact-sort{
+  min-height:38px;
+  border-radius:11px;
+  background-color:var(--bg-card);
+}

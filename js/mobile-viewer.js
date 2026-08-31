@@ -1,198 +1,130 @@
 /*
- * JUAN PROJECT WORKSPACE — Mobile Companion v1.1.3
- * -------------------------------------------------
- * Mobile is a companion, not the full management system.
+ * JUAN PROJECT WORKSPACE — Mobile Workflow v1.1.4
+ * ------------------------------------------------
+ * Five-tab iPhone companion:
+ * Overview · Projects · + Quick Access · AI · Finance
  *
- * Mobile destinations:
- *   1. Overview — deadlines, status, project progress
- *   2. AI       — guided project lookup and workspace questions
- *   3. Finance  — receivables, revenue and recent payments
- *
- * The center + button is the only primary write action on mobile:
- * Record Payment -> attach receipt -> local OCR -> swipe to confirm.
- *
- * Desktop behavior is intentionally untouched.
+ * Mobile reuses the desktop data/actions so edits remain consistent.
  */
 (function(){
+  'use strict';
   const PHONE_QUERY='(max-width: 820px)';
-  const allowedMobileViews=new Set(['my-works','assistant','reports']);
-  let redirecting=false;
-  let receiptFile=null;
-
+  const ALLOWED=new Set(['my-works','projects','assistant','reports','new-order','project-details']);
   const $=(s,r=document)=>r.querySelector(s);
   const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
-  const money=n=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:2}).format(Number(n||0));
   const esc=s=>String(s??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-  const today=()=>{const d=new Date(),y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');return `${y}-${m}-${day}`};
-  const projectRef=p=>`JP-${String(Number(p?.project_number||0)).padStart(3,'0')}`;
+  const money=n=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:2}).format(Number(n||0));
+  const today=()=>{const d=new Date();return [d.getFullYear(),String(d.getMonth()+1).padStart(2,'0'),String(d.getDate()).padStart(2,'0')].join('-')};
   const isPhone=()=>window.matchMedia(PHONE_QUERY).matches;
-  const isStandalone=()=>window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;
+  const projectRef=p=>`JP-${String(Number(p?.project_number||0)).padStart(3,'0')}`;
+  const icon=path=>`<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`;
+  let receiptFile=null,lastDataSignature='',activeProjectId='',projectTab='deliverables',redirecting=false,editReturnProjectId='';
 
-  function getWorkspaceApp(){
-    try{if(typeof app!=='undefined'&&app&&typeof app.navigateTo==='function')return app}catch(_){}
-    if(window.app&&typeof window.app.navigateTo==='function')return window.app;
-    return null;
+  function workspace(){
+    try{if(typeof app!=='undefined'&&app&&typeof app.navigateTo==='function')return app}catch(_){/* global lexical const */}
+    return window.app&&typeof window.app.navigateTo==='function'?window.app:null;
   }
   function readProjects(){try{return JSON.parse(localStorage.getItem('JUAN_PROJECTS_LOCAL')||'[]')||[]}catch(_){return []}}
   function activeProjects(){return readProjects().filter(p=>!p.deleted&&p.status!=='Completed'&&p.delivery_status!=='Delivered'&&!p.archived_at)}
-  function paymentsFor(p){return Array.isArray(p?.payments)?p.payments:[]}
-  function paid(p){return paymentsFor(p).reduce((s,x)=>s+Number(x.amount_paid||x.amount||0),0)}
-  function total(p){return Number(p?.total_amount||0)+Number(p?.system_maintenance_charge||0)}
-  function balance(p){return Math.max(0,total(p)-paid(p))}
+  function payments(p){return Array.isArray(p?.payments)?p.payments:[]}
+  function paid(p){return payments(p).reduce((s,x)=>s+Number(x.amount_paid||x.amount||0),0)}
+  function maintenance(p){const items=p?.project_items||p?.items||[];return Array.isArray(items)&&items.some(i=>String(i?.type||'').toUpperCase()==='PACKAGE')?1:0}
+  function invoiceTotal(p){return Math.max(0,Number(p?.total_amount||0))+maintenance(p)}
+  function balance(p){return Math.max(0,invoiceTotal(p)-paid(p))}
   function realDeliverables(p){return (p?.deliverables||[]).filter(d=>!d.is_group)}
-  function progress(p){const ds=realDeliverables(p);if(!ds.length)return {done:0,total:0,pct:0};const done=ds.filter(d=>d.completed).length;return {done,total:ds.length,pct:Math.round(done/ds.length*100)}}
-  function dateLabel(v){if(!v)return 'On hold';const d=new Date(`${String(v).slice(0,10)}T00:00:00`);if(Number.isNaN(d.getTime()))return 'On hold';return d.toLocaleDateString('en-PH',{month:'short',day:'numeric'})}
-  function daysFromToday(v){if(!v)return null;const d=new Date(`${String(v).slice(0,10)}T00:00:00`),n=new Date(`${today()}T00:00:00`);if(Number.isNaN(d.getTime()))return null;return Math.round((d-n)/86400000)}
-  function urgency(p){const n=daysFromToday(p.deadline_date);if(n===null)return {label:'ON HOLD',cls:'neutral'};if(n<0)return {label:'OVERDUE',cls:'danger'};if(n===0)return {label:'TODAY',cls:'danger'};if(n===1)return {label:'TOMORROW',cls:'warning'};if(n<=7)return {label:`${n} DAYS`,cls:'warning'};return {label:dateLabel(p.deadline_date).toUpperCase(),cls:'neutral'}}
-  function paymentStatus(p){const b=balance(p),x=paid(p);return b<=0&&total(p)>0?'PAID':x>0?'DOWNPAYMENT':'PENDING'}
-  function icon(path){return `<svg viewBox="0 0 24 24" aria-hidden="true">${path}</svg>`}
+  function progress(p){const ds=realDeliverables(p),done=ds.filter(d=>d.completed).length;return {done,total:ds.length,pct:ds.length?Math.round(done/ds.length*100):0}}
+  function dateObj(v){if(!v)return null;const d=new Date(`${String(v).slice(0,10)}T00:00:00`);return Number.isNaN(d.getTime())?null:d}
+  function dateLabel(v,long=false){const d=dateObj(v);if(!d)return 'On hold';return d.toLocaleDateString('en-PH',long?{month:'short',day:'numeric',year:'numeric'}:{month:'short',day:'numeric'})}
+  function daysFromToday(v){const d=dateObj(v),n=dateObj(today());return d&&n?Math.round((d-n)/86400000):null}
+  function urgency(p){const n=daysFromToday(p?.deadline_date);if(n===null)return {label:'ON HOLD',cls:'neutral'};if(n<0)return {label:'OVERDUE',cls:'danger'};if(n===0)return {label:'DUE TODAY',cls:'danger'};if(n===1)return {label:'TOMORROW',cls:'warning'};if(n<=7)return {label:`DUE IN ${n}D`,cls:'warning'};return {label:dateLabel(p.deadline_date).toUpperCase(),cls:'neutral'}}
+  function paymentStatus(p){const b=balance(p),x=paid(p);return b<=0&&invoiceTotal(p)>0?'PAID':x>0?'DOWNPAYMENT':'PENDING'}
+  function priority(p){return !!p?.priority||Number(p?.rush_fee||0)>0||Number(p?.rush_days_early||0)>0}
+  function sortCurrent(list){return list.slice().sort((a,b)=>{const ad=daysFromToday(a.deadline_date),bd=daysFromToday(b.deadline_date);return (ad??9999)-(bd??9999)||Number(priority(b))-Number(priority(a))||Number(a.project_number||0)-Number(b.project_number||0)})}
+  function projectTags(p){const out=[];if(priority(p))out.push('<span class="m-tag priority">PRIORITY</span>');const u=urgency(p);out.push(`<span class="m-tag ${u.cls}">${u.label}</span>`);return out.join('')}
+  function currentView(){const active=$('.view.active');return active?active.id.replace(/^view-/,''):'my-works'}
 
   function buildShell(){
     if(!$('.mobile-topbar')){
-      const top=document.createElement('header');top.className='mobile-topbar';
-      top.innerHTML=`<div class="mobile-brand-lockup"><img class="mobile-brand-mark" src="./assets/icon-192.png" alt=""><div><div class="mobile-brand-name">JUAN PROJECT</div><div class="mobile-brand-mode">Mobile Companion</div></div></div>`;
-      document.body.prepend(top);
+      const top=document.createElement('header');top.className='mobile-topbar';top.innerHTML=`<div class="mobile-brand-lockup"><img src="./assets/icon-192.png" class="mobile-brand-mark" alt=""><div><strong>JUAN PROJECT</strong><span id="mobilePageLabel">Overview</span></div></div>`;document.body.prepend(top);
     }
     if(!$('.mobile-bottom-nav')){
-      const bottom=document.createElement('nav');bottom.className='mobile-bottom-nav';bottom.setAttribute('aria-label','JUAN mobile navigation');
-      bottom.innerHTML=`
-        <button class="mobile-nav-item" data-mobile-view="my-works" type="button">${icon('<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>')}<span>Overview</span></button>
-        <button class="mobile-nav-item" data-mobile-view="assistant" type="button">${icon('<path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4A7 7 0 0 1 3 13V9a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6Z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/>')}<span>AI</span></button>
-        <button class="mobile-payment-fab" id="mobilePaymentFab" type="button" aria-label="Record payment">${icon('<path d="M12 5v14M5 12h14"/>')}</button>
-        <button class="mobile-nav-item" data-mobile-view="reports" type="button">${icon('<path d="M4 19V9M10 19V5M16 19v-7M22 19V3"/><path d="M2 19h20"/>')}<span>Finance</span></button>`;
-      document.body.appendChild(bottom);
-      bottom.addEventListener('click',e=>{const btn=e.target.closest('[data-mobile-view]');if(btn){e.preventDefault();activate(btn.dataset.mobileView)}});
-      $('#mobilePaymentFab',bottom)?.addEventListener('click',openQuickPayment);
+      const nav=document.createElement('nav');nav.className='mobile-bottom-nav';nav.setAttribute('aria-label','Mobile navigation');nav.innerHTML=`
+        <button type="button" class="mobile-nav-item" data-mobile-view="my-works">${icon('<path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>')}<span>Overview</span></button>
+        <button type="button" class="mobile-nav-item" data-mobile-view="projects">${icon('<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M8 9h8M8 13h8M8 17h5"/>')}<span>Projects</span></button>
+        <button type="button" class="mobile-quick-fab" id="mobileQuickFab" aria-label="Quick access">${icon('<path d="M12 5v14M5 12h14"/>')}</button>
+        <button type="button" class="mobile-nav-item" data-mobile-view="assistant">${icon('<path d="M12 3l1.4 4.2L18 9l-4.6 1.8L12 15l-1.4-4.2L6 9l4.6-1.8L12 3Z"/><path d="M18 15l.8 2.2L21 18l-2.2.8L18 21l-.8-2.2L15 18l2.2-.8L18 15Z"/>')}<span>AI</span></button>
+        <button type="button" class="mobile-nav-item" data-mobile-view="reports">${icon('<path d="M4 18V10M10 18V6M16 18v-5M22 18V4"/><path d="M2 20h20"/>')}<span>Finance</span></button>`;
+      document.body.appendChild(nav);
+      nav.addEventListener('click',e=>{const b=e.target.closest('[data-mobile-view]');if(b){e.preventDefault();activate(b.dataset.mobileView)}});
+      $('#mobileQuickFab',nav).addEventListener('click',e=>{e.preventDefault();openQuickAccess()});
     }
-    buildProjectViewer();
-    buildQuickPaymentSheet();
+    buildAllProjectsSheet();buildProjectSheet();buildActionSheet();buildQuickAccessSheet();buildQuickPaymentSheet();buildEditOrderSheet();
   }
 
-  function currentView(){const active=$('.view.active');return active?active.id.replace(/^view-/,''):'my-works'}
-  function syncActive(view=currentView()){
-    document.body.classList.toggle('mobile-on-assistant',view==='assistant');
-    document.body.classList.toggle('mobile-on-finance',view==='reports');
+  function syncNav(view=currentView()){
+    const labels={"my-works":'Overview',projects:'Projects',assistant:'JUAN AI',reports:'Finance','new-order':'Create Order','project-details':'Project'};
+    const lab=$('#mobilePageLabel');if(lab)lab.textContent=labels[view]||'JUAN PROJECT';
     $$('.mobile-nav-item').forEach(b=>{const on=b.dataset.mobileView===view;b.classList.toggle('active',on);b.setAttribute('aria-current',on?'page':'false')});
   }
-  function activate(view){const workspace=getWorkspaceApp();if(!workspace)return;workspace.navigateTo(view);syncActive(view);if(view==='my-works')renderMobileOverview();if(view==='reports')renderMobileFinance();try{window.scrollTo({top:0,behavior:'instant'})}catch(_){window.scrollTo(0,0)}}
-  function enforce(){if(!isPhone()||redirecting)return;const view=currentView();if(allowedMobileViews.has(view))return;const workspace=getWorkspaceApp();if(!workspace)return;redirecting=true;workspace.navigateTo('assistant');setTimeout(()=>{redirecting=false;syncActive('assistant');window.juanAI?.home?.(true)},0)}
+  function activate(view){const w=workspace();if(!w)return;w.navigateTo(view);syncNav(view);if(view==='my-works')renderOverview();if(view==='projects')renderProjects();if(view==='reports')renderFinance();try{window.scrollTo({top:0,behavior:'instant'})}catch(_){window.scrollTo(0,0)}}
+  function enforce(){if(!isPhone()||redirecting)return;const v=currentView();if(ALLOWED.has(v))return;redirecting=true;workspace()?.navigateTo('my-works');setTimeout(()=>{redirecting=false;syncNav('my-works');renderOverview()},0)}
 
-  function renderMobileOverview(){
-    if(!isPhone())return;
-    const host=$('#overviewDashboard');if(!host)return;
-    let mobile=$('#mobileOverviewCompanion');if(!mobile){mobile=document.createElement('div');mobile.id='mobileOverviewCompanion';mobile.className='mobile-companion-screen';host.parentNode.insertBefore(mobile,host)}
-    const active=activeProjects();
-    const deadlines=active.filter(p=>p.deadline_date).sort((a,b)=>String(a.deadline_date).localeCompare(String(b.deadline_date))).slice(0,4);
-    const unfinished=active.reduce((s,p)=>s+realDeliverables(p).filter(d=>!d.completed).length,0);
-    const overdue=active.filter(p=>(daysFromToday(p.deadline_date)??0)<0).length;
-    const projectRows=active.sort((a,b)=>{const ad=daysFromToday(a.deadline_date),bd=daysFromToday(b.deadline_date);return (ad??9999)-(bd??9999)||Number(b.priority)-Number(a.priority)||Number(a.project_number)-Number(b.project_number)}).slice(0,12);
-    mobile.innerHTML=`
-      <section class="m-section m-deadlines-section">
-        <div class="m-section-head"><div><span class="m-eyebrow">UPCOMING</span><h2>Deadlines</h2></div><span class="m-count">${deadlines.length}</span></div>
-        <div class="m-deadline-strip">${deadlines.length?deadlines.map(p=>{const u=urgency(p);return `<button class="m-deadline-card" data-open-project="${esc(p.id)}" type="button"><span class="m-deadline-date">${dateLabel(p.deadline_date)}</span><strong>${esc(p.title||'Untitled')}</strong><small>${projectRef(p)}</small><span class="m-status ${u.cls}">${u.label}</span></button>`}).join(''):'<div class="m-empty">No upcoming deadlines.</div>'}</div>
-      </section>
-      <section class="m-summary-card">
-        <div><span>Active</span><strong>${active.length}</strong></div>
-        <div><span>Remaining</span><strong>${unfinished}</strong></div>
-        <div><span>Overdue</span><strong class="${overdue?'danger-text':''}">${overdue}</strong></div>
-      </section>
-      <section class="m-section">
-        <div class="m-section-head"><div><span class="m-eyebrow">WORK</span><h2>Current Projects</h2></div></div>
-        <div class="m-project-list">${projectRows.length?projectRows.map(p=>{const pr=progress(p),u=urgency(p);return `<button class="m-project-card" data-open-project="${esc(p.id)}" type="button"><div class="m-project-top"><span class="m-project-ref">${projectRef(p)}</span><span class="m-status ${u.cls}">${u.label}</span></div><strong class="m-project-title">${esc(p.title||'Untitled Project')}</strong><span class="m-project-client">${esc(p.client_email||p.client_name||'')}</span><div class="m-project-meta"><span>${pr.total?`${pr.done}/${pr.total} complete`:'No deliverables'}</span><strong>${money(balance(p))} balance</strong></div><div class="m-progress"><i style="width:${pr.pct}%"></i></div></button>`}).join(''):'<div class="m-empty">No active projects.</div>'}</div>
-      </section>`;
-    mobile.onclick=e=>{const btn=e.target.closest('[data-open-project]');if(btn)openProjectViewer(btn.dataset.openProject)};
+  function projectRow(p,{withMenu=false}={}){const pr=progress(p);return `<article class="m-project-row" data-open-project="${esc(p.id)}"><div class="m-project-row-main"><div class="m-project-idline"><span>${projectRef(p)}</span><div class="m-tags">${projectTags(p)}</div></div><strong>${esc(p.title||'Untitled Project')}</strong><div class="m-project-row-meta"><span>${pr.done}/${pr.total||0}</span><span>${dateLabel(p.deadline_date)}</span></div><div class="m-progress"><i style="width:${pr.pct}%"></i></div></div>${withMenu?`<button type="button" class="m-more" data-project-menu="${esc(p.id)}" aria-label="Project actions">⋮</button>`:''}</article>`}
+
+  function renderOverview(){
+    if(!isPhone())return;const host=$('#overviewDashboard');if(!host)return;let screen=$('#mobileOverview');if(!screen){screen=document.createElement('div');screen.id='mobileOverview';screen.className='mobile-companion-screen';host.parentNode.insertBefore(screen,host)}
+    const current=sortCurrent(activeProjects()),unfinished=current.reduce((s,p)=>s+realDeliverables(p).filter(d=>!d.completed).length,0),due=current.filter(p=>{const n=daysFromToday(p.deadline_date);return n!==null&&n<=7}).length,deadlines=current.filter(p=>p.deadline_date).slice(0,8);
+    screen.innerHTML=`
+      <section class="m-section m-deadline-section"><button type="button" class="m-section-title m-title-button" data-open-current-list><span><small>UPCOMING</small><strong>Deadlines</strong></span><em>${deadlines.length}</em></button><div class="m-scroll-feather"><div class="m-deadline-strip">${deadlines.length?deadlines.map(p=>{const u=urgency(p);return `<button type="button" class="m-deadline-chip" data-open-project="${esc(p.id)}"><span>${dateLabel(p.deadline_date)}</span><strong>${esc(p.title||'Untitled')}</strong><small>${projectRef(p)}</small><em class="${u.cls}">${u.label}</em></button>`}).join(''):'<div class="m-empty-inline">No upcoming deadlines.</div>'}</div></div></section>
+      <section class="m-stats-strip"><div><strong>${current.length}</strong><span>Active</span></div><div><strong>${unfinished}</strong><span>Remaining</span></div><div><strong>${due}</strong><span>Due</span></div></section>
+      <section class="m-section"><button type="button" class="m-section-title m-title-button" data-open-current-list><span><small>WORK</small><strong>Current Projects</strong></span><em>View all</em></button><div class="m-project-list">${current.slice(0,5).map(p=>projectRow(p)).join('')||'<div class="m-empty">No active projects.</div>'}</div></section>`;
+    screen.onclick=e=>{const list=e.target.closest('[data-open-current-list]');if(list){openAllProjects();return}const row=e.target.closest('[data-open-project]');if(row)openProject(row.dataset.openProject)};
   }
 
-  function buildProjectViewer(){
-    if($('#mobileProjectViewer'))return;
-    const el=document.createElement('div');el.id='mobileProjectViewer';el.className='m-sheet-backdrop';el.innerHTML=`<section class="m-sheet m-project-viewer" role="dialog" aria-modal="true"><header class="m-sheet-head"><button class="m-sheet-close" type="button" aria-label="Close">×</button><div><span id="mProjectRef"></span><h2 id="mProjectTitle">Project</h2></div></header><div class="m-segmented"><button class="active" data-mtab="deliverables" type="button">Deliverables</button><button data-mtab="invoice" type="button">Invoice</button></div><div id="mProjectBody" class="m-sheet-body"></div></section>`;document.body.appendChild(el);
-    $('.m-sheet-close',el).onclick=()=>closeSheet(el);
-    el.addEventListener('click',e=>{if(e.target===el)closeSheet(el);const tab=e.target.closest('[data-mtab]');if(tab){$$('[data-mtab]',el).forEach(x=>x.classList.toggle('active',x===tab));renderProjectTab(el.dataset.projectId,tab.dataset.mtab)}});
-  }
-  function openProjectViewer(id){const p=readProjects().find(x=>String(x.id)===String(id));if(!p)return;const el=$('#mobileProjectViewer');el.dataset.projectId=id;$('#mProjectRef').textContent=projectRef(p);$('#mProjectTitle').textContent=p.title||'Project';$$('[data-mtab]',el).forEach((x,i)=>x.classList.toggle('active',i===0));renderProjectTab(id,'deliverables');openSheet(el)}
-  function renderProjectTab(id,tab){const p=readProjects().find(x=>String(x.id)===String(id)),body=$('#mProjectBody');if(!p||!body)return;const pr=progress(p);
-    if(tab==='deliverables'){
-      const ds=realDeliverables(p);body.innerHTML=`<div class="m-project-progress-card"><div><span>Overall Progress</span><strong>${pr.done}/${pr.total||0}</strong></div><div class="m-progress large"><i style="width:${pr.pct}%"></i></div></div><div class="m-deliverable-list">${ds.length?ds.map(d=>`<div class="m-deliverable-row"><span class="m-check ${d.completed?'done':''}">${d.completed?'✓':''}</span><div><strong>${esc(d.name||d.item_name||'Deliverable')}</strong>${d.package_name?`<small>${esc(d.package_name)}</small>`:''}</div><span>${d.completed?'Completed':'Pending'}</span></div>`).join(''):'<div class="m-empty">No deliverables recorded.</div>'}</div>`;
-    }else{
-      const b=balance(p),x=paid(p),t=total(p);body.innerHTML=`<div class="m-invoice-hero"><span>Balance</span><strong>${money(b)}</strong><small>${paymentStatus(p)}</small></div><div class="m-invoice-lines"><div><span>Invoice</span><strong>${esc(p.invoice_number||`${projectRef(p)}-${new Date().getFullYear()}`)}</strong></div><div><span>Project Total</span><strong>${money(t)}</strong></div><div><span>Paid</span><strong>${money(x)}</strong></div><div class="emphasis"><span>Balance Due</span><strong>${money(b)}</strong></div><div><span>Deadline</span><strong>${p.deadline_date?dateLabel(p.deadline_date):'On hold'}</strong></div></div>`;
-    }
+  function ensureMobileProjectsHost(){const view=$('#view-projects');if(!view)return null;let screen=$('#mobileProjects');if(!screen){screen=document.createElement('div');screen.id='mobileProjects';screen.className='mobile-companion-screen';view.appendChild(screen)}return screen}
+  function renderProjects(){
+    if(!isPhone())return;const screen=ensureMobileProjectsHost();if(!screen)return;const current=sortCurrent(activeProjects());screen.innerHTML=`<section class="m-section m-projects-page"><div class="m-section-title"><span><small>PROJECTS</small><strong>Current</strong></span><em>${current.length}</em></div><div class="m-project-list">${current.map(p=>projectRow(p,{withMenu:true})).join('')||'<div class="m-empty">No current projects.</div>'}</div></section>`;
+    screen.onclick=e=>{const menu=e.target.closest('[data-project-menu]');if(menu){e.stopPropagation();openProjectActions(menu.dataset.projectMenu);return}const row=e.target.closest('[data-open-project]');if(row)openProject(row.dataset.openProject)};
   }
 
-  function renderMobileFinance(){
-    if(!isPhone())return;const view=$('#view-reports');if(!view)return;let mobile=$('#mobileFinanceCompanion');if(!mobile){mobile=document.createElement('div');mobile.id='mobileFinanceCompanion';mobile.className='mobile-companion-screen';view.appendChild(mobile)}
-    const projects=readProjects().filter(p=>!p.deleted),receivable=projects.reduce((s,p)=>s+total(p),0),collected=projects.reduce((s,p)=>s+paid(p),0),outstanding=Math.max(0,receivable-collected);
-    const rows=projects.flatMap(p=>paymentsFor(p).map(x=>({p,x}))).sort((a,b)=>String(b.x.payment_date||b.x.created_at||'').localeCompare(String(a.x.payment_date||a.x.created_at||''))).slice(0,8);
-    mobile.innerHTML=`<section class="m-finance-hero"><span>Outstanding</span><strong>${money(outstanding)}</strong><small>${projects.filter(p=>balance(p)>0).length} projects with balance</small></section><section class="m-finance-pair"><div><span>Collected</span><strong>${money(collected)}</strong></div><div><span>Receivables</span><strong>${money(receivable)}</strong></div></section><section class="m-section"><div class="m-section-head"><div><span class="m-eyebrow">ACTIVITY</span><h2>Recent Payments</h2></div></div><div class="m-payment-list">${rows.length?rows.map(({p,x})=>`<div class="m-payment-row"><span class="m-payment-icon">${icon('<path d="M4 7h16v10H4z"/><path d="M7 12h4"/>')}</span><div><strong>${esc(p.title||'Project')}</strong><small>${projectRef(p)} · ${esc(x.payment_method||'Payment')} · ${dateLabel(x.payment_date||x.created_at)}</small></div><strong>+${money(x.amount_paid||x.amount||0)}</strong></div>`).join(''):'<div class="m-empty">No payments recorded.</div>'}</div></section>`;
-  }
+  function buildAllProjectsSheet(){if($('#mobileAllProjects'))return;const el=document.createElement('div');el.id='mobileAllProjects';el.className='m-sheet-backdrop';el.innerHTML=`<section class="m-sheet" role="dialog" aria-modal="true"><header class="m-sheet-head"><button type="button" class="m-sheet-close" aria-label="Close">×</button><div><span>CURRENT PROJECTS</span><h2>All Active Work</h2></div></header><div class="m-sheet-body" id="mobileAllProjectsBody"></div></section>`;document.body.appendChild(el);bindSheet(el)}
+  function openAllProjects(){const body=$('#mobileAllProjectsBody'),rows=sortCurrent(activeProjects());body.innerHTML=`<div class="m-project-list">${rows.map(p=>projectRow(p)).join('')||'<div class="m-empty">No current projects.</div>'}</div>`;body.onclick=e=>{const row=e.target.closest('[data-open-project]');if(row){closeSheet($('#mobileAllProjects'));openProject(row.dataset.openProject)}};openSheet($('#mobileAllProjects'))}
 
-  function buildQuickPaymentSheet(){
-    if($('#mobileQuickPayment'))return;
-    const el=document.createElement('div');el.id='mobileQuickPayment';el.className='m-sheet-backdrop';
-    el.innerHTML=`<section class="m-sheet m-payment-sheet" role="dialog" aria-modal="true"><header class="m-sheet-head"><button class="m-sheet-close" type="button" aria-label="Close">×</button><div><span>QUICK ACCESS</span><h2>Record Payment</h2></div></header><div class="m-sheet-body"><label class="m-field"><span>Project</span><select id="mPayProject"></select></label><label class="m-field"><span>Amount</span><div class="m-money-input"><b>₱</b><input id="mPayAmount" inputmode="decimal" type="number" min="0" step="0.01" placeholder="0.00"></div></label><div class="m-field-grid"><label class="m-field"><span>Method</span><select id="mPayMethod"><option>GCash</option><option>Bank Transfer</option></select></label><label class="m-field"><span>Date</span><input id="mPayDate" type="date"></label></div><label class="m-field"><span>Reference Number</span><input id="mPayRef" type="text" inputmode="numeric" placeholder="Auto-detect from receipt"></label><div class="m-receipt-block"><div><span>Receipt</span><small id="mOcrStatus">Add a receipt to scan the reference number.</small></div><div class="m-receipt-actions"><button id="mTakeReceipt" type="button">Take Photo</button><button id="mChooseReceipt" type="button">Choose Photo</button></div><img id="mReceiptPreview" alt="Receipt preview" hidden><input id="mReceiptCamera" type="file" accept="image/*" capture="environment" hidden><input id="mReceiptLibrary" type="file" accept="image/*" hidden></div><div class="m-swipe" id="mSwipe"><div class="m-swipe-text">Swipe to Record Payment</div><button class="m-swipe-thumb" type="button" aria-label="Swipe to record payment">${icon('<path d="m8 5 7 7-7 7"/><path d="m13 5 7 7-7 7"/>')}</button></div></div></section>`;
-    document.body.appendChild(el);
-    $('.m-sheet-close',el).onclick=()=>closeSheet(el);el.addEventListener('click',e=>{if(e.target===el)closeSheet(el)});
-    $('#mTakeReceipt').onclick=()=>$('#mReceiptCamera').click();$('#mChooseReceipt').onclick=()=>$('#mReceiptLibrary').click();
-    $('#mReceiptCamera').onchange=e=>handleReceipt(e.target.files?.[0]);$('#mReceiptLibrary').onchange=e=>handleReceipt(e.target.files?.[0]);
-    setupSwipe();
-  }
-  function openQuickPayment(){
-    receiptFile=null;const el=$('#mobileQuickPayment'),select=$('#mPayProject');if(!el||!select)return;
-    const rows=readProjects().filter(p=>!p.deleted&&balance(p)>0).sort((a,b)=>Number(a.project_number||0)-Number(b.project_number||0));
-    select.innerHTML=`<option value="">Select project…</option>${rows.map(p=>`<option value="${esc(p.id)}">${projectRef(p)} — ${esc(p.title||'Untitled')} · ${money(balance(p))}</option>`).join('')}`;
-    $('#mPayAmount').value='';$('#mPayMethod').value='GCash';$('#mPayDate').value=today();$('#mPayRef').value='';$('#mOcrStatus').textContent='Add a receipt to scan the reference number.';$('#mReceiptPreview').hidden=true;$('#mReceiptPreview').removeAttribute('src');resetSwipe();openSheet(el);
-  }
-  function openSheet(el){el.classList.add('active');document.body.classList.add('m-sheet-open')}
-  function closeSheet(el){el.classList.remove('active');if(!$('.m-sheet-backdrop.active'))document.body.classList.remove('m-sheet-open')}
+  function buildProjectSheet(){if($('#mobileProjectSheet'))return;const el=document.createElement('div');el.id='mobileProjectSheet';el.className='m-sheet-backdrop';el.innerHTML=`<section class="m-sheet m-project-sheet" role="dialog" aria-modal="true"><header class="m-sheet-head"><button type="button" class="m-sheet-close" aria-label="Close">×</button><div><span id="mProjectRef">PROJECT</span><h2 id="mProjectTitle">Project</h2></div></header><div id="mProjectHero"></div><div class="m-segmented"><button type="button" data-project-tab="deliverables" class="active">Deliverables</button><button type="button" data-project-tab="payment">Payment</button></div><div class="m-sheet-body" id="mProjectBody"></div></section>`;document.body.appendChild(el);bindSheet(el);el.addEventListener('click',e=>{const tab=e.target.closest('[data-project-tab]');if(tab){projectTab=tab.dataset.projectTab;$$('[data-project-tab]',el).forEach(b=>b.classList.toggle('active',b===tab));renderProjectBody();return}const check=e.target.closest('[data-toggle-deliverable]');if(check){toggleDeliverable(check.dataset.projectId,check.dataset.toggleDeliverable);return}const add=e.target.closest('[data-add-project-item]');if(add){workspace()?.mobileOpenProjectOrderBatch?.(add.dataset.addProjectItem);return}const receipt=e.target.closest('[data-view-receipt]');if(receipt){workspace()?.mobileViewPaymentReceipt?.(receipt.dataset.projectId,receipt.dataset.viewReceipt);return}const attach=e.target.closest('[data-attach-receipt]');if(attach){workspace()?.mobileAttachReceipt?.(attach.dataset.projectId,attach.dataset.attachReceipt);return}const pay=e.target.closest('[data-record-project-payment]');if(pay){openQuickPayment(pay.dataset.recordProjectPayment);return}})}
+  function openProject(id,tab='deliverables'){const p=readProjects().find(x=>String(x.id)===String(id));if(!p)return;activeProjectId=String(id);projectTab=tab;$('#mProjectRef').textContent=projectRef(p);$('#mProjectTitle').textContent=p.title||'Project';renderProjectHero(p);$$('[data-project-tab]',$('#mobileProjectSheet')).forEach(b=>b.classList.toggle('active',b.dataset.projectTab===tab));renderProjectBody();openSheet($('#mobileProjectSheet'))}
+  function renderProjectHero(p){const pr=progress(p),u=urgency(p);$('#mProjectHero').innerHTML=`<div class="m-project-hero"><div class="m-project-hero-top"><div class="m-tags">${projectTags(p)}</div><span class="m-project-status ${u.cls}">${esc(p.status||'In Progress')}</span></div><div class="m-deadline-line"><span>Deadline</span><strong>${dateLabel(p.deadline_date,true)}</strong></div><div class="m-project-progress-line"><span>${pr.done}/${pr.total||0} Deliverables</span><strong>${pr.pct}%</strong></div><div class="m-progress large"><i style="width:${pr.pct}%"></i></div></div>`}
+  function renderProjectBody(){const p=readProjects().find(x=>String(x.id)===String(activeProjectId)),body=$('#mProjectBody');if(!p||!body)return;renderProjectHero(p);if(projectTab==='payment'){renderPaymentTab(p,body);return}renderDeliverablesTab(p,body)}
+  function renderDeliverablesTab(p,body){const ds=Array.isArray(p.deliverables)?p.deliverables:[],roots=ds.filter(d=>!d.parent_id);const row=(d,child=false)=>{const children=ds.filter(c=>String(c.parent_id||'')===String(d.id)),done=d.is_group?children.filter(c=>c.completed).length:0;return `<button type="button" class="m-deliverable-row ${child?'child':''} ${d.completed?'done':''}" data-toggle-deliverable="${esc(d.id)}" data-project-id="${esc(p.id)}"><span class="m-check ${d.completed?'checked':''}">${d.completed?'✓':''}</span><span class="m-deliverable-copy"><strong>${esc(d.item_name||d.name||'Deliverable')}</strong>${d.is_group?`<small>${done}/${children.length} included</small>`:child?`<small>${esc(d.package_name||'Included service')}</small>`:''}</span></button>`};body.innerHTML=`<div class="m-deliverable-list">${roots.length?roots.map(r=>`<div class="m-deliverable-group">${row(r)}${ds.filter(c=>String(c.parent_id||'')===String(r.id)).map(c=>row(c,true)).join('')}</div>`).join(''):'<div class="m-empty">No deliverables yet.</div>'}</div><button type="button" class="m-add-item" data-add-project-item="${esc(p.id)}">${icon('<path d="M12 5v14M5 12h14"/>')}<span>Add Item from Service Catalog</span></button>`}
+  async function toggleDeliverable(projectId,delId){const w=workspace();if(!w?.toggleDeliverable)return;const btn=$(`[data-toggle-deliverable="${CSS.escape(String(delId))}"]`);btn?.classList.add('is-updating');try{await w.toggleDeliverable(projectId,delId)}finally{setTimeout(()=>{renderProjectBody();renderProjects();renderOverview()},80)}}
+  function renderPaymentTab(p,body){const rows=payments(p).slice().sort((a,b)=>String(b.payment_date||b.created_at||'').localeCompare(String(a.payment_date||a.created_at||''))).slice(0,6),t=invoiceTotal(p),x=paid(p),b=balance(p);body.innerHTML=`<section class="m-payment-monitor"><div class="m-payment-status-line"><span>${paymentStatus(p)}</span><strong>${dateLabel(p.deadline_date,true)}</strong></div><div class="m-payment-figures"><div><span>Balance</span><strong>${money(b)}</strong></div><div><span>Paid</span><strong>${money(x)}</strong></div><div><span>Total</span><strong>${money(t)}</strong></div></div></section><div class="m-inline-head"><strong>Recent Payments</strong><button type="button" data-record-project-payment="${esc(p.id)}">Record Payment</button></div><div class="m-payment-list">${rows.length?rows.map(r=>{const amount=Number(r.amount_paid||r.amount||0),ref=r.reference_no||r.reference_number||'',has=!!r.receipt_data,isImage=has&&String(r.receipt_type||'').startsWith('image/');return `<article class="m-payment-card"><div class="m-payment-card-copy"><span>${dateLabel(r.payment_date||r.created_at,true)}</span><strong>+${money(amount)}</strong><small>${esc(r.payment_method||r.method||'Payment')}${ref?` · Ref ${esc(ref)}`:''}</small></div>${has?`<button type="button" class="m-receipt-thumb ${isImage?'':'file'}" data-project-id="${esc(p.id)}" data-view-receipt="${esc(r.id)}">${isImage?`<img src="${esc(r.receipt_data)}" alt="Receipt">`:icon('<path d="M6 2h8l4 4v16H6z"/><path d="M14 2v6h6"/>')}</button>`:`<button type="button" class="m-receipt-add" data-project-id="${esc(p.id)}" data-attach-receipt="${esc(r.id)}">Add receipt</button>`}</article>`}).join(''):'<div class="m-empty">No payments recorded.</div>'}</div><div class="m-invoice-mini"><div><span>Invoice Total</span><strong>${money(t)}</strong></div><div><span>Amount Paid</span><strong>${money(x)}</strong></div><div><span>Balance</span><strong>${money(b)}</strong></div></div>`}
 
-  async function handleReceipt(file){
-    if(!file)return;receiptFile=file;const preview=$('#mReceiptPreview'),status=$('#mOcrStatus');preview.src=URL.createObjectURL(file);preview.hidden=false;status.textContent='Scanning receipt locally…';
-    try{
-      if(!window.localOCR)throw new Error('OCR module unavailable');
-      const canvas=await window.localOCR.prepare(file),worker=await window.localOCR.getWorker(),res=await worker.recognize(canvas),ref=window.localOCR.reference(res?.data?.text||'');
-      if(ref){$('#mPayRef').value=ref;status.textContent=`Reference detected: ${ref}`}else status.textContent='No reference detected — enter it manually.';
-    }catch(e){console.warn('Mobile receipt OCR:',e);status.textContent='Could not scan automatically — enter the reference manually.'}
-  }
+  function buildActionSheet(){if($('#mobileProjectActions'))return;const el=document.createElement('div');el.id='mobileProjectActions';el.className='m-sheet-backdrop';el.innerHTML=`<section class="m-sheet m-action-sheet"><header class="m-sheet-head"><button type="button" class="m-sheet-close">×</button><div><span>PROJECT</span><h2 id="mActionProject">Actions</h2></div></header><div class="m-action-list"><button type="button" data-action="edit">Edit Details</button><button type="button" class="danger" data-action="delete">Delete Project</button></div></section>`;document.body.appendChild(el);bindSheet(el);el.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const id=el.dataset.projectId,p=readProjects().find(x=>String(x.id)===String(id));closeSheet(el);if(b.dataset.action==='edit'){editReturnProjectId=id;workspace()?.mobileOpenEditProject?.(id)}else if(b.dataset.action==='delete'){workspace()?.deleteProjectById?.(id)}if(p)$('#mActionProject').textContent=p.title||projectRef(p)})}
+  function openProjectActions(id){const el=$('#mobileProjectActions'),p=readProjects().find(x=>String(x.id)===String(id));if(!p)return;el.dataset.projectId=id;$('#mActionProject').textContent=p.title||projectRef(p);openSheet(el)}
 
-  function setupSwipe(){
-    const track=$('#mSwipe'),thumb=$('.m-swipe-thumb',track);if(!track||!thumb)return;let dragging=false,startX=0,max=0,current=0;
-    const move=x=>{current=Math.max(0,Math.min(max,x-startX));thumb.style.transform=`translateX(${current}px)`;track.style.setProperty('--swipe-progress',`${max?current/max*100:0}%`)};
-    const end=()=>{if(!dragging)return;dragging=false;thumb.releasePointerCapture?.(thumb._pid);if(max&&current/max>=.82){thumb.style.transform=`translateX(${max}px)`;track.style.setProperty('--swipe-progress','100%');track.classList.add('complete');setTimeout(recordPaymentFromSheet,120)}else resetSwipe()};
-    thumb.addEventListener('pointerdown',e=>{if(track.classList.contains('busy'))return;dragging=true;thumb._pid=e.pointerId;thumb.setPointerCapture?.(e.pointerId);const tr=track.getBoundingClientRect(),br=thumb.getBoundingClientRect();max=Math.max(0,tr.width-br.width-10);startX=e.clientX-current;e.preventDefault()});
-    thumb.addEventListener('pointermove',e=>{if(dragging)move(e.clientX)});thumb.addEventListener('pointerup',end);thumb.addEventListener('pointercancel',end);
-  }
-  function resetSwipe(){const track=$('#mSwipe'),thumb=$('.m-swipe-thumb',track);if(!track||!thumb)return;track.classList.remove('complete','busy');track.style.setProperty('--swipe-progress','0%');thumb.style.transform='translateX(0)';const txt=$('.m-swipe-text',track);if(txt)txt.textContent='Swipe to Record Payment'}
-  function setSwipeMessage(msg){const t=$('#mSwipe'),x=$('.m-swipe-text',t);if(x)x.textContent=msg}
+  function buildQuickAccessSheet(){if($('#mobileQuickAccess'))return;const el=document.createElement('div');el.id='mobileQuickAccess';el.className='m-sheet-backdrop';el.innerHTML=`<section class="m-sheet m-quick-sheet"><header class="m-sheet-head"><button type="button" class="m-sheet-close">×</button><div><span>QUICK ACCESS</span><h2>What do you want to do?</h2></div></header><div class="m-quick-list"><button type="button" data-quick="create"><span class="m-quick-icon">${icon('<path d="M12 5v14M5 12h14"/>')}</span><span><strong>Create Order</strong><small>Start a new project order</small></span></button><button type="button" data-quick="edit"><span class="m-quick-icon">${icon('<path d="M4 20h4L19 9l-4-4L4 16v4Z"/><path d="m13.5 6.5 4 4"/>')}</span><span><strong>Edit Order</strong><small>Choose an existing project</small></span></button><button type="button" data-quick="payment"><span class="m-quick-icon green">${icon('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 12h10"/>')}</span><span><strong>Record Payment</strong><small>Camera, receipt OCR and swipe confirm</small></span></button></div></section>`;document.body.appendChild(el);bindSheet(el);el.addEventListener('click',e=>{const b=e.target.closest('[data-quick]');if(!b)return;closeSheet(el);if(b.dataset.quick==='create')activate('new-order');if(b.dataset.quick==='edit')openEditOrder();if(b.dataset.quick==='payment')openQuickPayment()})}
+  function openQuickAccess(){openSheet($('#mobileQuickAccess'))}
 
-  async function recordPaymentFromSheet(){
-    const workspace=getWorkspaceApp(),projectId=$('#mPayProject')?.value,amount=Number($('#mPayAmount')?.value||0),date=$('#mPayDate')?.value,method=$('#mPayMethod')?.value,ref=$('#mPayRef')?.value.trim();
-    const track=$('#mSwipe');track?.classList.add('busy');
-    if(!workspace||!projectId){setSwipeMessage('Choose a project');setTimeout(resetSwipe,900);return}
-    if(!Number.isFinite(amount)||amount<=0){setSwipeMessage('Enter a valid amount');setTimeout(resetSwipe,900);return}
-    if(!date){setSwipeMessage('Choose a payment date');setTimeout(resetSwipe,900);return}
-    try{
-      setSwipeMessage('Recording…');
-      /* Reuse the desktop payment engine so balances, persistence and Supabase sync stay consistent. */
-      workspace.openProjectDetails(projectId);
-      workspace.openRecordPaymentModal();
-      $('#paymentAmountInput').value=amount;$('#paymentDateInput').value=date;$('#paymentMethodInput').value=method;$('#paymentRefInput').value=ref;$('#paymentNotesInput').value='';
-      if(receiptFile){const input=$('#paymentReceiptInput');if(input){try{const dt=new DataTransfer();dt.items.add(receiptFile);input.files=dt.files}catch(_){}}}
-      await workspace.submitPaymentRecord();
-      /* Swipe itself is the confirmation on mobile; skip the redundant second tap. */
-      const started=Date.now();const autoConfirm=setInterval(()=>{const modal=$('#confirmationModal'),btn=$('#confirmModalActionBtn');if(modal?.classList.contains('active')&&btn){clearInterval(autoConfirm);btn.click()}else if(Date.now()-started>2500)clearInterval(autoConfirm)},40);
-      closeSheet($('#mobileQuickPayment'));
-      setTimeout(()=>{renderMobileOverview();renderMobileFinance();syncActive();},1100);
-    }catch(e){console.error('Quick payment failed:',e);setSwipeMessage('Could not record payment');setTimeout(resetSwipe,1000)}
-  }
+  function buildEditOrderSheet(){if($('#mobileEditOrder'))return;const el=document.createElement('div');el.id='mobileEditOrder';el.className='m-sheet-backdrop';el.innerHTML=`<section class="m-sheet"><header class="m-sheet-head"><button type="button" class="m-sheet-close">×</button><div><span>QUICK ACCESS</span><h2>Edit Order</h2></div></header><div class="m-sheet-body"><div class="m-picker-list" id="mEditOrderList"></div></div></section>`;document.body.appendChild(el);bindSheet(el);el.addEventListener('click',e=>{const b=e.target.closest('[data-edit-order]');if(!b)return;editReturnProjectId=b.dataset.editOrder;closeSheet(el);workspace()?.mobileOpenEditProject?.(editReturnProjectId)})}
+  function openEditOrder(){const rows=sortCurrent(activeProjects()),box=$('#mEditOrderList');box.innerHTML=rows.map(p=>`<button type="button" data-edit-order="${esc(p.id)}"><span><strong>${projectRef(p)}</strong><small>${esc(p.title||'Untitled Project')}</small></span><em>›</em></button>`).join('')||'<div class="m-empty">No current projects.</div>';openSheet($('#mobileEditOrder'))}
 
-  function applyMode(){
-    const phone=isPhone();document.body.classList.toggle('mobile-companion-mode',phone);document.body.classList.toggle('mobile-standalone',phone&&isStandalone());if(!phone)return;buildShell();syncActive();enforce();renderMobileOverview();renderMobileFinance();
-  }
-  function init(){
-    buildShell();applyMode();
-    const obs=new MutationObserver(()=>{if(!isPhone())return;syncActive();enforce();if(currentView()==='my-works')renderMobileOverview();if(currentView()==='reports')renderMobileFinance()});
-    $$('.view').forEach(v=>obs.observe(v,{attributes:true,attributeFilter:['class']}));
-    window.matchMedia(PHONE_QUERY).addEventListener?.('change',applyMode);
-    window.addEventListener('storage',()=>{renderMobileOverview();renderMobileFinance()});
-  }
+  function buildQuickPaymentSheet(){if($('#mobileQuickPayment'))return;const el=document.createElement('div');el.id='mobileQuickPayment';el.className='m-sheet-backdrop';el.innerHTML=`<section class="m-sheet m-payment-sheet"><header class="m-sheet-head"><button type="button" class="m-sheet-close">×</button><div><span>QUICK ACCESS</span><h2>Record Payment</h2></div></header><div class="m-sheet-body"><label class="m-field"><span>Project</span><select id="mPayProject"></select></label><label class="m-field"><span>Amount</span><div class="m-money-input"><b>₱</b><input id="mPayAmount" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0.00"></div></label><div class="m-field-grid"><label class="m-field"><span>Method</span><select id="mPayMethod"><option>GCash</option><option>Bank Transfer</option></select></label><label class="m-field"><span>Date</span><input id="mPayDate" type="date"></label></div><label class="m-field"><span>Reference Number</span><input id="mPayRef" inputmode="numeric" placeholder="Auto-detect from receipt"></label><div class="m-receipt-block"><div><span>Receipt</span><small id="mOcrStatus">Add a receipt to scan its reference number.</small></div><div class="m-receipt-actions"><button type="button" id="mTakeReceipt">Take Photo</button><button type="button" id="mChooseReceipt">Choose Photo</button></div><img id="mReceiptPreview" alt="Receipt preview" hidden><input id="mReceiptCamera" type="file" accept="image/*" capture="environment" hidden><input id="mReceiptLibrary" type="file" accept="image/*" hidden></div><div class="m-swipe" id="mSwipe"><div class="m-swipe-text">Swipe to Record Payment</div><button type="button" class="m-swipe-thumb">${icon('<path d="m7 6 6 6-6 6"/><path d="m12 6 6 6-6 6"/>')}</button></div></div></section>`;document.body.appendChild(el);bindSheet(el);$('#mTakeReceipt').onclick=()=>$('#mReceiptCamera').click();$('#mChooseReceipt').onclick=()=>$('#mReceiptLibrary').click();$('#mReceiptCamera').onchange=e=>handleReceipt(e.target.files?.[0]);$('#mReceiptLibrary').onchange=e=>handleReceipt(e.target.files?.[0]);setupSwipe()}
+  function openQuickPayment(projectId=''){receiptFile=null;const rows=readProjects().filter(p=>!p.deleted&&balance(p)>0).sort((a,b)=>Number(a.project_number||0)-Number(b.project_number||0)),sel=$('#mPayProject');sel.innerHTML=`<option value="">Select project…</option>${rows.map(p=>`<option value="${esc(p.id)}">${projectRef(p)} — ${esc(p.title||'Untitled')} · ${money(balance(p))}</option>`).join('')}`;sel.value=projectId||'';$('#mPayAmount').value='';$('#mPayMethod').value='GCash';$('#mPayDate').value=today();$('#mPayRef').value='';$('#mOcrStatus').textContent='Add a receipt to scan its reference number.';$('#mReceiptPreview').hidden=true;$('#mReceiptPreview').removeAttribute('src');resetSwipe();openSheet($('#mobileQuickPayment'))}
+  async function handleReceipt(file){if(!file)return;receiptFile=file;const preview=$('#mReceiptPreview'),status=$('#mOcrStatus');preview.src=URL.createObjectURL(file);preview.hidden=false;status.textContent='Scanning receipt locally…';try{if(!window.localOCR)throw new Error('OCR unavailable');const canvas=await window.localOCR.prepare(file),worker=await window.localOCR.getWorker(),res=await worker.recognize(canvas),ref=window.localOCR.reference(res?.data?.text||'');if(ref){$('#mPayRef').value=ref;status.textContent=`Reference detected: ${ref}`}else status.textContent='No reference detected — enter it manually.'}catch(e){console.warn('Receipt OCR:',e);status.textContent='OCR unavailable — receipt is still attached; enter reference manually.'}}
+  function setupSwipe(){const track=$('#mSwipe'),thumb=$('.m-swipe-thumb',track);if(!track||!thumb)return;let drag=false,start=0,max=0,current=0;const move=x=>{current=Math.max(0,Math.min(max,x-start));thumb.style.transform=`translateX(${current}px)`;track.style.setProperty('--swipe-progress',`${max?current/max*100:0}%`)};const end=()=>{if(!drag)return;drag=false;if(max&&current/max>=.82){thumb.style.transform=`translateX(${max}px)`;track.style.setProperty('--swipe-progress','100%');track.classList.add('complete');setTimeout(recordPayment,100)}else resetSwipe()};thumb.addEventListener('pointerdown',e=>{if(track.classList.contains('busy'))return;drag=true;thumb.setPointerCapture?.(e.pointerId);const tr=track.getBoundingClientRect(),br=thumb.getBoundingClientRect();max=Math.max(0,tr.width-br.width-10);start=e.clientX-current;e.preventDefault()});thumb.addEventListener('pointermove',e=>{if(drag)move(e.clientX)});thumb.addEventListener('pointerup',end);thumb.addEventListener('pointercancel',end)}
+  function resetSwipe(){const t=$('#mSwipe'),b=$('.m-swipe-thumb',t);if(!t||!b)return;t.classList.remove('complete','busy');t.style.setProperty('--swipe-progress','0%');b.style.transform='translateX(0)';$('.m-swipe-text',t).textContent='Swipe to Record Payment'}
+  function swipeMessage(text){const x=$('.m-swipe-text',$('#mSwipe'));if(x)x.textContent=text}
+  async function recordPayment(){const w=workspace(),projectId=$('#mPayProject').value,amount=Number($('#mPayAmount').value||0),date=$('#mPayDate').value,method=$('#mPayMethod').value,ref=$('#mPayRef').value.trim(),track=$('#mSwipe');track.classList.add('busy');if(!w||!projectId){swipeMessage('Choose a project');return setTimeout(resetSwipe,900)}if(!Number.isFinite(amount)||amount<=0){swipeMessage('Enter a valid amount');return setTimeout(resetSwipe,900)}if(!date){swipeMessage('Choose a payment date');return setTimeout(resetSwipe,900)}try{swipeMessage('Recording…');document.body.classList.add('m-swipe-bridge');w.mobileOpenRecordPayment?.(projectId);$('#paymentAmountInput').value=amount;$('#paymentDateInput').value=date;$('#paymentMethodInput').value=method;$('#paymentRefInput').value=ref;$('#paymentNotesInput').value='';if(receiptFile){const input=$('#paymentReceiptInput');try{const dt=new DataTransfer();dt.items.add(receiptFile);input.files=dt.files}catch(_){}}await w.submitPaymentRecord();const started=Date.now(),timer=setInterval(()=>{const modal=$('#confirmationModal'),btn=$('#confirmModalActionBtn');if(modal?.classList.contains('active')&&btn){clearInterval(timer);btn.click();setTimeout(()=>document.body.classList.remove('m-swipe-bridge'),450)}else if(Date.now()-started>2400){clearInterval(timer);document.body.classList.remove('m-swipe-bridge')}},40);closeSheet($('#mobileQuickPayment'));setTimeout(()=>{renderOverview();renderProjects();renderFinance();if(activeProjectId)renderProjectBody()},1000)}catch(e){document.body.classList.remove('m-swipe-bridge');console.error(e);swipeMessage('Could not record payment');setTimeout(resetSwipe,1000)}}
+
+  function renderFinance(){if(!isPhone())return;const view=$('#view-reports');if(!view)return;let screen=$('#mobileFinance');if(!screen){screen=document.createElement('div');screen.id='mobileFinance';screen.className='mobile-companion-screen';view.appendChild(screen)}const all=readProjects().filter(p=>!p.deleted),receivable=all.reduce((s,p)=>s+invoiceTotal(p),0),collected=all.reduce((s,p)=>s+paid(p),0),out=Math.max(0,receivable-collected),recent=all.flatMap(p=>payments(p).map(x=>({p,x}))).sort((a,b)=>String(b.x.payment_date||b.x.created_at||'').localeCompare(String(a.x.payment_date||a.x.created_at||''))).slice(0,8);screen.innerHTML=`<section class="m-finance-hero"><span>Outstanding</span><strong>${money(out)}</strong><small>${all.filter(p=>balance(p)>0).length} projects with balance</small></section><section class="m-finance-pair"><div><span>Collected</span><strong>${money(collected)}</strong></div><div><span>Receivables</span><strong>${money(receivable)}</strong></div></section><section class="m-section"><div class="m-section-title"><span><small>ACTIVITY</small><strong>Recent Payments</strong></span></div><div class="m-finance-list">${recent.map(({p,x})=>`<div class="m-finance-row"><span>${icon('<rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 12h6"/>')}</span><div><strong>${esc(p.title||'Project')}</strong><small>${projectRef(p)} · ${dateLabel(x.payment_date||x.created_at)}</small></div><em>+${money(x.amount_paid||x.amount||0)}</em></div>`).join('')||'<div class="m-empty">No payments recorded.</div>'}</div></section>`}
+
+  function bindSheet(el){$('.m-sheet-close',el)?.addEventListener('click',()=>closeSheet(el));el.addEventListener('click',e=>{if(e.target===el)closeSheet(el)})}
+  function openSheet(el){if(!el)return;el.classList.add('active');document.body.classList.add('m-sheet-open')}
+  function closeSheet(el){if(!el)return;el.classList.remove('active');if(!$('.m-sheet-backdrop.active'))document.body.classList.remove('m-sheet-open')}
+
+  function refreshIfChanged(){if(!isPhone())return;const sig=localStorage.getItem('JUAN_PROJECTS_LOCAL')||'';if(sig===lastDataSignature)return;lastDataSignature=sig;renderOverview();renderProjects();renderFinance();if(activeProjectId&&$('#mobileProjectSheet')?.classList.contains('active'))renderProjectBody()}
+  function bindDesktopBridges(){document.addEventListener('click',e=>{if(!isPhone())return;if(e.target.closest('#projectOrderBatchAddBtn'))setTimeout(()=>{renderProjectBody();renderOverview();renderProjects()},120);const save=e.target.closest('#editProjectModal .btn-primary');if(save&&/save changes/i.test(save.textContent||'')){const id=editReturnProjectId;setTimeout(()=>{activate('projects');if(id)openProject(id)},180)}});}
+
+  function applyMode(){const phone=isPhone();document.body.classList.toggle('mobile-companion-mode',phone);if(!phone)return;buildShell();syncNav();enforce();renderOverview();renderProjects();renderFinance();lastDataSignature=localStorage.getItem('JUAN_PROJECTS_LOCAL')||''}
+  function init(){buildShell();applyMode();bindDesktopBridges();const obs=new MutationObserver(()=>{if(!isPhone())return;syncNav();enforce();if(currentView()==='my-works')renderOverview();if(currentView()==='projects')renderProjects();if(currentView()==='reports')renderFinance()});$$('.view').forEach(v=>obs.observe(v,{attributes:true,attributeFilter:['class']}));window.matchMedia(PHONE_QUERY).addEventListener?.('change',applyMode);window.addEventListener('storage',refreshIfChanged);setInterval(refreshIfChanged,900)}
   document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
