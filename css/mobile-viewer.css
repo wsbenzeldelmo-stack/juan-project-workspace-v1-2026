@@ -1,434 +1,59 @@
-/*
- * JUAN PROJECT WORKSPACE — mobile-viewer.css
- * ---------------------------------------------------------------
- * v1.1.1 Mobile Viewer navigation fix
- *
- * DESIGN GOAL
- * - Mobile is a read-first companion, not a compressed desktop app.
- * - Bottom navigation stays fixed and reliably tappable.
- * - Uses safe-area insets so Safari browser and installed web-app mode
- *   both fit correctly on modern iPhones.
- * - Layout is fluid: designed around large iPhone screens but works
- *   down to smaller phones without hard-coded device dimensions.
- */
+/* JUAN PROJECT — Mobile Companion v1.1.2
+   Three screens only: Overview, AI, Finance. */
+.mobile-topbar,.mobile-bottom-nav{display:none}
+@media (max-width:820px){
+  :root{--m-top:54px;--m-nav:64px;--m-gutter:clamp(14px,4vw,20px)}
+  html,body{width:100%;max-width:100%;overflow-x:hidden;-webkit-text-size-adjust:100%}
+  body.mobile-companion-mode{background:var(--bg-main,#f5f5f7);min-height:100dvh;overscroll-behavior-y:none}
+  body.mobile-companion-mode .sidebar{display:none!important}
+  body.mobile-companion-mode .app-container{display:block;min-height:100dvh}
+  body.mobile-companion-mode .main-content{margin-left:0!important;width:100%!important;max-width:100%!important;min-width:0!important;padding:calc(var(--m-top) + env(safe-area-inset-top,0px) + 14px) var(--m-gutter) calc(var(--m-nav) + env(safe-area-inset-bottom,0px) + 18px)!important;overflow:visible!important}
 
-.mobile-topbar,
-.mobile-bottom-nav,
-.mobile-viewer-badge { display:none; }
+  .mobile-topbar{position:fixed;inset:0 0 auto 0;display:flex;align-items:flex-end;height:calc(var(--m-top) + env(safe-area-inset-top,0px));padding:env(safe-area-inset-top,0px) var(--m-gutter) 9px;box-sizing:border-box;z-index:4900;background:rgba(245,245,247,.94);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-bottom:1px solid rgba(0,0,0,.05)}
+  .mobile-brand-lockup{display:flex;align-items:center;gap:9px}.mobile-brand-mark{width:30px;height:30px;border-radius:9px}.mobile-brand-name{font-size:12px;font-weight:720;letter-spacing:-.02em}.mobile-brand-mode{font-size:10px;color:var(--text-secondary,#777);margin-top:2px}
 
-@media (max-width: 820px) {
-  :root {
-    --mobile-top-height: 58px;
-    --mobile-nav-content-height: 58px;
-    --mobile-page-gutter: clamp(12px, 3.4vw, 18px);
-  }
+  .mobile-bottom-nav{position:fixed!important;left:0!important;right:0!important;bottom:0!important;z-index:5000!important;display:grid!important;grid-template-columns:repeat(3,1fr);height:calc(var(--m-nav) + env(safe-area-inset-bottom,0px));padding:4px max(10px,env(safe-area-inset-left,0px)) env(safe-area-inset-bottom,0px);background:rgba(255,255,255,.96);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border-top:1px solid rgba(0,0,0,.06);box-shadow:0 -2px 12px rgba(0,0,0,.035)}
+  .mobile-nav-item{min-height:54px;border:0;background:transparent;color:#777;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font:inherit;font-size:10px;font-weight:550;touch-action:manipulation;-webkit-tap-highlight-color:transparent;border-radius:12px}
+  .mobile-nav-item svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;pointer-events:none}.mobile-nav-item span{pointer-events:none}.mobile-nav-item.active{color:#11945c;font-weight:680}.mobile-nav-item:active{background:rgba(25,186,117,.08)}
 
-  html,
-  body {
-    width:100%;
-    min-width:0;
-    max-width:100%;
-    overflow-x:hidden;
-    -webkit-text-size-adjust:100%;
-  }
+  body.mobile-companion-mode .page-header{margin:0 0 14px!important}body.mobile-companion-mode .greeting-subtitle{display:none!important}body.mobile-companion-mode .page-title{font-size:clamp(26px,7.3vw,31px)!important;line-height:1.04;letter-spacing:-.045em}body.mobile-companion-mode .page-header>div:last-child{display:none!important}
+  body.mobile-companion-mode .card{border-radius:16px!important;box-shadow:none!important;border:1px solid rgba(0,0,0,.055)!important}
 
-  body.mobile-viewer-mode {
-    background:var(--bg-main,#f5f5f7);
-    min-height:100dvh;
-    overscroll-behavior-y:none;
-  }
+  /* OVERVIEW: stats + attention only. Project detail browsing lives in AI. */
+  body.mobile-companion-mode #overviewDashboard{height:auto!important;display:block!important;overflow:visible!important}
+  body.mobile-companion-mode .kpi-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-bottom:10px!important}
+  body.mobile-companion-mode .kpi-card{min-height:92px!important;padding:12px!important;border-radius:15px!important}
+  body.mobile-companion-mode .kpi-card .kpi-value,body.mobile-companion-mode .stat-value{font-size:22px!important}
+  body.mobile-companion-mode #overviewDashboard .overview-priority-grid{display:block!important;height:auto!important}
+  body.mobile-companion-mode #overviewDashboard .overview-priority-grid>.card:first-child{display:none!important}
+  body.mobile-companion-mode #overviewDashboard .overview-priority-grid>div> .card:nth-child(2){display:none!important}
+  body.mobile-companion-mode #overviewDashboard .overview-priority-grid>div{display:block!important}
+  body.mobile-companion-mode #overviewUpcomingDeadlines{max-height:none!important;overflow:visible!important}
+  body.mobile-companion-mode .overview-task-card{display:none!important}
+  body.mobile-companion-mode .overview-heading-actions{display:none!important}
+  body.mobile-companion-mode .overview-section-heading{margin-bottom:8px!important}
+  body.mobile-companion-mode .attention-list>*{padding:10px 0!important}
 
-  body.mobile-viewer-mode .app-container {
-    display:block;
-    min-height:100dvh;
-  }
+  /* AI is the project viewer. */
+  body.mobile-companion-mode #view-assistant .page-header{display:none!important}
+  body.mobile-companion-mode .assistant-page-layout{grid-template-columns:1fr!important;min-height:calc(100dvh - var(--m-top) - var(--m-nav) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 34px)!important}
+  body.mobile-companion-mode .assistant-history-panel{display:none!important}
+  body.mobile-companion-mode .assistant-main-panel{border-radius:18px!important;min-width:0!important;box-shadow:none!important}
+  body.mobile-companion-mode #assistantSuggestions{display:grid!important;grid-template-columns:1fr!important;gap:8px!important}
+  body.mobile-companion-mode #assistantSuggestions button{min-height:54px!important;padding:11px 13px!important;border-radius:14px!important;text-align:left!important}
+  body.mobile-companion-mode .assistant-page-message{max-width:92%!important}
+  body.mobile-companion-mode .assistant-inline-card{border-radius:15px!important;box-shadow:none!important}
+  body.mobile-companion-mode .assistant-project-select{min-height:48px!important;font-size:16px!important}
+  body.mobile-companion-mode .assistant-composer{padding:9px!important}
+  .mobile-ai-project-card{display:grid;gap:13px}.mobile-ai-project-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.mobile-ai-project-head>div{display:grid;gap:3px}.mobile-ai-project-head span{font-size:10px;color:#777}.mobile-ai-project-head strong{font-size:17px;line-height:1.15}.mobile-ai-project-progress>div:first-child{display:flex;justify-content:space-between;font-size:12px;margin-bottom:6px}.mobile-ai-progress-track{height:7px;border-radius:99px;background:#eceeed;overflow:hidden}.mobile-ai-progress-track i{display:block;height:100%;border-radius:inherit;background:#19ba75}.mobile-ai-project-stats{display:grid;grid-template-columns:1fr;gap:8px}.mobile-ai-project-stats>div{display:flex;justify-content:space-between;gap:12px;padding-top:8px;border-top:1px solid rgba(0,0,0,.06)}.mobile-ai-project-stats span,.mobile-ai-recent>span{font-size:11px;color:#777}.mobile-ai-project-stats strong{font-size:12px;text-align:right}.mobile-ai-recent{display:grid;gap:6px;padding-top:3px}.mobile-ai-recent div{font-size:12px}
 
-  /* Desktop sidebar is replaced by the mobile shell. */
-  body.mobile-viewer-mode .sidebar { display:none !important; }
+  /* FINANCE REPORT: one-column, view-only and quiet. */
+  body.mobile-companion-mode #view-reports #reportsContent{display:block!important}
+  body.mobile-companion-mode #view-reports .reports-grid,body.mobile-companion-mode #view-reports .finance-kpi-grid,body.mobile-companion-mode #view-reports .report-kpi-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+  body.mobile-companion-mode #view-reports .card{margin-bottom:10px!important}
+  body.mobile-companion-mode #view-reports table{min-width:620px}body.mobile-companion-mode #view-reports .table-responsive{overflow-x:auto;-webkit-overflow-scrolling:touch}
 
-  body.mobile-viewer-mode .main-content {
-    margin-left:0 !important;
-    width:100% !important;
-    max-width:100% !important;
-    min-width:0 !important;
-    padding:
-      calc(var(--mobile-top-height) + env(safe-area-inset-top, 0px) + 12px)
-      var(--mobile-page-gutter)
-      calc(var(--mobile-nav-content-height) + env(safe-area-inset-bottom, 0px) + 22px)
-      !important;
-    overflow:visible !important;
-  }
-
-  /* -----------------------------------------------------------
-     TOP BAR — simple, quiet and compact.
-     ----------------------------------------------------------- */
-  .mobile-topbar {
-    position:fixed;
-    top:0;
-    left:0;
-    right:0;
-    min-height:calc(var(--mobile-top-height) + env(safe-area-inset-top, 0px));
-    display:flex;
-    align-items:flex-end;
-    justify-content:space-between;
-    padding:
-      env(safe-area-inset-top, 0px)
-      var(--mobile-page-gutter)
-      10px;
-    z-index:4900;
-    background:color-mix(in srgb, var(--bg-main,#f5f5f7) 94%, transparent);
-    -webkit-backdrop-filter:blur(16px) saturate(145%);
-    backdrop-filter:blur(16px) saturate(145%);
-    border-bottom:1px solid color-mix(in srgb, var(--border-color,#e5e5e7) 82%, transparent);
-    box-sizing:border-box;
-  }
-
-  .mobile-brand-lockup {
-    display:flex;
-    align-items:center;
-    gap:9px;
-    min-width:0;
-  }
-
-  .mobile-brand-mark {
-    width:32px;
-    height:32px;
-    flex:0 0 32px;
-    border-radius:9px;
-    object-fit:cover;
-  }
-
-  .mobile-brand-copy { min-width:0; }
-
-  .mobile-brand-name {
-    font-size:13px;
-    line-height:1.05;
-    font-weight:700;
-    letter-spacing:-.015em;
-    white-space:nowrap;
-  }
-
-  .mobile-brand-mode {
-    margin-top:3px;
-    font-size:10px;
-    line-height:1;
-    color:var(--text-secondary,#777);
-  }
-
-  .mobile-viewer-badge {
-    display:inline-flex;
-    align-items:center;
-    min-height:25px;
-    padding:0 9px;
-    border-radius:999px;
-    font-size:10px;
-    font-weight:650;
-    color:#087a4a;
-    background:rgba(44,243,158,.11);
-  }
-
-  /* -----------------------------------------------------------
-     BOTTOM NAVIGATION
-     IMPORTANT: fixed to the actual bottom edge, not floating.
-     This gives a larger reliable tap zone in Safari and PWA mode.
-     ----------------------------------------------------------- */
-  .mobile-bottom-nav {
-    position:fixed !important;
-    left:0 !important;
-    right:0 !important;
-    bottom:0 !important;
-    width:100% !important;
-    height:calc(var(--mobile-nav-content-height) + env(safe-area-inset-bottom, 0px));
-    display:grid !important;
-    grid-template-columns:repeat(5,minmax(0,1fr));
-    align-items:start;
-    padding:4px max(6px, env(safe-area-inset-left, 0px)) env(safe-area-inset-bottom, 0px);
-    margin:0 !important;
-    border-radius:0 !important;
-    box-sizing:border-box;
-    z-index:5000 !important;
-    pointer-events:auto !important;
-    isolation:isolate;
-    background:color-mix(in srgb, var(--card-bg,#fff) 96%, transparent);
-    -webkit-backdrop-filter:blur(18px) saturate(150%);
-    backdrop-filter:blur(18px) saturate(150%);
-    border:0;
-    border-top:1px solid color-mix(in srgb, var(--border-color,#e5e5e7) 88%, transparent);
-    box-shadow:0 -3px 16px rgba(0,0,0,.045);
-  }
-
-  .mobile-nav-item {
-    position:relative;
-    min-width:0;
-    min-height:50px;
-    margin:0;
-    padding:5px 2px 4px;
-    border:0;
-    border-radius:12px;
-    background:transparent;
-    color:var(--text-secondary,#707075);
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    gap:2px;
-    font:inherit;
-    font-size:10px;
-    line-height:1.05;
-    font-weight:500;
-    cursor:pointer;
-    pointer-events:auto !important;
-    touch-action:manipulation;
-    -webkit-tap-highlight-color:transparent;
-    user-select:none;
-  }
-
-  .mobile-nav-item::before {
-    content:"";
-    position:absolute;
-    inset:-3px 0;
-    z-index:-1;
-  }
-
-  .mobile-nav-item svg {
-    width:20px;
-    height:20px;
-    stroke:currentColor;
-    fill:none;
-    stroke-width:1.8;
-    pointer-events:none;
-  }
-
-  .mobile-nav-item span { pointer-events:none; }
-
-  .mobile-nav-item.active {
-    color:#0d965d;
-    background:transparent;
-    font-weight:650;
-  }
-
-  .mobile-nav-item.active::after {
-    content:"";
-    position:absolute;
-    top:1px;
-    width:22px;
-    height:2px;
-    border-radius:999px;
-    background:#19ba75;
-  }
-
-  .mobile-nav-item:active {
-    background:rgba(44,243,158,.09);
-    transform:scale(.97);
-  }
-
-  /* Installed app gets a slightly calmer shell while Safari stays identical. */
-  body.mobile-standalone .mobile-topbar,
-  body.mobile-standalone .mobile-bottom-nav {
-    background:color-mix(in srgb, var(--card-bg,#fff) 98%, transparent);
-  }
-
-  /* -----------------------------------------------------------
-     SIMPLIFIED MOBILE CONTENT
-     ----------------------------------------------------------- */
-  body.mobile-viewer-mode .page-header {
-    margin-bottom:12px !important;
-    align-items:flex-end;
-  }
-
-  body.mobile-viewer-mode .greeting-subtitle { font-size:11px; }
-
-  body.mobile-viewer-mode .page-title {
-    font-size:clamp(25px,7vw,30px) !important;
-    line-height:1.05;
-    letter-spacing:-.04em;
-  }
-
-  body.mobile-viewer-mode .page-header > div:last-child { display:none !important; }
-
-  body.mobile-viewer-mode .card {
-    border-radius:16px !important;
-    box-shadow:0 1px 2px rgba(0,0,0,.025) !important;
-  }
-
-  body.mobile-viewer-mode .kpi-grid {
-    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
-    gap:8px !important;
-  }
-
-  body.mobile-viewer-mode .kpi-card {
-    min-height:102px;
-    padding:13px !important;
-  }
-
-  body.mobile-viewer-mode .kpi-card .kpi-value,
-  body.mobile-viewer-mode .stat-value { font-size:23px !important; }
-
-  body.mobile-viewer-mode #overviewDashboard {
-    height:auto !important;
-    overflow:visible !important;
-    display:block !important;
-  }
-
-  body.mobile-viewer-mode #overviewDashboard .overview-priority-grid,
-  body.mobile-viewer-mode .overview-priority-grid {
-    display:grid !important;
-    grid-template-columns:1fr !important;
-    gap:10px !important;
-    height:auto !important;
-    overflow:visible !important;
-  }
-
-  body.mobile-viewer-mode #overviewCurrentProjects,
-  body.mobile-viewer-mode #overviewUpcomingDeadlines {
-    max-height:none !important;
-    overflow:visible !important;
-  }
-
-  body.mobile-viewer-mode .overview-project-card { min-width:0 !important; }
-
-  /* Keep wide data readable instead of squeezing every desktop column. */
-  body.mobile-viewer-mode .table-container,
-  body.mobile-viewer-mode .table-wrap,
-  body.mobile-viewer-mode .data-table-wrap {
-    overflow-x:auto !important;
-    -webkit-overflow-scrolling:touch;
-  }
-
-  body.mobile-viewer-mode table { min-width:680px; }
-
-  body.mobile-viewer-mode .project-details-grid,
-  body.mobile-viewer-mode .payment-overview-grid,
-  body.mobile-viewer-mode .reports-grid,
-  body.mobile-viewer-mode .settings-grid,
-  body.mobile-viewer-mode .form-grid {
-    grid-template-columns:1fr !important;
-  }
-
-  body.mobile-viewer-mode .project-tabs,
-  body.mobile-viewer-mode .filter-tabs {
-    overflow-x:auto;
-    flex-wrap:nowrap !important;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-  }
-
-  body.mobile-viewer-mode .project-tabs::-webkit-scrollbar,
-  body.mobile-viewer-mode .filter-tabs::-webkit-scrollbar { display:none; }
-
-  body.mobile-viewer-mode .project-tab,
-  body.mobile-viewer-mode .filter-tab { flex:0 0 auto; }
-
-  /* AI is the main mobile action. */
-  body.mobile-viewer-mode #view-assistant {
-    min-height:calc(100dvh - var(--mobile-top-height) - var(--mobile-nav-content-height) - 40px);
-  }
-
-  body.mobile-viewer-mode .assistant-layout,
-  body.mobile-viewer-mode .ai-layout {
-    grid-template-columns:1fr !important;
-    min-height:calc(100dvh - 165px) !important;
-  }
-
-  body.mobile-viewer-mode .assistant-sidebar,
-  body.mobile-viewer-mode .ai-sidebar { display:none !important; }
-
-  body.mobile-viewer-mode .assistant-main,
-  body.mobile-viewer-mode .ai-main {
-    min-width:0;
-    border-radius:16px !important;
-  }
-
-  body.mobile-viewer-mode .assistant-suggestions { grid-template-columns:1fr !important; }
-
-  body.mobile-viewer-mode .assistant-composer {
-    position:sticky;
-    bottom:calc(var(--mobile-nav-content-height) + env(safe-area-inset-bottom, 0px) + 6px);
-    z-index:25;
-  }
-
-  /* Mobile is intentionally view-first. Settings stays editable. */
-  body.mobile-viewer-mode [onclick*="navigateTo('new-order')"],
-  body.mobile-viewer-mode [data-view="new-order"],
-  body.mobile-viewer-mode #view-new-order,
-  body.mobile-viewer-mode [onclick*="toggleDeliverable"],
-  body.mobile-viewer-mode [onclick*="openRecordPaymentModal"],
-  body.mobile-viewer-mode [onclick*="deleteProject"],
-  body.mobile-viewer-mode [onclick*="deleteCurrentProject"],
-  body.mobile-viewer-mode [onclick*="deleteTask"],
-  body.mobile-viewer-mode [onclick*="deleteCatalog"],
-  body.mobile-viewer-mode [onclick*="saveCatalog"],
-  body.mobile-viewer-mode [onclick*="openCatalogCategoryModal"],
-  body.mobile-viewer-mode [onclick*="openCatalogServiceModal"],
-  body.mobile-viewer-mode [onclick*="openCatalogPackageModal"],
-  body.mobile-viewer-mode [onclick*="promptMarkAsDelivered"],
-  body.mobile-viewer-mode [onclick*="saveProjectData"],
-  body.mobile-viewer-mode [onclick*="submitPaymentRecord"] {
-    display:none !important;
-  }
-
-  body.mobile-viewer-mode input:not(#profilePhotoFileInput):not(#cropZoomRange),
-  body.mobile-viewer-mode textarea,
-  body.mobile-viewer-mode select {
-    font-size:16px;
-  }
-
-  body.mobile-viewer-mode #view-settings .card { padding:16px !important; }
-  body.mobile-viewer-mode .profile-photo-editor-row { align-items:flex-start !important; }
-  body.mobile-viewer-mode #settingsAvatarPreview { width:76px !important; height:76px !important; }
-
-  /* Profile crop editor remains comfortably usable on phones. */
-  .profile-crop-modal {
-    width:min(94vw,460px) !important;
-    max-height:90dvh;
-    overflow:hidden;
-  }
-
-  .profile-crop-body { padding:16px; overflow:auto; }
-
-  .crop-stage {
-    width:min(78vw,340px);
-    aspect-ratio:1;
-    margin:0 auto 16px;
-    border-radius:24px;
-    overflow:hidden;
-    position:relative;
-    background:#e8e8ed;
-    touch-action:none;
-  }
-
-  #cropCanvas {
-    display:block;
-    width:100%;
-    height:100%;
-    cursor:grab;
-    touch-action:none;
-  }
-
-  #cropCanvas:active { cursor:grabbing; }
-
-  .crop-circle-guide {
-    pointer-events:none;
-    position:absolute;
-    inset:10%;
-    border:2px solid rgba(255,255,255,.95);
-    border-radius:50%;
-    box-shadow:0 0 0 999px rgba(0,0,0,.20);
-  }
-
-  .crop-controls { display:grid; gap:10px; }
-  .crop-zoom-row { display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:10px; }
-  #cropZoomRange { width:100%; accent-color:#19ba75; }
-  .crop-help { font-size:12px; color:var(--text-secondary,#777); text-align:center; }
-  .crop-actions { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:14px; }
-
-  body.mobile-viewer-mode.mobile-on-assistant .assistant-fab,
-  body.mobile-viewer-mode.mobile-on-assistant .ai-fab { display:none !important; }
-}
-
-/* Narrow phones: preserve five tabs but trim labels and spacing gracefully. */
-@media (max-width: 370px) {
-  .mobile-nav-item { font-size:9px; }
-  .mobile-nav-item svg { width:19px; height:19px; }
-  body.mobile-viewer-mode .kpi-grid { grid-template-columns:1fr 1fr !important; }
+  /* Anything outside the three companion screens is never part of the mobile shell. */
+  body.mobile-companion-mode .assistant-bubble-wrap{display:none!important}
+  body.mobile-companion-mode .modal-card{max-width:calc(100vw - 24px)!important}
 }
