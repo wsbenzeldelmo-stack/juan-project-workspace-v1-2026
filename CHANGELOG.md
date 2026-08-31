@@ -1,31 +1,59 @@
-# JUAN PROJECT WORKSPACE v1.1.4
+# JUAN Project Workspace — v1.1.5
 
-## Mobile workflow
-- Final five-slot mobile navigation: Overview · Projects · + · AI · Finance.
-- Floating iPhone-style navigation capsule with maximum pill radius, safe-area handling, larger touch targets, and fixed high z-index.
-- Quick Access center button: Create Order, Edit Order, Record Payment.
-- Upcoming Deadlines moved to the top with horizontal scrolling and soft feather edges.
-- Compact Project Status strip: Active, Remaining deliverables, Due.
-- Current Projects header opens a full active-project sheet with deadline tags and progress.
-- Projects list reduced to Project ID, name, progress, deadline, tags, and a vertical action menu.
-- Project detail sheet prioritizes deadline/status/progress, then Deliverables and Payment Monitoring.
-- Deliverables can be checked/un-checked on mobile.
-- Add Item reuses the existing Service Catalog / batch-add project-item workflow.
-- Payment Monitoring shows balance, paid, total, recent payment activity, and receipt thumbnails.
-- Mobile receipt capture supports Camera / Photos, local OCR when available, editable reference number, and receipt attachment.
-- Swipe to Record Payment uses the existing payment engine and its success state.
-- AI returns to the existing guided project encoding/editing workflow.
-- Finance remains intentionally compact.
+## Shop + Workspace Refinement
 
-## Fees and invoice
-- System Maintenance is system-defined at PHP 1.00 once per project whenever any package is present, including restored/older package projects.
-- Rush Production Fee now considers Project Timeline and Project Workload using system-defined tiers.
-- Current Workload Adjustment retains the existing workload snapshot rules for projects starting at project 052.
-- Existing production standards remain: one standalone service = 7 days; two or more standalone services = 14 days; any package = 14 days.
-- Invoice totals section simplified to Subtotal, Discount, Additional Fees, TOTAL, Amount Paid, and Balance.
-- Additional Fees list Rush Production Fee, Current Workload Adjustment, and System Maintenance with compact info explanations.
+This patch continues from the stable v1.1.4 Workspace. It does **not** include the cancelled v1.2.0 Supabase / JUAN Project Online redesign.
 
-## Visual language
-- Retains JUAN fonts, green palette, white surfaces, neutral metadata, and existing status colors.
-- Project/finance mobile pages use rows for lists and cards only for summaries to maximize usable screen area.
-- Desktop toolbar filters are grouped into a quieter segmented control; primary header action uses a compact pill treatment.
+### Shop terminology and structure
+- Renames the visible **Pricelist / Catalog** module to **Shop**.
+- Uses the hierarchy **Shop → Services → Items + Packages**.
+- `TV Broadcast Graphics` is now presented as a **Service**.
+- `Studio`, `Lower Thirds`, `Logo Animation`, etc. are presented as **Items**.
+- Packages are built from the same existing Items used by New Order.
+- New Order and Shop continue to read the same `soloServices` and `packagesList` data, preventing duplicate price lists.
+- Adds Service filters to New Order.
+- Shop `All` view combines Items first and Packages last in one table.
+- Selecting a specific Service shows separate aligned Items and Packages tables.
+- Package inclusions are collapsible.
+- Adds maximize controls to Items and Packages.
+- Services can be drag-reordered while Shop sort is set to Default.
+- Corrects Shop table column sizing and the large whitespace bug.
+
+### Actions and visual language
+- Standard buttons use the existing JUAN capsule language.
+- Only the primary action in an action group remains green; supporting actions are neutral.
+- `Mark as Delivered` is now secondary beside the primary `Record Payment` action.
+- Row action controls use the vertical `⋮` pattern with explicit action labels such as Edit Item, Delete Item, Edit Package, Delete Package, Edit Client, and Delete Client.
+- Removes the duplicate Edit button from Project Data → Order Items; the vertical menu now owns Edit / Remove.
+- Fixes the existing-client typeahead layering / overlap bug.
+- Updates the JUAN Assistant floating control to a true circular button with a small wave mark.
+- Makes the guided JUAN Assistant copy friendlier while preserving its existing controlled workflow.
+
+### Calendar
+- Adds custom **Events** and **Meetings** to the existing Calendar.
+- Click a date or `+ Add Event` to schedule.
+- Supports title, date, start/end time, related project, and notes.
+- Saved events persist locally in `JUAN_CALENDAR_EVENTS` and can be edited or deleted.
+- Project deadlines remain visible and clickable.
+
+### Rush and additional fees
+- Keeps the underlying saved rush fields for backwards compatibility.
+- Client-facing display is simplified to **Rush Fee** and **System Maintenance Fee**.
+- Starting from JP-052, the displayed Rush Fee combines the saved production rush charge and applicable workload adjustment.
+- Rush logic still considers Project Timeline, Project Workload, and Current Workload.
+- Details are moved to an `i` information modal instead of occupying permanent order / invoice space.
+- System Maintenance Fee remains ₱1 once when a project contains at least one Package, and ₱0 for solo-only projects.
+
+### Invoice
+- Adds Order Item, Quantity, and Price rows to the invoice.
+- Keeps totals compact: Subtotal, Discount, Additional Fees, Total, Amount Paid, Balance.
+- Additional fee lines use tight spacing and only show explanations when requested on-screen.
+
+### Clients
+- Adds a visible Client ID inherited from the client's earliest project sequence (`CL-###`).
+- Client Directory defaults to ID order.
+- Client Profile receives a cleaner editable profile layout and a single capsule **Save Changes** action.
+- Phone numbers are normalized to Philippine international display format (`+63 9xx xxx xxxx`) when saved.
+
+### Cache
+- Service Worker cache bumped to `cache-115` and includes `shop-refinement.css`.

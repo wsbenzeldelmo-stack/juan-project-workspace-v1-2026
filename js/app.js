@@ -204,18 +204,20 @@ function formatCurrency(amount) {
         catalogCategories: [],
         catalogManagerCategory: "ALL",
         catalogManagerFilter: "All Items",
+        orderShopService: "ALL",
         projectFilter: "Current",
         paymentFilter: "Pending",
         listSorts: {
           projects: "default",
           payments: "default",
-          clients: "az",
-          catalog: "az",
+          clients: "id",
+          catalog: "default",
           overviewProjects: "date",
           overviewDeadlines: "date"
         },
         packageBuilderSelectedNames: [],
-        calendarDate: new Date()
+        calendarDate: new Date(),
+        manualEvents: []
       };
 
       // Profile Cropping State Variables
@@ -315,6 +317,12 @@ function formatCurrency(amount) {
         if (savedClients) {
           try { state.clients = JSON.parse(savedClients); } catch(e){}
         }
+
+        try {
+          const savedCalendarEvents = localStorage.getItem("JUAN_CALENDAR_EVENTS");
+          state.manualEvents = savedCalendarEvents ? JSON.parse(savedCalendarEvents) : [];
+          if (!Array.isArray(state.manualEvents)) state.manualEvents = [];
+        } catch(e) { state.manualEvents = []; }
 
         const addrInput = document.getElementById("ownerAddressInput");
         const phoneInput = document.getElementById("ownerPhoneInput");
@@ -646,6 +654,32 @@ function formatCurrency(amount) {
         localStorage.setItem("JUAN_CLIENTS_LOCAL", JSON.stringify(state.clients));
       }
 
+      function persistCalendarEvents(){
+        localStorage.setItem("JUAN_CALENDAR_EVENTS", JSON.stringify(state.manualEvents || []));
+      }
+
+      function normalizePhilippinePhone(value){
+        let digits=String(value||'').replace(/\D/g,'');
+        if(!digits)return '';
+        if(digits.startsWith('0063'))digits=digits.slice(2);
+        if(digits.startsWith('63'))digits=digits.slice(2);
+        if(digits.startsWith('0'))digits=digits.slice(1);
+        digits=digits.slice(0,10);
+        if(!digits)return '';
+        const a=digits.slice(0,3),b=digits.slice(3,6),c=digits.slice(6,10);
+        return `+63 ${a}${b?` ${b}`:''}${c?` ${c}`:''}`.trim();
+      }
+
+      function clientFirstProject(client){
+        if(!client)return null;
+        const matches=state.projects.filter(p=>!p.deleted&&(p.client_id===client.id||(!p.client_id&&p.client_name===client.name)||p.client_name===client.name));
+        return matches.sort((a,b)=>projectNumber(a)-projectNumber(b)||new Date(a.created_at||0)-new Date(b.created_at||0))[0]||null;
+      }
+      function clientDisplayId(client){
+        const first=clientFirstProject(client);
+        return first?`CL-${String(projectNumber(first)).padStart(3,'0')}`:'CL-—';
+      }
+
       function updateProfileDisplay() {
         const ownerName = state.ownerName;
         document.getElementById("sidebarUserName").innerText = ownerName;
@@ -762,7 +796,7 @@ function formatCurrency(amount) {
       }
 
       function updateOwnerPhone(val) {
-        const phone = val.trim();
+        const phone = normalizePhilippinePhone(val);
         if (phone && !/^[\+\d\s\-\(\)]+$/.test(phone)) {
           showToast("Please enter a valid phone number.");
           return;
@@ -1381,17 +1415,20 @@ ${description}`))actionCallback();return;}
         if(scope==='projects')renderProjects(); else if(scope==='payments')renderPaymentsView(); else if(scope==='clients')renderClients(); else if(scope==='catalog')renderPricelist(); else if(scope==='overviewProjects')renderOverviewCurrentProjects(); else if(scope==='overviewDeadlines')renderOverviewUpcomingDeadlines();
       }
       function sortProjectsFor(scope,items,filterMode=''){
-        const pref=state.listSorts?.[scope]||'default', arr=items.slice();
+        const pref=state.listSorts?.[scope]||'default',arr=items.slice();
         if(pref==='az')return arr.sort((a,b)=>String(a.title||a.name||'').localeCompare(String(b.title||b.name||'')));
         if(pref==='za')return arr.sort((a,b)=>String(b.title||b.name||'').localeCompare(String(a.title||a.name||'')));
+        if(pref==='id')return arr.sort((a,b)=>projectNumber(a)-projectNumber(b));
+        if(pref==='priority')return arr.sort(compareProjectPriority);
         if(pref==='date'){
-          if(scope==='payments')return arr.sort((a,b)=>{const ad=parseDateSafe(a.payment_due_date||a.deadline_date)?.getTime()??Infinity,bd=parseDateSafe(b.payment_due_date||b.deadline_date)?.getTime()??Infinity;const pd=Number(projectIsPriority(b))-Number(projectIsPriority(a));return ad-bd||pd||projectNumber(a)-projectNumber(b)});
+          if(scope==='payments')return arr.sort((a,b)=>{const ad=parseDateSafe(a.payment_due_date||a.deadline_date)?.getTime()??Infinity,bd=parseDateSafe(b.payment_due_date||b.deadline_date)?.getTime()??Infinity;return ad-bd||Number(projectIsPriority(b))-Number(projectIsPriority(a))||projectNumber(a)-projectNumber(b)});
           return arr.sort(compareProjectPriority);
         }
         if(scope==='projects')return arr.sort(filterMode==='Current'?compareProjectPriority:(a,b)=>projectNumber(a)-projectNumber(b));
         if(scope==='payments')return arr.sort(filterMode==='Pending'?(a,b)=>{const ad=parseDateSafe(a.payment_due_date||a.deadline_date)?.getTime()??Infinity,bd=parseDateSafe(b.payment_due_date||b.deadline_date)?.getTime()??Infinity;return ad-bd||Number(projectIsPriority(b))-Number(projectIsPriority(a))||projectNumber(a)-projectNumber(b)}:(a,b)=>projectNumber(a)-projectNumber(b));
         return arr;
       }
+
       function renumberProjectSequence(){
         // No reserved or skipped Project IDs: JP-001, JP-002, JP-003 ... continuously.
         // Existing order is preserved by the current numeric reference, then creation time.
@@ -1590,16 +1627,12 @@ ${description}`))actionCallback();return;}
       }
 
       function renderClientProfile(){
-        const id=state.activeClientId, c=state.clients.find(x=>x.id===id); if(!c)return;
-        document.getElementById("clientProfileName").innerText=c.name||"Client";
-        document.getElementById("clientProfileEmail").innerText=c.email||"";
-        const projects=state.projects.filter(p=>!p.deleted&&(p.client_id===id||p.client_name===c.name));
-        const paid=projects.reduce((s,p)=>s+getProjectPaid(p),0), total=projects.reduce((s,p)=>s+Number(p.total_amount||0)+Math.max(0,getProjectMaintenanceFee(p)),0);
-        document.getElementById("clientProfileEditBtn").onclick=()=>openEditClientModal(id);
-        document.getElementById("clientProfileContent").innerHTML=`<div class="client-stat-grid"><div class="mini-stat"><div class="label">Projects</div><div class="value">${projects.length}</div></div><div class="mini-stat"><div class="label">Total Project Value</div><div class="value">${formatCurrency(total)}</div></div><div class="mini-stat"><div class="label">Paid</div><div class="value">${formatCurrency(paid)}</div></div><div class="mini-stat"><div class="label">Outstanding</div><div class="value">${formatCurrency(Math.max(0,total-paid))}</div></div></div>
-        <div class="card"><div class="card-header"><h2 class="card-title">Projects</h2></div><div class="table-responsive"><table class="data-table"><thead><tr><th>Project</th><th>Value</th><th>Paid</th><th>Balance</th><th>Status</th></tr></thead><tbody>${projects.map(p=>`<tr onclick="app.openProjectDetails('${p.id}')" style="cursor:pointer"><td>${escapeHtml(p.title)}</td><td>${formatCurrency(p.total_amount)}</td><td>${formatCurrency(getProjectPaid(p))}</td><td>${formatCurrency(getProjectBalance(p))}</td><td>${escapeHtml(p.status||"")}</td></tr>`).join("")||`<tr><td colspan="5" class="text-muted text-center">No projects.</td></tr>`}</tbody></table></div></div>
-        <div class="card mt-6"><div class="card-header"><h2 class="card-title">Payment History</h2></div>${projects.flatMap(p=>(p.payments||[]).map(pay=>`<div class="summary-row"><span>${escapeHtml(p.title)} • ${escapeHtml(pay.payment_date||"")}</span><strong>${formatCurrency(pay.amount_paid||pay.amount||0)}</strong></div>`)).join("")||`<div class="text-muted">No payment history.</div>`}</div>
-        <div class="card mt-6"><div class="card-header"><h2 class="card-title">Messages</h2></div><div class="text-muted">Message interface placeholder. Client communication can be connected here later.</div></div>`;
+        const id=state.activeClientId,c=state.clients.find(x=>x.id===id);if(!c)return;const cid=clientDisplayId(c),projects=state.projects.filter(p=>!p.deleted&&(p.client_id===id||p.client_name===c.name)),paid=projects.reduce((s,p)=>s+getProjectPaid(p),0),total=projects.reduce((s,p)=>s+Number(p.total_amount||0)+Math.max(0,getProjectMaintenanceFee(p)),0);
+        document.getElementById('clientProfileName').innerText=c.name||'Client';document.getElementById('clientProfileEmail').innerText=`${cid}${c.email?` · ${c.email}`:''}`;document.getElementById('clientProfileEditBtn').onclick=()=>saveClientProfileChanges();
+        document.getElementById('clientProfileContent').innerHTML=`<div class="client-profile-layout"><div class="card client-profile-card"><div class="client-profile-identity"><div class="client-profile-avatar">${escapeHtml((c.name||'C').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase())}</div><div><span class="client-id-pill">${escapeHtml(cid)}</span><h2>${escapeHtml(c.name||'Client')}</h2><p>Client record inherited from the first project ID.</p></div></div><div class="client-profile-form"><div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="clientProfileNameInput" value="${escapeHtml(c.name||'')}"></div><div class="form-group"><label class="form-label">Email</label><input class="form-control" id="clientProfileEmailInput" value="${escapeHtml(c.email||'')}"></div><div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="clientProfilePhoneInput" value="${escapeHtml(normalizePhilippinePhone(c.phone)||c.phone||'')}"></div><div class="form-group"><label class="form-label">Address</label><input class="form-control" id="clientProfileAddressInput" value="${escapeHtml(c.address||'')}"></div></div></div><div class="client-stat-grid client-profile-stats"><div class="mini-stat"><div class="label">Projects</div><div class="value">${projects.length}</div></div><div class="mini-stat"><div class="label">Total Project Value</div><div class="value">${formatCurrency(total)}</div></div><div class="mini-stat"><div class="label">Paid</div><div class="value">${formatCurrency(paid)}</div></div><div class="mini-stat"><div class="label">Outstanding</div><div class="value">${formatCurrency(Math.max(0,total-paid))}</div></div></div></div><div class="card mt-6"><div class="card-header"><h2 class="card-title">Projects</h2></div><div class="table-responsive"><table class="data-table"><thead><tr><th>Project ID</th><th>Project</th><th>Value</th><th>Balance</th><th>Status</th></tr></thead><tbody>${projects.sort((a,b)=>projectNumber(a)-projectNumber(b)).map(p=>`<tr onclick="app.openProjectDetails('${p.id}')" style="cursor:pointer"><td><strong>${escapeHtml(formatProjectId(p))}</strong></td><td>${escapeHtml(p.title)}</td><td>${formatCurrency(Number(p.total_amount||0)+getProjectMaintenanceFee(p))}</td><td>${formatCurrency(getProjectBalance(p))}</td><td>${escapeHtml(p.status||'')}</td></tr>`).join('')||`<tr><td colspan="5" class="text-muted text-center">No projects.</td></tr>`}</tbody></table></div></div><div class="card mt-6"><div class="card-header"><h2 class="card-title">Payment History</h2></div>${projects.flatMap(p=>(p.payments||[]).map(pay=>`<div class="summary-row"><span>${escapeHtml(formatProjectId(p))} · ${escapeHtml(pay.payment_date||'')}</span><strong>${formatCurrency(pay.amount_paid||pay.amount||0)}</strong></div>`)).join('')||`<div class="text-muted">No payment history.</div>`}</div>`;
+      }
+      function saveClientProfileChanges(){
+        const c=state.clients.find(x=>x.id===state.activeClientId);if(!c)return;const name=document.getElementById('clientProfileNameInput')?.value.trim()||'',email=document.getElementById('clientProfileEmailInput')?.value.trim()||'',phone=normalizePhilippinePhone(document.getElementById('clientProfilePhoneInput')?.value||''),address=document.getElementById('clientProfileAddressInput')?.value.trim()||'';if(!name||!email||!phone){showToast('Full name, email, and phone are required.');return;}c.name=name;c.email=email;c.phone=phone;c.address=address;state.projects.forEach(p=>{if(p.client_id===c.id){p.client_name=name;p.client_email=email;p.client_phone=phone;p.client_address=address;}});persistClientsState();persistProjectsState();renderClientProfile();showToast('Client changes saved.');if(supabaseClient&&state.isConnected)syncClientToDatabase(c);
       }
 
       function openClientProfile(id){state.activeClientId=id;navigateTo("client-profile");}
@@ -1879,54 +1912,20 @@ ${description}`))actionCallback();return;}
       }
 
       /* UNIFIED SERVICE CATALOG PRESENTATION WITH UNIFIED ADD TO CART BUTTONS */
+      function setOrderShopService(service){ state.orderShopService=service||'ALL'; renderServiceCatalog(); }
       function renderServiceCatalog() {
         ensureCatalogCategories();
-        const grid = document.getElementById("serviceCatalogGrid");
-        if (!grid) return;
-        grid.innerHTML = "";
-        grid.classList.toggle('package-grid', state.catalogTab === 'PACKAGE');
-
-        if (state.catalogTab === 'SOLO') {
-          state.soloServices.forEach(item => {
-            grid.innerHTML += `
-              <div class="catalog-item">
-                <div>
-                  <div class="catalog-title">${item.name}</div>
-                  <div class="catalog-desc">${item.description || 'Service'}</div>
-                </div>
-                <div class="catalog-price-area">
-                  <div class="catalog-current-price">${formatCurrency(item.price)}</div>
-                  <button class="btn-add-cart" onclick="app.addToCart('${item.name}', ${item.price}, 'SOLO')">+ Add to Cart</button>
-                </div>
-              </div>
-            `;
-          });
-        } else {
-          state.packagesList.forEach(pkg => {
-            const inclusions = Array.isArray(pkg.includedServiceNames)
-              ? pkg.includedServiceNames
-              : String(pkg.description || '').split('\n').map(s => s.replace(/^•\s*/, '').trim()).filter(Boolean);
-            grid.innerHTML += `
-              <div class="catalog-item package-card">
-                <div>
-                  <div class="catalog-title">${pkg.name}</div>
-                  <details class="package-inclusions">
-                    <summary>VIEW INCLUSIONS</summary>
-                    <ul class="package-inclusions-list">
-                      ${inclusions.map(item => `<li>${item}</li>`).join('')}
-                    </ul>
-                  </details>
-                </div>
-                <div class="catalog-price-area">
-                  <div class="package-price-stack">
-                    <span class="catalog-current-price">${formatCurrency(pkg.sellingPrice)}</span>
-                    <span class="package-original-price">${formatCurrency(pkg.originalPrice)}</span>
-                  </div>
-                  <button class="btn-add-cart" onclick="app.addPackageToCart('${pkg.product_code}')">+ Add to Cart</button>
-                </div>
-              </div>
-            `;
-          });
+        const grid=document.getElementById("serviceCatalogGrid"),filters=document.getElementById('orderShopServiceFilters');
+        if(!grid)return;
+        const selected=state.orderShopService||'ALL';
+        if(filters)filters.innerHTML=['ALL',...state.catalogCategories].map(service=>`<button type="button" class="shop-filter-chip ${selected===service?'active':''}" onclick="app.setOrderShopService(decodeURIComponent('${encodeURIComponent(service)}'))">${escapeHtml(service==='ALL'?'All':displayCategory(service))}</button>`).join('');
+        grid.innerHTML="";grid.classList.toggle('package-grid',state.catalogTab==='PACKAGE');
+        if(state.catalogTab==='SOLO'){
+          const items=state.soloServices.filter(item=>selected==='ALL'||String(item.category||'')===selected);
+          grid.innerHTML=items.map(item=>`<div class="catalog-item"><div><div class="catalog-title">${escapeHtml(item.name)}</div><div class="catalog-desc">${escapeHtml(item.description||'Item')}</div><div class="catalog-service-tag">${escapeHtml(displayCategory(item.category||''))}</div></div><div class="catalog-price-area"><div class="catalog-current-price">${formatCurrency(item.price)}</div><button class="btn-add-cart" onclick="app.addToCart('${String(item.name).replace(/'/g,"\\'")}', ${Number(item.price||0)}, 'SOLO')">+ Add</button></div></div>`).join('')||`<div class="empty-compact-state"><strong>No items</strong><span>No Shop items are available in this Service.</span></div>`;
+        }else{
+          const packages=state.packagesList.filter(pkg=>selected==='ALL'||String(pkg.category||'')===selected);
+          grid.innerHTML=packages.map(pkg=>{const inclusions=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames:String(pkg.description||'').split('\n').map(s=>s.replace(/^•\s*/,'').trim()).filter(Boolean);return `<div class="catalog-item package-card"><div><div class="catalog-title">${escapeHtml(pkg.name)}</div><div class="catalog-service-tag">${escapeHtml(displayCategory(pkg.category||''))}</div><details class="package-inclusions"><summary>${inclusions.length} items · View inclusions</summary><ul class="package-inclusions-list">${inclusions.map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul></details></div><div class="catalog-price-area"><div class="package-price-stack"><span class="catalog-current-price">${formatCurrency(pkg.sellingPrice)}</span><span class="package-original-price">${formatCurrency(pkg.originalPrice)}</span></div><button class="btn-add-cart" onclick="app.addPackageToCart('${pkg.product_code}')">+ Add</button></div></div>`}).join('')||`<div class="empty-compact-state"><strong>No packages</strong><span>No packages are available in this Service.</span></div>`;
         }
       }
 
@@ -2050,7 +2049,7 @@ ${description}`))actionCallback();return;}
         if (rushRow && rushSummary) {
           const combinedRush = rushFee + workloadRushFee;
           rushRow.style.display = combinedRush > 0 ? "flex" : "none";
-          rushSummary.innerText = workloadRushFee>0 ? `+ ${formatCurrency(rushFee)} · Workload +${formatCurrency(workloadRushFee)}` : `+ ${formatCurrency(rushFee)}`;
+          rushSummary.innerText = `+ ${formatCurrency(combinedRush)}`;
         }
 
         const maintenanceRow=document.getElementById("summaryMaintenanceRow"),maintenanceEl=document.getElementById("summaryMaintenance");
@@ -2174,7 +2173,7 @@ ${description}`))actionCallback();return;}
           badgeEl.className = rushLevel === 0 ? "rush-simple-label" : "rush-simple-label rush";
           badgeEl.innerText = rushLevel===0 ? `STANDARD · ${STANDARD_DAYS}D` : levelNames[rushLevel];
         }
-        if (rushTextEl) rushTextEl.innerText = formatCurrency(rushFee);
+        if (rushTextEl) rushTextEl.innerText = formatCurrency(rushFee + Number(workloadRush.fee||0));
         const factorsEl=document.getElementById('rushFactorsSummary');
         if(factorsEl){
           const currentLoad=Number(workloadRush.active||0);
@@ -2187,7 +2186,7 @@ ${description}`))actionCallback();return;}
         const rushSummary = document.getElementById("summaryRushFee");
         const rushRow = document.getElementById("summaryRushRow");
         const combinedRush=rushFee+Number(workloadRush.fee||0);
-        if (rushSummary) rushSummary.innerText = workloadRush.fee>0 ? `+ ${formatCurrency(rushFee)} · Workload +${formatCurrency(workloadRush.fee)}` : `+ ${formatCurrency(rushFee)}`;
+        if (rushSummary) rushSummary.innerText = `+ ${formatCurrency(combinedRush)}`;
         if (rushRow) rushRow.style.display = combinedRush > 0 ? "flex" : "none";
 
         const deadlineErr = document.getElementById("orderDeadlineError");
@@ -2268,7 +2267,7 @@ ${description}`))actionCallback();return;}
           <div class="font-bold mb-2">Order Items:</div>
           ${state.cart.items.map(i => `<div class="summary-row"><span>${i.name} (x${i.qty})</span><span>${formatCurrency(i.price * i.qty)}</span></div>`).join("")}
           <div class="divider"></div>
-          ${Number(state.cart.rushFee||0)>0?`<div class="summary-row"><span>Rush Production Fee</span><span>${formatCurrency(Number(state.cart.rushFee || 0))}</span></div>`:''}${Number(state.cart.workloadRushFee||0)>0?`<div class="summary-row"><span>Current Workload Adjustment (${Number(state.cart.workloadRushRate||0)}%)</span><span>${formatCurrency(Number(state.cart.workloadRushFee||0))}</span></div>`:''}${state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-row"><span>System Maintenance</span><span>${formatCurrency(1)}</span></div>`:''}
+          ${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))>0?`<div class="summary-section-label">Additional Fees</div><div class="summary-row compact-fee-row"><span>Rush Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('rush')">i</button></span><span>${formatCurrency(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))}</span></div>`:(state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-section-label">Additional Fees</div>`:'')}${state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-row compact-fee-row"><span>System Maintenance Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('maintenance')">i</button></span><span>${formatCurrency(1)}</span></div>`:''}
           <div class="summary-row"><span>Included Revisions</span><span>1</span></div>
           <div class="summary-row"><span>Additional Revisions</span><span>From ${formatCurrency(500)} / revision</span></div>
           <div class="summary-row summary-total"><span>Total Amount</span><span>${document.getElementById("summaryTotal").innerText}</span></div>
@@ -2393,7 +2392,7 @@ ${description}`))actionCallback();return;}
         if (state.cart.clientMode === 'new') {
           clientName = document.getElementById("newClientName").value.trim();
           clientEmail = document.getElementById("newClientEmail").value.trim();
-          const phone = document.getElementById("newClientPhone").value.trim();
+          const phone = normalizePhilippinePhone(document.getElementById("newClientPhone").value);
           const address = document.getElementById("newClientAddress").value.trim();
 
           const newClient = { id: 'client_' + Date.now(), name: clientName, email: clientEmail, phone, address };
@@ -2654,7 +2653,7 @@ ${description}`))actionCallback();return;}
         proj.title=document.getElementById('projectDataProjectName')?.value??proj.title??'';
         proj.client_name=document.getElementById('projectDataClientName')?.value??proj.client_name??'';
         proj.client_email=document.getElementById('projectDataClientEmail')?.value??proj.client_email??'';
-        proj.client_phone=document.getElementById('projectDataClientPhone')?.value??proj.client_phone??'';
+        proj.client_phone=normalizePhilippinePhone(document.getElementById('projectDataClientPhone')?.value??proj.client_phone??'');
         proj.client_address=document.getElementById('projectDataClientAddress')?.value??proj.client_address??'';
         proj.start_date=document.getElementById('projectDataStartDate')?.value||'';
         proj.deadline_date=document.getElementById('projectDataDeadline')?.value||'';
@@ -2747,10 +2746,10 @@ ${description}`))actionCallback();return;}
         const items=proj.project_items;
         const rows=items.length ? items.map((item,index)=>{
           const visibleCategory=String(item.category||'').trim() || (String(item.type||'').toUpperCase()==='PACKAGE'?'Package':'Service');
-          const line=Number(item.price||0)*Math.max(1,Number(item.qty||1)),lineDisc=String(item.type||'').toUpperCase()==='PACKAGE'?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-lineDisc;return `<div class="order-item-row"><div class="order-item-main"><strong>${escapeHtml(item.name||'Untitled Item')}</strong><span>${escapeHtml(visibleCategory)} · Qty ${Math.max(1,Number(item.qty||1))}${lineDisc?` · Discount ${formatCurrency(lineDisc)}`:''}</span></div><div class="order-item-price"><strong>${formatCurrency(net)}</strong><span>${formatCurrency(Number(item.price||0))} each</span></div><div class="order-item-actions"><button class="btn btn-secondary btn-sm" onclick="app.openProjectOrderItemModal(${index})">Edit</button><button class="icon-more-button vertical-more" title="Item options" onclick="app.requestDeleteProjectOrderItem(${index},event)">⋮</button></div></div>`;
+          const line=Number(item.price||0)*Math.max(1,Number(item.qty||1)),lineDisc=String(item.type||'').toUpperCase()==='PACKAGE'?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-lineDisc,menuId=`orderItemMenu_${index}`;return `<div class="order-item-row"><div class="order-item-main"><strong>${escapeHtml(item.name||'Untitled Item')}</strong><span>${escapeHtml(visibleCategory)} · Qty ${Math.max(1,Number(item.qty||1))}${lineDisc?` · Discount ${formatCurrency(lineDisc)}`:''}</span></div><div class="order-item-price"><strong>${formatCurrency(net)}</strong><span>${formatCurrency(Number(item.price||0))} each</span></div><div class="order-item-actions"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Order item options" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openProjectOrderItemModal(${index})">Edit Order Item</button><button class="popover-action text-danger" onclick="app.requestDeleteProjectOrderItem(${index},event)">Remove Order Item</button></div></div></div></div>`;
         }).join('') : `<div class="text-muted py-4">No order items recorded. Add items when you are ready.</div>`;
         const grossSubtotal=items.reduce((sum,item)=>sum+Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1)),0),itemDiscountTotal=items.reduce((sum,item)=>{if(String(item.type||'').toUpperCase()==='PACKAGE')return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0),subtotal=Math.max(0,grossSubtotal-itemDiscountTotal),discount=Math.max(0,Number(proj.discount_amount||0)),rush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),workloadRate=Math.max(0,Number(proj.workload_rush_rate||0)),total=Number(proj.total_amount||Math.max(0,subtotal-discount+rush+workloadFee));
-        box.innerHTML=`${rows}<div class="project-items-total"><div><span>Items subtotal</span><strong>${formatCurrency(grossSubtotal)}</strong></div>${itemDiscountTotal?`<div><span>Item discounts</span><strong>− ${formatCurrency(itemDiscountTotal)}</strong></div>`:''}${discount?`<div><span>Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:''}${rush?`<div class="rush-line"><span>Rush Production Fee</span><strong>+ ${formatCurrency(rush)}</strong></div>`:''}${workloadFee?`<div class="rush-line"><span>Current Workload Adjustment (${workloadRate}%)</span><strong>+ ${formatCurrency(workloadFee)}</strong></div>`:''}<div class="project-items-grand-total"><span>Project Total</span><strong>${formatCurrency(total)}</strong></div></div>`;
+        const combinedRush=rush+workloadFee,maintenance=Math.max(0,getProjectMaintenanceFee(proj)),displayTotal=total+maintenance;box.innerHTML=`${rows}<div class="project-items-total"><div><span>Items subtotal</span><strong>${formatCurrency(grossSubtotal)}</strong></div>${itemDiscountTotal?`<div><span>Item discounts</span><strong>− ${formatCurrency(itemDiscountTotal)}</strong></div>`:''}${discount?`<div><span>Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:''}${combinedRush?`<div class="rush-line compact-fee-row"><span>Rush Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('rush')">i</button></span><strong>+ ${formatCurrency(combinedRush)}</strong></div>`:''}${maintenance?`<div class="rush-line compact-fee-row"><span>System Maintenance Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('maintenance')">i</button></span><strong>+ ${formatCurrency(maintenance)}</strong></div>`:''}<div class="project-items-grand-total"><span>Project Total</span><strong>${formatCurrency(displayTotal)}</strong></div></div>`;
       }
       function getProjectCatalogChoices(query=''){
         const q=String(query||'').trim().toLowerCase();
@@ -2957,50 +2956,27 @@ ${description}`))actionCallback();return;}
       /* ==========================================================================
          INVOICE GENERATOR & EMAIL REMINDERS
          ========================================================================== */
+      function openFeeInfo(type){
+        const title=document.getElementById('feeInfoTitle'),body=document.getElementById('feeInfoBody');if(!title||!body)return;
+        if(type==='maintenance'){
+          title.textContent='System Maintenance Fee';
+          body.innerHTML=`<div class="fee-info-copy"><p>Supports the JUAN Project management system and digital service infrastructure.</p><div class="fee-info-rule"><strong>Applied when</strong><span>An order contains at least one Package. It is charged once per project.</span></div></div>`;
+        }else{
+          title.textContent='Rush Fee';
+          body.innerHTML=`<div class="fee-info-copy"><p>An accelerated-production charge automatically selected by the Workspace for qualifying projects.</p><div class="fee-factor-list"><div><span>Project Timeline</span><small>Requested production time</small></div><div><span>Project Workload</span><small>Number and complexity of deliverables</small></div><div><span>Current Workload</span><small>Active production workload at booking</small></div></div><div class="fee-info-rule"><strong>Starting from JP-052</strong><span>The final Rush Fee includes the applicable current-workload adjustment. Existing projects keep their saved fee.</span></div></div>`;
+        }
+        openModal('feeInfoModal');
+      }
       function renderInvoicePaper(proj) {
-        const paper=document.getElementById('invoicePaperPrintable'); if(!paper||!proj)return;
-        const invoiceNo=ensureInvoiceNumber(proj);
-        const storedSubtotal=Math.max(0,Number(proj.subtotal_amount||0));
-        const discount=Math.max(0,Number(proj.discount_amount||0));
-        const rush=Math.max(0,Number(proj.rush_fee||0));
-        const workloadFee=Math.max(0,Number(proj.workload_rush_fee||0));
-        const workloadRate=Math.max(0,Number(proj.workload_rush_rate||0));
-        const maintenance=Math.max(0,getProjectMaintenanceFee(proj));
-        const projectTotal=Math.max(0,Number(proj.total_amount||0));
-        const inferredSubtotal=Math.max(0,projectTotal-rush-workloadFee+discount);
-        const subtotal=storedSubtotal>0?storedSubtotal:inferredSubtotal;
-        const additionalFees=rush+workloadFee+maintenance;
-        const invoiceTotal=Math.max(0,subtotal-discount+additionalFees);
-        const paid=(proj.payments||[]).reduce((sum,p)=>sum+Number(p.amount_paid||p.amount||0),0);
-        const balance=Math.max(0,invoiceTotal-paid),status=getInvoiceStatus({...proj,total_amount:invoiceTotal},balance);
-        const issue=getLocalDateString(new Date()),due=proj.invoice_due_date||proj.payment_due_date||proj.deadline_date||'',statusClass=status==='UNPAID'?'unpaid':status==='DOWNPAYMENT'?'partial':'paid';
-        const issueLabel=new Date(issue+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'});
-        const dueLabel=due?new Date(due+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'—';
-        const feeInfo={
-          rush:'Predefined production charge based on project timeline and project workload.',
-          workload:'Adjustment based on the active production workload when the project was accepted.',
-          maintenance:'Supports the JUAN Project management system and digital service infrastructure.'
-        };
-        const info=(text)=>`<span class="mini-info" title="${escapeHtml(text)}" aria-label="${escapeHtml(text)}">ⓘ</span>`;
-        paper.innerHTML=`
-          <div class="invoice-header invoice-header-v68">
-            <div class="invoice-brand-block"><h2>${escapeHtml(state.settings.businessName||'JUAN PROJECT')}</h2><div>${escapeHtml(state.ownerEmail||'')}</div><div>${escapeHtml(state.ownerPhone||'')}</div></div>
-            <div class="invoice-header-stack"><div class="invoice-label">Invoice</div><div class="invoice-number">${invoiceNo}</div><span class="invoice-status ${statusClass}">${status}</span><div class="invoice-issued-date">Issued ${issueLabel}</div></div>
-          </div>
-          <div class="invoice-meta-grid"><div><div class="invoice-label">Bill To</div><div class="font-bold">${escapeHtml(proj.client_name||'—')}</div><div class="text-sm text-secondary">${escapeHtml(proj.client_email||'')}</div></div><div><div class="invoice-label">Project</div><div class="font-bold">${escapeHtml(proj.title||'—')}</div><div class="text-sm text-secondary">Due ${dueLabel}</div></div></div>
-          <div class="invoice-simple-summary">
-            <div class="invoice-simple-row"><span>Subtotal</span><strong>${formatCurrency(subtotal)}</strong></div>
-            <div class="invoice-simple-row"><span>Discount</span><strong class="${discount?'text-danger':''}">${discount?`− ${formatCurrency(discount)}`:formatCurrency(0)}</strong></div>
-            <div class="invoice-simple-section">Additional Fees</div>
-            <div class="invoice-simple-row invoice-fee-row"><span>Rush Production Fee ${info(feeInfo.rush)}</span><strong>${formatCurrency(rush)}</strong></div>
-            <div class="invoice-simple-row invoice-fee-row"><span>Current Workload Adjustment ${info(feeInfo.workload)}</span><strong>${formatCurrency(workloadFee)}</strong></div>
-            <div class="invoice-simple-row invoice-fee-row"><span>System Maintenance ${info(feeInfo.maintenance)}</span><strong>${formatCurrency(maintenance)}</strong></div>
-            <div class="invoice-simple-row invoice-additional-total"><span>Additional Fees</span><strong>${formatCurrency(additionalFees)}</strong></div>
-            <div class="invoice-simple-row invoice-grand-total"><span>TOTAL</span><strong>${formatCurrency(invoiceTotal)}</strong></div>
-            <div class="invoice-simple-row"><span>Amount Paid</span><strong>${formatCurrency(paid)}</strong></div>
-            <div class="invoice-simple-row invoice-balance-row"><span>Balance</span><strong style="color:${balance?'var(--status-red)':'var(--status-green)'}">${formatCurrency(balance)}</strong></div>
-          </div>
-          <div class="text-sm text-tertiary invoice-thankyou">Thank you for choosing ${escapeHtml(state.settings.businessName||'JUAN PROJECT')}.</div>`;
+        const paper=document.getElementById('invoicePaperPrintable');if(!paper||!proj)return;
+        const invoiceNo=ensureInvoiceNumber(proj),storedSubtotal=Math.max(0,Number(proj.subtotal_amount||0)),discount=Math.max(0,Number(proj.discount_amount||0));
+        const baseRush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),rush=baseRush+workloadFee,maintenance=Math.max(0,getProjectMaintenanceFee(proj));
+        const projectTotal=Math.max(0,Number(proj.total_amount||0)),inferredSubtotal=Math.max(0,projectTotal-baseRush-workloadFee+discount),subtotal=storedSubtotal>0?storedSubtotal:inferredSubtotal,additionalFees=rush+maintenance,invoiceTotal=Math.max(0,subtotal-discount+additionalFees);
+        const paid=(proj.payments||[]).reduce((sum,p)=>sum+Number(p.amount_paid||p.amount||0),0),balance=Math.max(0,invoiceTotal-paid),status=getInvoiceStatus({...proj,total_amount:invoiceTotal},balance);
+        const issue=getLocalDateString(new Date()),due=proj.invoice_due_date||proj.payment_due_date||proj.deadline_date||'',statusClass=status==='UNPAID'?'unpaid':status==='DOWNPAYMENT'?'partial':'paid',issueLabel=new Date(issue+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}),dueLabel=due?new Date(due+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'—';
+        const items=Array.isArray(proj.project_items)&&proj.project_items.length?proj.project_items:(Array.isArray(proj.items)?proj.items:[]);
+        const itemRows=items.map(item=>{const qty=Math.max(1,Number(item.qty||1)),unit=Math.max(0,Number(item.price||0)),line=qty*unit,itemDisc=String(item.type||'').toUpperCase()==='PACKAGE'?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-itemDisc;return `<tr><td><strong>${escapeHtml(item.name||'Item')}</strong>${itemDisc?`<small>Item discount −${formatCurrency(itemDisc)}</small>`:''}</td><td>${qty}</td><td>${formatCurrency(net)}</td></tr>`}).join('')||`<tr><td>Project Services</td><td>1</td><td>${formatCurrency(subtotal)}</td></tr>`;
+        paper.innerHTML=`<div class="invoice-header invoice-header-v68"><div class="invoice-brand-block"><h2>${escapeHtml(state.settings.businessName||'JUAN PROJECT')}</h2><div>${escapeHtml(state.ownerEmail||'')}</div><div>${escapeHtml(state.ownerPhone||'')}</div></div><div class="invoice-header-stack"><div class="invoice-label">Invoice</div><div class="invoice-number">${invoiceNo}</div><span class="invoice-status ${statusClass}">${status}</span><div class="invoice-issued-date">Issued ${issueLabel}</div></div></div><div class="invoice-meta-grid"><div><div class="invoice-label">Bill To</div><div class="font-bold">${escapeHtml(proj.client_name||'—')}</div><div class="text-sm text-secondary">${escapeHtml(proj.client_email||'')}</div></div><div><div class="invoice-label">Project</div><div class="font-bold">${escapeHtml(proj.title||'—')}</div><div class="text-sm text-secondary">Due ${dueLabel}</div></div></div><div class="invoice-items-wrap"><table class="invoice-items-table"><thead><tr><th>Order Item</th><th>Qty</th><th>Price</th></tr></thead><tbody>${itemRows}</tbody></table></div><div class="invoice-simple-summary"><div class="invoice-simple-row"><span>Subtotal</span><strong>${formatCurrency(subtotal)}</strong></div><div class="invoice-simple-row"><span>Discount</span><strong class="${discount?'text-danger':''}">${discount?`− ${formatCurrency(discount)}`:formatCurrency(0)}</strong></div><div class="invoice-simple-section">Additional Fees</div>${rush?`<div class="invoice-simple-row invoice-fee-row"><span>Rush Fee <button type="button" class="mini-info-button screen-only" onclick="app.openFeeInfo('rush')">i</button></span><strong>${formatCurrency(rush)}</strong></div>`:''}${maintenance?`<div class="invoice-simple-row invoice-fee-row"><span>System Maintenance Fee <button type="button" class="mini-info-button screen-only" onclick="app.openFeeInfo('maintenance')">i</button></span><strong>${formatCurrency(maintenance)}</strong></div>`:''}<div class="invoice-simple-row invoice-additional-total"><span>Additional Fees</span><strong>${formatCurrency(additionalFees)}</strong></div><div class="invoice-simple-row invoice-grand-total"><span>TOTAL</span><strong>${formatCurrency(invoiceTotal)}</strong></div><div class="invoice-simple-row"><span>Amount Paid</span><strong>${formatCurrency(paid)}</strong></div><div class="invoice-simple-row invoice-balance-row"><span>Balance</span><strong style="color:${balance?'var(--status-red)':'var(--status-green)'}">${formatCurrency(balance)}</strong></div></div><div class="text-sm text-tertiary invoice-thankyou">Thank you for choosing ${escapeHtml(state.settings.businessName||'JUAN PROJECT')}.</div>`;
       }
 
       function sendDeadlineReminderEmail(projId = null) {
@@ -3237,43 +3213,27 @@ ${description}`))actionCallback();return;}
       /* ==========================================================================
          CALENDAR TRUE BOX/GRID LAYOUT
          ========================================================================== */
-      function renderCalendar() {
-        const cells = document.getElementById("calendarGridCells");
-        const header = document.getElementById("calendarMonthYearHeader");
-        if (!cells || !header) return;
-
-        const curr = state.calendarDate;
-        header.innerText = curr.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
-
-        cells.innerHTML = "";
-        const year = curr.getFullYear();
-        const month = curr.getMonth();
-
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-        const startOffset = firstDay;
-
-        for (let i = 0; i < startOffset; i++) {
-          cells.innerHTML += `<div class="calendar-cell text-muted" style="opacity:0.2;"></div>`;
-        }
-
-        const todayStr = getLocalDateString(new Date());
-
-        for (let d = 1; d <= daysInMonth; d++) {
-          const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-          const isToday = dateStr === todayStr;
-
-          const matchingProjects = state.projects.filter(p => !p.deleted && p.deadline_date === dateStr);
-
-          cells.innerHTML += `
-            <div class="calendar-cell ${isToday ? 'today' : ''}">
-              <div class="cell-day-num">${d}</div>
-              ${matchingProjects.map(p => `<div class="calendar-event-tag" onclick="app.openProjectDetails('${p.id}')">${escapeHtml(formatProjectId(p))} · ${escapeHtml(p.title||p.client_name||'Project')}</div>`).join("")}
-            </div>
-          `;
+      function renderCalendar(){
+        const cells=document.getElementById('calendarGridCells'),header=document.getElementById('calendarMonthYearHeader');if(!cells||!header)return;
+        const curr=state.calendarDate,year=curr.getFullYear(),month=curr.getMonth();header.innerText=curr.toLocaleDateString('en-US',{month:'long',year:'numeric'});cells.innerHTML='';
+        const firstDay=new Date(year,month,1).getDay(),daysInMonth=new Date(year,month+1,0).getDate(),todayStr=getLocalDateString(new Date());
+        for(let i=0;i<firstDay;i++)cells.innerHTML+='<div class="calendar-cell text-muted" style="opacity:.2"></div>';
+        for(let d=1;d<=daysInMonth;d++){
+          const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`,isToday=dateStr===todayStr,matchingProjects=state.projects.filter(p=>!p.deleted&&p.deadline_date===dateStr),events=(state.manualEvents||[]).filter(e=>e.date===dateStr).sort((a,b)=>String(a.start_time||'').localeCompare(String(b.start_time||'')));
+          cells.innerHTML+=`<div class="calendar-cell ${isToday?'today':''}" onclick="if(event.target===this||event.target.classList.contains('cell-day-num'))app.openCalendarEventModal('${dateStr}')"><div class="cell-day-num">${d}<button type="button" class="calendar-cell-add" onclick="event.stopPropagation();app.openCalendarEventModal('${dateStr}')" aria-label="Add event on ${dateStr}">+</button></div>${matchingProjects.map(p=>`<div class="calendar-event-tag project-deadline" onclick="event.stopPropagation();app.openProjectDetails('${p.id}')">${escapeHtml(formatProjectId(p))} · ${escapeHtml(p.title||p.client_name||'Project')}</div>`).join('')}${events.map(e=>`<div class="calendar-event-tag manual-calendar-event ${e.type==='Meeting'?'meeting':''}" onclick="event.stopPropagation();app.openCalendarEventModal('${dateStr}','${e.id}')"><span>${escapeHtml(e.start_time||'')}</span>${escapeHtml(e.title||e.type||'Event')}</div>`).join('')}</div>`;
         }
       }
+      function openCalendarEventModal(dateValue='',eventId=''){
+        const existing=(state.manualEvents||[]).find(e=>e.id===eventId)||null,date=dateValue||existing?.date||getLocalDateString(new Date());
+        document.getElementById('calendarEventModalTitle').textContent=existing?`Edit ${existing.type||'Event'}`:'Add Event';document.getElementById('calendarEventId').value=existing?.id||'';document.getElementById('calendarEventType').value=existing?.type||'Event';document.getElementById('calendarEventDate').value=existing?.date||date;document.getElementById('calendarEventTitle').value=existing?.title||'';document.getElementById('calendarEventStartTime').value=existing?.start_time||'';document.getElementById('calendarEventEndTime').value=existing?.end_time||'';document.getElementById('calendarEventNotes').value=existing?.notes||'';document.getElementById('calendarEventDeleteBtn')?.classList.toggle('hidden',!existing);
+        const projectSel=document.getElementById('calendarEventProject');if(projectSel){projectSel.innerHTML='<option value="">None</option>'+state.projects.filter(p=>!p.deleted).sort((a,b)=>projectNumber(a)-projectNumber(b)).map(p=>`<option value="${escapeHtml(p.id)}">${escapeHtml(formatProjectId(p))} · ${escapeHtml(p.title||'Project')}</option>`).join('');projectSel.value=existing?.project_id||'';}
+        openModal('calendarEventModal');
+      }
+      function saveCalendarEvent(){
+        const id=document.getElementById('calendarEventId').value,title=document.getElementById('calendarEventTitle').value.trim(),date=document.getElementById('calendarEventDate').value,type=document.getElementById('calendarEventType').value,startTime=document.getElementById('calendarEventStartTime').value,endTime=document.getElementById('calendarEventEndTime').value,projectId=document.getElementById('calendarEventProject').value,notes=document.getElementById('calendarEventNotes').value.trim();if(!title||!date){showToast('Add an event title and date.');return;}
+        const payload={id:id||`evt_${Date.now()}`,title,date,type,start_time:startTime,end_time:endTime,project_id:projectId,notes,updated_at:new Date().toISOString()};const idx=(state.manualEvents||[]).findIndex(e=>e.id===id);if(idx>=0)state.manualEvents[idx]={...state.manualEvents[idx],...payload};else state.manualEvents.push({...payload,created_at:new Date().toISOString()});persistCalendarEvents();closeModal('calendarEventModal');renderCalendar();renderOverviewUpcomingEvents();showToast(id?'Calendar event updated.':'Calendar event added.');
+      }
+      function deleteCalendarEvent(){const id=document.getElementById('calendarEventId').value;if(!id)return;const event=(state.manualEvents||[]).find(e=>e.id===id);requestDestructivePin('Delete Calendar Event',`Delete "${event?.title||'this event'}"?`,()=>{state.manualEvents=(state.manualEvents||[]).filter(e=>e.id!==id);persistCalendarEvents();closeModal('calendarEventModal');renderCalendar();renderOverviewUpcomingEvents();showToast('Calendar event deleted.');});}
 
       function changeCalendarMonth(delta) {
         state.calendarDate.setMonth(state.calendarDate.getMonth() + delta);
@@ -3316,9 +3276,11 @@ ${description}`))actionCallback();return;}
       /* ==========================================================================
          CLIENTS DIRECTORY & EDIT CLIENT WORKFLOW
          ========================================================================== */
-      function renderClients() {
-        const grid=document.getElementById("clientsListGrid");if(!grid)return;const q=(document.getElementById('clientsSearch')?.value||'').trim().toLowerCase(),pref=state.listSorts?.clients||'az';let clients=state.clients.slice().filter(c=>`${c.name||''} ${c.email||''} ${c.phone||''} ${c.address||''}`.toLowerCase().includes(q));clients.sort(pref==='za'?(a,b)=>String(b.name||'').localeCompare(String(a.name||'')):(a,b)=>String(a.name||'').localeCompare(String(b.name||'')));const sortEl=document.getElementById('clientsSort');if(sortEl)sortEl.value=pref;if(!clients.length){grid.innerHTML=`<div class="card text-center text-muted py-4">${q?'No matching clients.':'No clients registered yet.'}</div>`;return}
-        const rows=clients.map((c,idx)=>{const count=state.projects.filter(p=>!p.deleted&&(p.client_id===c.id||p.client_name===c.name)).length;return `<tr class="clickable-row" onclick="app.openClientProfile('${c.id}')"><td><strong>${escapeHtml(c.name||'—')}</strong></td><td>${escapeHtml(c.email||'—')}</td><td>${escapeHtml(c.phone||'—')}</td><td class="client-address-cell">${escapeHtml(c.address||'—')}</td><td>${count}</td><td class="text-right" onclick="event.stopPropagation()"><div class="popover-wrap" id="clientMenu${idx}"><button class="icon-more-button" title="Client options" aria-label="Options for ${escapeHtml(c.name||'client')}" onclick="app.togglePopover('clientMenu${idx}',event)">•••</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditClientModal('${c.id}')">Edit client</button><button class="popover-action text-danger" onclick="app.removeClient('${c.id}')">Remove client</button></div></div></td></tr>`}).join('');grid.innerHTML=`<div class="card table-card clients-directory-card"><div class="table-responsive"><table class="data-table unified-table"><thead><tr><th>Full Name</th><th>Email</th><th>Number</th><th>Address</th><th>No. of Projects</th><th></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+      function renderClients(){
+        const grid=document.getElementById('clientsListGrid');if(!grid)return;const q=(document.getElementById('clientsSearch')?.value||'').trim().toLowerCase(),pref=state.listSorts?.clients||'id';let clients=state.clients.slice().filter(c=>`${clientDisplayId(c)} ${c.name||''} ${c.email||''} ${c.phone||''} ${c.address||''}`.toLowerCase().includes(q));
+        if(pref==='az')clients.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));else if(pref==='za')clients.sort((a,b)=>String(b.name||'').localeCompare(String(a.name||'')));else clients.sort((a,b)=>{const ap=clientFirstProject(a),bp=clientFirstProject(b),an=ap?projectNumber(ap):Number.MAX_SAFE_INTEGER,bn=bp?projectNumber(bp):Number.MAX_SAFE_INTEGER;return an-bn||String(a.name||'').localeCompare(String(b.name||''))});
+        const sortEl=document.getElementById('clientsSort');if(sortEl)sortEl.value=pref;if(!clients.length){grid.innerHTML=`<div class="card text-center text-muted py-4">${q?'No matching clients.':'No clients registered yet.'}</div>`;return}
+        const rows=clients.map((c,idx)=>{const count=state.projects.filter(p=>!p.deleted&&(p.client_id===c.id||p.client_name===c.name)).length,menuId=`clientMenu${idx}`;return `<tr class="clickable-row" onclick="app.openClientProfile('${c.id}')"><td><strong>${escapeHtml(clientDisplayId(c))}</strong></td><td><strong>${escapeHtml(c.name||'—')}</strong></td><td>${escapeHtml(c.email||'—')}</td><td>${escapeHtml(normalizePhilippinePhone(c.phone)||c.phone||'—')}</td><td class="client-address-cell">${escapeHtml(c.address||'—')}</td><td>${count}</td><td class="text-right" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Client options" aria-label="Options for ${escapeHtml(c.name||'client')}" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditClientModal('${c.id}')">Edit Client</button><button class="popover-action text-danger" onclick="app.removeClient('${c.id}')">Delete Client</button></div></div></td></tr>`}).join('');grid.innerHTML=`<div class="card table-card clients-directory-card"><div class="table-responsive"><table class="data-table unified-table clients-unified-table"><thead><tr><th>Client ID</th><th>Full Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Projects</th><th class="actions-col"></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
       }
 
       function removeClient(clientId){
@@ -3354,7 +3316,7 @@ ${description}`))actionCallback();return;}
 
         const name = nameInput.value.trim();
         const email = emailInput.value.trim();
-        const phone = phoneInput.value.trim();
+        const phone = normalizePhilippinePhone(phoneInput.value);
         const address = addressInput.value.trim();
         const notes = notesInput.value.trim();
 
@@ -3456,47 +3418,62 @@ ${description}`))actionCallback();return;}
       function openCatalogFullView(){
         renderPricelist();
         const filter=state.catalogManagerFilter||'All Items',selected=state.catalogManagerCategory||'ALL',title=document.getElementById('catalogFullViewTitle'),body=document.getElementById('catalogFullViewBody');if(!body)return;
-        const category=selected==='ALL'?'All Categories':displayCategory(selected);if(title)title.textContent=`${filter} · ${category}`;
+        const category=selected==='ALL'?'All Services':displayCategory(selected);if(title)title.textContent=`${filter} · ${category}`;
         const services=catalogTableSnapshot('#catalogServicesCard table'),packages=catalogTableSnapshot('#catalogPackagesCard table');
-        body.innerHTML=filter==='Services'?services:filter==='Packages'?packages:`<div class="catalog-full-section"><div class="section-kicker">SERVICES</div>${services}</div><div class="catalog-full-section"><div class="section-kicker">PACKAGES</div>${packages}</div>`;
+        body.innerHTML=selected==='ALL'?services:(filter==='Items'?services:filter==='Packages'?packages:`<div class="catalog-full-section"><div class="section-kicker">ITEMS</div>${services}</div><div class="catalog-full-section"><div class="section-kicker">PACKAGES</div>${packages}</div>`);
         openModal('catalogFullViewModal');
       }
 
-      function renderPricelist(){
-        ensureCatalogCategories();const categoryList=document.getElementById('catalogCategoryList'),servicesBody=document.getElementById('catalogServicesBody'),packagesBody=document.getElementById('catalogPackagesBody'),filters=document.getElementById('catalogManagerFilters');if(!categoryList||!servicesBody||!packagesBody||!filters)return;
-        const q=(document.getElementById('catalogManagerSearch')?.value||'').trim().toLowerCase(),filter=state.catalogManagerFilter||'All Items',pref=state.listSorts?.catalog||'az';filters.innerHTML=['All Items','Services','Packages'].map(n=>`<button class="filter-pill ${filter===n?'active':''}" onclick="app.setCatalogManagerFilter('${n}')">${n}</button>`).join('');const sortEl=document.getElementById('catalogSort');if(sortEl)sortEl.value=pref;
-        const categories=['ALL',...state.catalogCategories].sort((a,b)=>a==='ALL'?-1:b==='ALL'?1:(pref==='za'?String(b).localeCompare(String(a)):String(a).localeCompare(String(b))));
-        categoryList.innerHTML=categories.map(cat=>{const label=cat==='ALL'?'All Categories':displayCategory(cat),serviceCount=cat==='ALL'?state.soloServices.length:state.soloServices.filter(s=>String(s.category||'')===cat).length,bundleCount=cat==='ALL'?state.packagesList.length:state.packagesList.filter(p=>String(p.category||'')===cat).length,enc=encodeURIComponent(cat);return `<button class="catalog-category-item ${state.catalogManagerCategory===cat?'active':''}" onclick="app.selectCatalogCategory(decodeURIComponent('${enc}'))"><span><strong>${escapeHtml(label)}</strong><small>${serviceCount} service${serviceCount===1?'':'s'}${bundleCount?` · ${bundleCount} bundle${bundleCount===1?'':'s'}`:''}</small></span>${cat!=='ALL'?`<span class="catalog-category-more" onclick="event.stopPropagation();app.openCatalogCategoryModal(decodeURIComponent('${enc}'))">•••</span>`:''}</button>`}).join('');
-        const selected=state.catalogManagerCategory||'ALL',title=document.getElementById('catalogSelectedCategoryTitle');if(title)title.textContent=selected==='ALL'?'All Services':displayCategory(selected);
-        let services=state.soloServices.filter(item=>(selected==='ALL'||String(item.category||'')===selected)&&(`${item.name||''} ${item.category||''} ${item.description||''}`).toLowerCase().includes(q)),packages=state.packagesList.filter(pkg=>(selected==='ALL'||String(pkg.category||'')===selected)&&`${pkg.name||''} ${pkg.category||''} ${pkg.description||''} ${(pkg.includedServiceNames||[]).join(' ')}`.toLowerCase().includes(q));
-        const cmp=pref==='za'?(a,b)=>String(b.name||'').localeCompare(String(a.name||'')):(a,b)=>String(a.name||'').localeCompare(String(b.name||''));services.sort(cmp);packages.sort(cmp);
-        const packageCard=document.getElementById('catalogPackagesCard'),serviceCard=document.getElementById('catalogServicesCard');serviceCard.style.display=filter==='Packages'?'none':'';packageCard.style.display=(filter==='Services'||(filter==='All Items'&&selected!=='ALL'&&packages.length===0))?'none':'';
-        servicesBody.innerHTML=services.map(item=>`<tr><td><strong>${escapeHtml(item.name)}</strong></td><td>${escapeHtml(displayCategory(item.category||'—'))}</td><td class="text-sm text-secondary catalog-desc-cell">${escapeHtml(item.description||'')}</td><td><strong>${formatCurrency(item.price||0)}</strong></td><td class="text-right"><button class="icon-more-button" onclick="app.openEditServiceModal('${item.product_code}')">•••</button></td></tr>`).join('')||`<tr><td colspan="5" class="text-center text-muted py-4">No matching services in this category.</td></tr>`;
-        packagesBody.innerHTML=packages.map(pkg=>{const inc=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames:[];return `<tr><td><strong>${escapeHtml(normalizeBroadcastPackageName(pkg.name))}</strong></td><td>${escapeHtml(displayCategory(pkg.category||'Uncategorized'))}</td><td><span class="catalog-inclusion-count">${inc.length} item${inc.length===1?'':'s'}</span><div class="text-sm text-muted catalog-inclusion-preview">${escapeHtml(inc.join(' • '))}</div></td><td>${formatCurrency(pkg.originalPrice||0)}</td><td><strong>${formatCurrency(pkg.sellingPrice||0)}</strong></td><td class="text-right"><button class="icon-more-button" onclick="app.openEditPackageModal('${pkg.product_code}')">•••</button></td></tr>`}).join('')||`<tr><td colspan="6" class="text-center text-muted py-4">No bundles in this category.</td></tr>`;
+      function openCatalogSectionFullView(kind='all'){
+        const previous=state.catalogManagerFilter;state.catalogManagerFilter=kind==='packages'?'Packages':kind==='items'?'Items':'All Items';openCatalogFullView();state.catalogManagerFilter=previous;renderPricelist();
       }
-      function setCatalogManagerFilter(filter){state.catalogManagerFilter=filter;renderPricelist()}
+      function renderPricelist(){
+        ensureCatalogCategories();const serviceList=document.getElementById('catalogCategoryList'),itemsBody=document.getElementById('catalogServicesBody'),packagesBody=document.getElementById('catalogPackagesBody'),filters=document.getElementById('catalogManagerFilters');if(!serviceList||!itemsBody||!packagesBody||!filters)return;
+        const q=(document.getElementById('catalogManagerSearch')?.value||'').trim().toLowerCase(),filter=state.catalogManagerFilter||'All Items',pref=state.listSorts?.catalog||'default',selected=state.catalogManagerCategory||'ALL';filters.innerHTML=['All Items','Items','Packages'].map(n=>`<button class="filter-pill ${filter===n?'active':''}" onclick="app.setCatalogManagerFilter('${n}')">${n}</button>`).join('');const sortEl=document.getElementById('catalogSort');if(sortEl)sortEl.value=pref;
+        const categories=['ALL',...state.catalogCategories];if(pref==='az')categories.splice(1,categories.length-1,...categories.slice(1).sort((a,b)=>String(a).localeCompare(String(b))));if(pref==='za')categories.splice(1,categories.length-1,...categories.slice(1).sort((a,b)=>String(b).localeCompare(String(a))));
+        serviceList.innerHTML=categories.map((service,index)=>{const label=service==='ALL'?'All':displayCategory(service),itemCount=service==='ALL'?state.soloServices.length:state.soloServices.filter(s=>String(s.category||'')===service).length,packageCount=service==='ALL'?state.packagesList.length:state.packagesList.filter(p=>String(p.category||'')===service).length,enc=encodeURIComponent(service),draggable=service!=='ALL'&&pref==='default';return `<button class="catalog-category-item ${selected===service?'active':''}" ${draggable?'draggable="true"':''} data-service-index="${index-1}" ondragstart="app.startCatalogServiceDrag(event,${index-1})" ondragover="app.allowCatalogServiceDrop(event)" ondrop="app.dropCatalogService(event,${index-1})" onclick="app.selectCatalogCategory(decodeURIComponent('${enc}'))"><span class="service-drag-handle" aria-hidden="true">${service==='ALL'?'':'⋮⋮'}</span><span class="service-nav-copy"><strong>${escapeHtml(label)}</strong><small>${itemCount} item${itemCount===1?'':'s'}${packageCount?` · ${packageCount} package${packageCount===1?'':'s'}`:''}</small></span>${service!=='ALL'?`<span class="catalog-category-more vertical-more" onclick="event.stopPropagation();app.openCatalogCategoryMenu(decodeURIComponent('${enc}'),this,event)">⋮</span>`:''}</button>`}).join('');
+        let items=state.soloServices.filter(item=>(selected==='ALL'||String(item.category||'')===selected)&&(`${item.name||''} ${item.category||''} ${item.description||''}`).toLowerCase().includes(q)),packages=state.packagesList.filter(pkg=>(selected==='ALL'||String(pkg.category||'')===selected)&&`${pkg.name||''} ${pkg.category||''} ${pkg.description||''} ${(pkg.includedServiceNames||[]).join(' ')}`.toLowerCase().includes(q));const cmp=pref==='za'?(a,b)=>String(b.name||'').localeCompare(String(a.name||'')):(a,b)=>String(a.name||'').localeCompare(String(b.name||''));if(pref!=='default'){items.sort(cmp);packages.sort(cmp)}
+        const packageCard=document.getElementById('catalogPackagesCard'),itemCard=document.getElementById('catalogServicesCard'),head=document.getElementById('catalogServicesHead'),title=document.getElementById('catalogSelectedCategoryTitle'),kicker=document.getElementById('catalogItemsKicker'),addItem=document.getElementById('catalogAddItemBtn');if(title)title.textContent=selected==='ALL'?'All Shop Items':displayCategory(selected);if(kicker)kicker.textContent=selected==='ALL'?'SHOP':'ITEMS';if(addItem)addItem.style.display=selected==='ALL'?'none':'';
+        if(selected==='ALL'){
+          packageCard.style.display='none';itemCard.style.display=filter==='Packages'?'none':'';if(head)head.innerHTML='<tr><th>Item / Package</th><th>Description / Inclusions</th><th>Price</th><th class="actions-col"></th></tr>';
+          const itemRows=items.map((item,i)=>{const menu=`shopItem_${i}`;return `<tr><td><strong>${escapeHtml(item.name)}</strong><small class="row-subtype">${escapeHtml(displayCategory(item.category||''))} · Item</small></td><td class="catalog-desc-cell">${escapeHtml(item.description||'')}</td><td><strong>${formatCurrency(item.price||0)}</strong></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditServiceModal('${item.product_code}')">Edit Item</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogItem('${item.product_code}')">Delete Item</button></div></div></td></tr>`}).join('');
+          const packageRows=packages.map((pkg,i)=>{const inc=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames:[],menu=`shopPkg_${i}`;return `<tr class="package-row"><td><strong>${escapeHtml(normalizeBroadcastPackageName(pkg.name))}</strong><small class="row-subtype">${escapeHtml(displayCategory(pkg.category||''))} · Package</small></td><td><details class="catalog-inclusions-accordion"><summary>${inc.length} item${inc.length===1?'':'s'}</summary><div>${inc.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div></details></td><td><strong>${formatCurrency(pkg.sellingPrice||0)}</strong><small class="row-price-note">Original ${formatCurrency(pkg.originalPrice||0)}</small></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditPackageModal('${pkg.product_code}')">Edit Package</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogPackage('${pkg.product_code}')">Delete Package</button></div></div></td></tr>`}).join('');itemsBody.innerHTML=(filter==='Packages'?'':itemRows)+(filter==='Items'?'':packageRows)||`<tr><td colspan="4" class="text-center text-muted py-4">No matching Shop items.</td></tr>`;
+        }else{
+          itemCard.style.display=filter==='Packages'?'none':'';packageCard.style.display=filter==='Items'?'none':'';if(head)head.innerHTML='<tr><th>Item / Service</th><th>Description</th><th>Price</th><th class="actions-col"></th></tr>';
+          itemsBody.innerHTML=items.map((item,i)=>{const menu=`shopItem_${i}`;return `<tr><td><strong>${escapeHtml(item.name)}</strong></td><td class="catalog-desc-cell">${escapeHtml(item.description||'')}</td><td><strong>${formatCurrency(item.price||0)}</strong></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditServiceModal('${item.product_code}')">Edit Item</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogItem('${item.product_code}')">Delete Item</button></div></div></td></tr>`}).join('')||`<tr><td colspan="4" class="text-center text-muted py-4">No matching items in this Service.</td></tr>`;
+          packagesBody.innerHTML=packages.map((pkg,i)=>{const inc=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames:[],menu=`shopPkg_${i}`;return `<tr><td><strong>${escapeHtml(normalizeBroadcastPackageName(pkg.name))}</strong></td><td><details class="catalog-inclusions-accordion"><summary>${inc.length} item${inc.length===1?'':'s'}</summary><div>${inc.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div></details></td><td>${formatCurrency(pkg.originalPrice||0)}</td><td><strong>${formatCurrency(pkg.sellingPrice||0)}</strong></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditPackageModal('${pkg.product_code}')">Edit Package</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogPackage('${pkg.product_code}')">Delete Package</button></div></div></td></tr>`}).join('')||`<tr><td colspan="5" class="text-center text-muted py-4">No packages in this Service.</td></tr>`;
+        }
+      }
+      function startCatalogServiceDrag(event,index){state.draggedCatalogServiceIndex=index;event.dataTransfer.effectAllowed='move';event.currentTarget.classList.add('is-dragging');}
+      function allowCatalogServiceDrop(event){event.preventDefault();event.dataTransfer.dropEffect='move';}
+      function dropCatalogService(event,index){event.preventDefault();document.querySelectorAll('.catalog-category-item').forEach(x=>x.classList.remove('is-dragging'));const from=Number(state.draggedCatalogServiceIndex);if(!Number.isInteger(from)||from<0||index<0||from===index)return;const list=state.catalogCategories;const [moved]=list.splice(from,1);list.splice(index,0,moved);persistCatalogState();state.listSorts.catalog='default';renderPricelist();showToast('Service sequence updated.');}
+      function openCatalogCategoryMenu(name,button,event){event?.stopPropagation();openCatalogCategoryModal(name);}
+      function quickDeleteCatalogItem(code){const svc=state.soloServices.find(s=>s.product_code===code);if(!svc)return;const bundles=state.packagesList.filter(p=>(p.includedServiceNames||[]).includes(svc.name));requestDestructivePin('Delete Item',`Delete "${svc.name}"?${bundles.length?` It will also be removed from ${bundles.length} Package${bundles.length===1?'':'s'}.`:''}`,()=>{state.soloServices=state.soloServices.filter(s=>s.product_code!==code);state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>n!==svc.name);const selected=new Set(p.includedServiceNames);p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));});persistCatalogState();renderPricelist();renderServiceCatalog();showToast('Item deleted.');});}
+      function quickDeleteCatalogPackage(code){const pkg=state.packagesList.find(p=>p.product_code===code);if(!pkg)return;requestDestructivePin('Delete Package',`Delete "${pkg.name}"?`,()=>{state.packagesList=state.packagesList.filter(p=>p.product_code!==code);persistCatalogState();renderPricelist();renderServiceCatalog();showToast('Package deleted.');});}
+
+      function setCatalogManagerFilter(filter){state.catalogManagerFilter=filter==='Services'?'Items':filter;renderPricelist()}
       function selectCatalogCategory(category){state.catalogManagerCategory=category;renderPricelist()}
       function switchPricelistTab(tab){state.catalogManagerFilter=tab==='PACKAGE'?'Packages':'Services';renderPricelist()}
       function filterPricelistTable(){renderPricelist()}
-      function openCatalogCategoryModal(existing=''){ensureCatalogCategories();document.getElementById('catalogCategoryOldName').value=existing||'';document.getElementById('catalogCategoryName').value=existing||'';document.getElementById('catalogCategoryModalTitle').textContent=existing?'Edit Category':'Add Category';document.getElementById('catalogCategoryDeleteBtn')?.classList.toggle('hidden',!existing);openModal('catalogCategoryModal')}
-      function saveCatalogCategory(){const old=document.getElementById('catalogCategoryOldName').value.trim(),name=document.getElementById('catalogCategoryName').value.trim();if(!name){showToast('Category name is required.');return}ensureCatalogCategories();const dup=state.catalogCategories.some(c=>c.toLowerCase()===name.toLowerCase()&&c!==old);if(dup){showToast('That category already exists.');return}if(old){const idx=state.catalogCategories.indexOf(old);if(idx>-1)state.catalogCategories[idx]=name;state.soloServices.forEach(s=>{if(String(s.category||'')===old)s.category=name});state.packagesList.forEach(pkg=>{if(String(pkg.category||'')===old)pkg.category=name});if(state.catalogManagerCategory===old)state.catalogManagerCategory=name}else state.catalogCategories.push(name);persistCatalogState();closeModal('catalogCategoryModal');renderPricelist();renderServiceCatalog();showToast(old?'Category updated.':'Category added.')}
+      function openCatalogCategoryModal(existing=''){ensureCatalogCategories();document.getElementById('catalogCategoryOldName').value=existing||'';document.getElementById('catalogCategoryName').value=existing||'';document.getElementById('catalogCategoryModalTitle').textContent=existing?'Edit Service':'Add Service';document.getElementById('catalogCategoryDeleteBtn')?.classList.toggle('hidden',!existing);openModal('catalogCategoryModal')}
+      function saveCatalogCategory(){const old=document.getElementById('catalogCategoryOldName').value.trim(),name=document.getElementById('catalogCategoryName').value.trim();if(!name){showToast('Item name is required.');return}ensureCatalogCategories();const dup=state.catalogCategories.some(c=>c.toLowerCase()===name.toLowerCase()&&c!==old);if(dup){showToast('That Service already exists.');return}if(old){const idx=state.catalogCategories.indexOf(old);if(idx>-1)state.catalogCategories[idx]=name;state.soloServices.forEach(s=>{if(String(s.category||'')===old)s.category=name});state.packagesList.forEach(pkg=>{if(String(pkg.category||'')===old)pkg.category=name});if(state.catalogManagerCategory===old)state.catalogManagerCategory=name}else state.catalogCategories.push(name);persistCatalogState();closeModal('catalogCategoryModal');renderPricelist();renderServiceCatalog();showToast(old?'Service updated.':'Service added.')}
       function openCatalogServiceModal(code=''){
-        ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a category first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select a category first, then add a service.');return}const item=code?state.soloServices.find(s=>s.product_code===code):null;document.getElementById('catalogServiceModalTitle').textContent=item?'Edit Service':'Add Service';document.getElementById('catalogServiceCode').value=item?.product_code||'';document.getElementById('catalogServiceName').value=item?.name||'';document.getElementById('catalogServiceDescription').value=item?.description||'';document.getElementById('catalogServicePrice').value=item?.price??'';document.getElementById('catalogServiceDeleteBtn')?.classList.toggle('hidden',!item);const sel=document.getElementById('catalogServiceCategory');sel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');sel.value=item?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);openModal('catalogServiceModal')
+        ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a Service first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select a Service first, then add an Item.');return}const item=code?state.soloServices.find(s=>s.product_code===code):null;document.getElementById('catalogServiceModalTitle').textContent=item?'Edit Item':'Add Item';document.getElementById('catalogServiceCode').value=item?.product_code||'';document.getElementById('catalogServiceName').value=item?.name||'';document.getElementById('catalogServiceDescription').value=item?.description||'';document.getElementById('catalogServicePrice').value=item?.price??'';document.getElementById('catalogServiceDeleteBtn')?.classList.toggle('hidden',!item);const sel=document.getElementById('catalogServiceCategory');sel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');sel.value=item?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);openModal('catalogServiceModal')
       }
-      function saveCatalogService(){const code=document.getElementById('catalogServiceCode').value,name=document.getElementById('catalogServiceName').value.trim(),category=document.getElementById('catalogServiceCategory').value,desc=document.getElementById('catalogServiceDescription').value.trim(),price=Number(document.getElementById('catalogServicePrice').value);if(!name||!category||!Number.isFinite(price)||price<0){showToast('Enter a valid service name, category, and price.');return}if(code){const item=state.soloServices.find(s=>s.product_code===code);if(item)Object.assign(item,{name:name.toUpperCase(),category,description:desc,price,active:true,type:'SOLO'})}else{const nums=state.soloServices.map(s=>Number(String(s.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.soloServices.push({product_code:`SRV-${String(next).padStart(3,'0')}`,name:name.toUpperCase(),category,description:desc,price,active:true,type:'SOLO'})}persistCatalogState();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast(code?'Service updated.':'Service added.')}
+      function saveCatalogService(){const code=document.getElementById('catalogServiceCode').value,name=document.getElementById('catalogServiceName').value.trim(),category=document.getElementById('catalogServiceCategory').value,desc=document.getElementById('catalogServiceDescription').value.trim(),price=Number(document.getElementById('catalogServicePrice').value);if(!name||!category||!Number.isFinite(price)||price<0){showToast('Enter a valid Item name, Service, and price.');return}if(code){const item=state.soloServices.find(s=>s.product_code===code);if(item)Object.assign(item,{name:name.toUpperCase(),category,description:desc,price,active:true,type:'SOLO'})}else{const nums=state.soloServices.map(s=>Number(String(s.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.soloServices.push({product_code:`SRV-${String(next).padStart(3,'0')}`,name:name.toUpperCase(),category,description:desc,price,active:true,type:'SOLO'})}persistCatalogState();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast(code?'Item updated.':'Item added.')}
       function renderPackageServiceChoices(query=''){
-        const box=document.getElementById('catalogPackageServiceChoices');if(!box)return;const q=String(query||'').toLowerCase(),category=document.getElementById('catalogPackageCategory')?.value||'',selected=new Set(state.packageBuilderSelectedNames||[]),items=state.soloServices.filter(s=>(!category||String(s.category||'')===category)&&(`${s.name||''} ${s.category||''}`).toLowerCase().includes(q));box.innerHTML=items.map(s=>`<label class="package-service-choice"><input type="checkbox" value="${escapeHtml(s.name)}" data-price="${Number(s.price||0)}" ${selected.has(s.name)?'checked':''} onchange="app.togglePackageBuilderService(this.value,this.checked)"><span><strong>${escapeHtml(s.name)}</strong><small>${escapeHtml(displayCategory(s.category||''))} · ${formatCurrency(s.price||0)}</small></span></label>`).join('')||`<div class="typeahead-empty">No matching services in this category</div>`;updatePackagePriceSummary()
+        const box=document.getElementById('catalogPackageServiceChoices');if(!box)return;const q=String(query||'').toLowerCase(),category=document.getElementById('catalogPackageCategory')?.value||'',selected=new Set(state.packageBuilderSelectedNames||[]),items=state.soloServices.filter(s=>(!category||String(s.category||'')===category)&&(`${s.name||''} ${s.category||''}`).toLowerCase().includes(q));box.innerHTML=items.map(s=>`<label class="package-service-choice"><input type="checkbox" value="${escapeHtml(s.name)}" data-price="${Number(s.price||0)}" ${selected.has(s.name)?'checked':''} onchange="app.togglePackageBuilderService(this.value,this.checked)"><span><strong>${escapeHtml(s.name)}</strong><small>${escapeHtml(displayCategory(s.category||''))} · Item · ${formatCurrency(s.price||0)}</small></span></label>`).join('')||`<div class="typeahead-empty">No matching Items in this Service</div>`;updatePackagePriceSummary()
       }
       function togglePackageBuilderService(name,checked){const set=new Set(state.packageBuilderSelectedNames||[]);if(checked)set.add(name);else set.delete(name);state.packageBuilderSelectedNames=[...set];updatePackagePriceSummary()}
       function updatePackagePriceSummary(){const selected=new Set(state.packageBuilderSelectedNames||[]),total=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0),el=document.getElementById('catalogPackageOriginalTotal');if(el)el.textContent=formatCurrency(total)}
       function openCatalogPackageModal(code=''){
-        ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a category and services first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select the category where this bundle belongs.');return}const pkg=code?state.packagesList.find(p=>p.product_code===code):null;state.packageBuilderSelectedNames=[...(pkg?.includedServiceNames||[])];document.getElementById('catalogPackageModalTitle').textContent=pkg?'Edit Package':'Create Package';document.getElementById('catalogPackageCode').value=pkg?.product_code||'';document.getElementById('catalogPackageName').value=pkg?normalizeBroadcastPackageName(pkg.name):'';document.getElementById('catalogPackageSellingPrice').value=pkg?.sellingPrice??'';document.getElementById('catalogPackageDeleteBtn')?.classList.toggle('hidden',!pkg);const categorySel=document.getElementById('catalogPackageCategory');categorySel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(displayCategory(c))}</option>`).join('');categorySel.value=pkg?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);document.getElementById('catalogPackageServiceSearch').value='';renderPackageServiceChoices('');openModal('catalogPackageModal')
+        ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a Service and Items first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select the Service where this Package belongs.');return}const pkg=code?state.packagesList.find(p=>p.product_code===code):null;state.packageBuilderSelectedNames=[...(pkg?.includedServiceNames||[])];document.getElementById('catalogPackageModalTitle').textContent=pkg?'Edit Package':'Create Package';document.getElementById('catalogPackageCode').value=pkg?.product_code||'';document.getElementById('catalogPackageName').value=pkg?normalizeBroadcastPackageName(pkg.name):'';document.getElementById('catalogPackageSellingPrice').value=pkg?.sellingPrice??'';document.getElementById('catalogPackageDeleteBtn')?.classList.toggle('hidden',!pkg);const categorySel=document.getElementById('catalogPackageCategory');categorySel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(displayCategory(c))}</option>`).join('');categorySel.value=pkg?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);document.getElementById('catalogPackageServiceSearch').value='';renderPackageServiceChoices('');openModal('catalogPackageModal')
       }
       function saveCatalogPackage(){
-        const code=document.getElementById('catalogPackageCode').value,name=document.getElementById('catalogPackageName').value.trim(),category=document.getElementById('catalogPackageCategory').value,selling=Number(document.getElementById('catalogPackageSellingPrice').value),included=[...(state.packageBuilderSelectedNames||[])],selected=new Set(included),original=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);if(!name||!category||!included.length||!Number.isFinite(selling)||selling<0){showToast('Add a package name, category, at least one service, and a valid offer price.');return}const payload={name:name.toUpperCase(),category,description:'Includes:\n'+included.map(x=>'• '+x).join('\n'),type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:true};if(code){const pkg=state.packagesList.find(p=>p.product_code===code);if(pkg)Object.assign(pkg,payload)}else{const nums=state.packagesList.map(p=>Number(String(p.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.packagesList.push({product_code:`PKG-${String(next).padStart(3,'0')}`,...payload})}persistCatalogState();closeModal('catalogPackageModal');renderPricelist();renderServiceCatalog();showToast(code?'Package updated.':'Package created.')
+        const code=document.getElementById('catalogPackageCode').value,name=document.getElementById('catalogPackageName').value.trim(),category=document.getElementById('catalogPackageCategory').value,selling=Number(document.getElementById('catalogPackageSellingPrice').value),included=[...(state.packageBuilderSelectedNames||[])],selected=new Set(included),original=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);if(!name||!category||!included.length||!Number.isFinite(selling)||selling<0){showToast('Add a Package name, Service, at least one Item, and a valid offer price.');return}const payload={name:name.toUpperCase(),category,description:'Includes:\n'+included.map(x=>'• '+x).join('\n'),type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:true};if(code){const pkg=state.packagesList.find(p=>p.product_code===code);if(pkg)Object.assign(pkg,payload)}else{const nums=state.packagesList.map(p=>Number(String(p.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.packagesList.push({product_code:`PKG-${String(next).padStart(3,'0')}`,...payload})}persistCatalogState();closeModal('catalogPackageModal');renderPricelist();renderServiceCatalog();showToast(code?'Package updated.':'Package created.')
       }
-      function deleteCatalogCategory(){const name=document.getElementById('catalogCategoryOldName')?.value.trim();if(!name)return;const usedServices=state.soloServices.filter(s=>String(s.category||'')===name).length,usedPackages=state.packagesList.filter(p=>String(p.category||'')===name).length;requestDestructivePin('Delete Category',`Delete "${name}"? ${usedServices+usedPackages?`It contains ${usedServices} service${usedServices===1?'':'s'} and ${usedPackages} package${usedPackages===1?'':'s'}; move or delete them first.`:'The category is empty.'}`,()=>{if(usedServices||usedPackages){showToast('Move or delete the items in this category first.');return;}state.catalogCategories=state.catalogCategories.filter(c=>c!==name);if(state.catalogManagerCategory===name)state.catalogManagerCategory='ALL';persistCatalogState();closeModal('catalogCategoryModal');renderPricelist();showToast('Category deleted.');});}
-      function deleteCatalogService(){const code=document.getElementById('catalogServiceCode')?.value;if(!code)return;const svc=state.soloServices.find(s=>s.product_code===code);if(!svc)return;const bundles=state.packagesList.filter(p=>(p.includedServiceNames||[]).includes(svc.name));requestDestructivePin('Delete Service',`Delete "${svc.name}"?${bundles.length?` It will also be removed from ${bundles.length} package${bundles.length===1?'':'s'}.`:''}`,()=>{state.soloServices=state.soloServices.filter(s=>s.product_code!==code);state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>n!==svc.name);const selected=new Set(p.includedServiceNames);p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));});persistCatalogState();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast('Service deleted.');});}
+      function deleteCatalogCategory(){const name=document.getElementById('catalogCategoryOldName')?.value.trim();if(!name)return;const usedServices=state.soloServices.filter(s=>String(s.category||'')===name).length,usedPackages=state.packagesList.filter(p=>String(p.category||'')===name).length;requestDestructivePin('Delete Service',`Delete "${name}"? ${usedServices+usedPackages?`It contains ${usedServices} item${usedServices===1?'':'s'} and ${usedPackages} package${usedPackages===1?'':'s'}; move or delete them first.`:'The Service is empty.'}`,()=>{if(usedServices||usedPackages){showToast('Move or delete the items in this category first.');return;}state.catalogCategories=state.catalogCategories.filter(c=>c!==name);if(state.catalogManagerCategory===name)state.catalogManagerCategory='ALL';persistCatalogState();closeModal('catalogCategoryModal');renderPricelist();showToast('Service deleted.');});}
+      function deleteCatalogService(){const code=document.getElementById('catalogServiceCode')?.value;if(!code)return;const svc=state.soloServices.find(s=>s.product_code===code);if(!svc)return;const bundles=state.packagesList.filter(p=>(p.includedServiceNames||[]).includes(svc.name));requestDestructivePin('Delete Item',`Delete "${svc.name}"?${bundles.length?` It will also be removed from ${bundles.length} package${bundles.length===1?'':'s'}.`:''}`,()=>{state.soloServices=state.soloServices.filter(s=>s.product_code!==code);state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>n!==svc.name);const selected=new Set(p.includedServiceNames);p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));});persistCatalogState();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast('Item deleted.');});}
       function deleteCatalogPackage(){const code=document.getElementById('catalogPackageCode')?.value;if(!code)return;const pkg=state.packagesList.find(p=>p.product_code===code);if(!pkg)return;requestDestructivePin('Delete Package',`Delete "${pkg.name}"?`,()=>{state.packagesList=state.packagesList.filter(p=>p.product_code!==code);persistCatalogState();closeModal('catalogPackageModal');renderPricelist();renderServiceCatalog();showToast('Package deleted.');});}
 
       function openEditServiceModal(code) { openCatalogServiceModal(code); }
@@ -3608,7 +3585,7 @@ ${description}`))actionCallback();return;}
 
         let valid = true;
         if (!name) {
-          if (errName) errName.innerText = "Service name is required.";
+          if (errName) errName.innerText = "Item name is required.";
           nameInput.classList.add("is-invalid");
           valid = false;
         }
@@ -3619,13 +3596,13 @@ ${description}`))actionCallback();return;}
         }
 
         if (!valid) {
-          showToast("Please enter a valid service name and price.");
+          showToast("Please enter a valid Item name and price.");
           return;
         }
 
         addToCart(name, price, 'SOLO', qty);
         closeModal("customProductModal");
-        showToast(`Custom service "${name}" added to cart.`);
+        showToast(`Custom Item "${name}" added to cart.`);
       }
 
       function mobileOpenProjectOrderBatch(projId){
@@ -3662,6 +3639,7 @@ ${description}`))actionCallback();return;}
         selectExistingClient,
         hideClientSuggestions,
         switchCatalogTab,
+        setOrderShopService,
         addToCart,
         addPackageToCart,
         updateCartQty,
@@ -3680,6 +3658,7 @@ ${description}`))actionCallback();return;}
         switchProjectTab,
         saveInvoicePDF,
         saveInvoiceImage,
+        openFeeInfo,
         toggleDeliverable,
         openRecordPaymentModal,
         submitPaymentRecord,
@@ -3709,12 +3688,19 @@ ${description}`))actionCallback();return;}
         addCustomProductToCart,
         renderPricelist,
         openCatalogFullView,
+        openCatalogSectionFullView,
         switchPricelistTab,
         filterPricelistTable,
         setCatalogManagerFilter,
         selectCatalogCategory,
         openCatalogCategoryModal,
         saveCatalogCategory,
+        startCatalogServiceDrag,
+        allowCatalogServiceDrop,
+        dropCatalogService,
+        openCatalogCategoryMenu,
+        quickDeleteCatalogItem,
+        quickDeleteCatalogPackage,
         openCatalogServiceModal,
         saveCatalogService,
         openCatalogPackageModal,
@@ -3740,6 +3726,9 @@ ${description}`))actionCallback();return;}
         updateOwnerEmail,
         changeCalendarMonth,
         resetCalendarToToday,
+        openCalendarEventModal,
+        saveCalendarEvent,
+        deleteCalendarEvent,
         closeModal,
         syncProjectToDatabase,
         syncPaymentToDatabase,
@@ -3773,6 +3762,7 @@ ${description}`))actionCallback();return;}
         renderClients,
         removeClient,
         renderClientProfile,
+        saveClientProfileChanges,
         handleLegacyCSVImport,
         importPastedSheetData,
         openEditProjectModal,
