@@ -1,28 +1,11 @@
-# v1.1.0 — Mobile Viewer + Profile Photo Editor
+# JUAN PROJECT WORKSPACE — Changelog
 
-- Added dedicated phone UI shell with Apple-style blurred top bar and bottom navigation.
-- Mobile is read-first: Overview, Projects, AI Assistant, Finance, Calendar/Clients viewing, Settings.
-- New-order and destructive/production editing actions are hidden/blocked on phones.
-- Added complete profile photo upload editor with drag repositioning, zoom, crop preview, and compressed saved image.
-- Desktop layout and workflows remain unchanged.
-
-# Changelog
-
-## v1.0.1 — 2026-08-31
-
-- Fixed JSON backup restore so it **replaces** the current workspace database instead of silently skipping duplicate IDs.
-- Added backup validation and a restore summary before changes are made.
-- Added PIN protection for destructive restore operations.
-- Restores clients, projects, templates, services, packages, and catalog categories.
-- Clears stale temporary task/cart data during restore.
-- Prevents the built-in sample seeder from overwriting restored legacy backups on reload.
-- Rebuilds the visible JP project sequence continuously after restore.
-
-## 1.0.0 — 2026
-
-- Converted the working JUAN PROJECT single-file web app into a modular folder structure.
-- Split CSS and JavaScript into maintainable files without changing application behavior.
-- Added documentation, cross-platform local launchers, Git/version-control guidance, PWA files and Vercel deployment support.
-- Updated app icon assets to the refined green JUAN icon.
-
-Future changes should be recorded here.
+## v1.1.1 — Mobile Navigation Fix
+- Fixed mobile bottom navigation buttons not responding to taps.
+- Corrected the app reference from `window.app` to the workspace's global `app` object.
+- Bottom navigation is now fixed directly to the screen bottom.
+- Added iPhone safe-area handling for Safari and installed web-app mode.
+- Increased reliable tap targets and enabled touch-friendly pointer handling.
+- Simplified mobile glass effects, spacing, cards, and active-tab treatment.
+- Added flexible viewport sizing using `dvh`, `clamp()`, and safe-area insets.
+- Mobile remains viewer-first; Settings/photo editing remains available.
