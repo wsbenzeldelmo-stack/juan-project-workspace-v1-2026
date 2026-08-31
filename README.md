@@ -1,3 +1,7 @@
+## Mobile Viewer Edition
+
+v1.1.0 adds a read-first mobile interface. See `docs/MOBILE_GUIDE.md`.
+
 # JUAN PROJECT Workspace — v1 (2026)
 
 A modular, offline-capable web workspace for JUAN PROJECT.

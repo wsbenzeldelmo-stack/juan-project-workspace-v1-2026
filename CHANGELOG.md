@@ -1,3 +1,11 @@
+# v1.1.0 — Mobile Viewer + Profile Photo Editor
+
+- Added dedicated phone UI shell with Apple-style blurred top bar and bottom navigation.
+- Mobile is read-first: Overview, Projects, AI Assistant, Finance, Calendar/Clients viewing, Settings.
+- New-order and destructive/production editing actions are hidden/blocked on phones.
+- Added complete profile photo upload editor with drag repositioning, zoom, crop preview, and compressed saved image.
+- Desktop layout and workflows remain unchanged.
+
 # Changelog
 
 ## v1.0.1 — 2026-08-31

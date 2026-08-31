@@ -223,6 +223,7 @@ function formatCurrency(amount) {
       let cropCanvasCtx = null;
       let cropOffset = { x: 0, y: 0 };
       let cropScale = 1;
+      let cropBaseScale = 1;
       let isDragging = false;
       let dragStart = { x: 0, y: 0 };
 
@@ -664,101 +665,76 @@ function formatCurrency(amount) {
       }
 
       // PROFILE PICTURE CROPPING WORKFLOW
+      // The original single-file app had crop logic but no actual crop modal.
+      // v1.1.0 completes the workflow and uses a cover-style crop so the image
+      // can be dragged/zoomed without exposing blank canvas edges.
       function handleProfilePhotoUpload(e) {
-        const file = e.target.files[0];
+        const file = e.target.files && e.target.files[0];
         if (!file) return;
-
-        const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-        if (!validTypes.includes(file.type)) {
-          showToast("That image couldn't be uploaded. Please choose a valid image file.");
-          return;
-        }
-
-        if (file.size > 5 * 1024 * 1024) {
-          showToast("That image couldn't be uploaded. File size must be under 5MB.");
-          return;
-        }
+        const validTypes = ['image/jpeg','image/jpg','image/png','image/webp'];
+        if (!validTypes.includes(file.type)) { showToast("Please choose a JPG, PNG, or WEBP image."); e.target.value=''; return; }
+        if (file.size > 5 * 1024 * 1024) { showToast("Profile photos must be 5MB or smaller."); e.target.value=''; return; }
 
         const reader = new FileReader();
-        reader.onload = function(evt) {
+        reader.onload = evt => {
           cropImageObj = new Image();
-          cropImageObj.onload = function() {
-            cropScale = 1;
-            cropOffset = { x: 0, y: 0 };
-            document.getElementById("cropZoomRange").value = 1;
-            initCropCanvasInteractions();
-            drawCropCanvas();
-            openModal("cropModal");
+          cropImageObj.onload = () => {
+            const canvas=document.getElementById('cropCanvas');
+            if(!canvas){ showToast('Photo editor is unavailable.'); return; }
+            cropCanvasCtx=canvas.getContext('2d');
+            cropBaseScale=Math.max(canvas.width/cropImageObj.naturalWidth,canvas.height/cropImageObj.naturalHeight);
+            cropScale=1; cropOffset={x:0,y:0};
+            const zoom=document.getElementById('cropZoomRange'); if(zoom) zoom.value='1';
+            initCropCanvasInteractions(); drawCropCanvas(); openModal('cropModal');
           };
-          cropImageObj.src = evt.target.result;
+          cropImageObj.onerror=()=>showToast('That image could not be opened.');
+          cropImageObj.src=evt.target.result;
         };
         reader.readAsDataURL(file);
+        e.target.value=''; // permits choosing the same file again later
+      }
+
+      function clampCropOffset(){
+        const canvas=document.getElementById('cropCanvas'); if(!canvas||!cropImageObj) return;
+        const scale=cropBaseScale*cropScale;
+        const w=cropImageObj.naturalWidth*scale, h=cropImageObj.naturalHeight*scale;
+        const maxX=Math.max(0,(w-canvas.width)/2), maxY=Math.max(0,(h-canvas.height)/2);
+        cropOffset.x=Math.max(-maxX,Math.min(maxX,cropOffset.x));
+        cropOffset.y=Math.max(-maxY,Math.min(maxY,cropOffset.y));
       }
 
       function initCropCanvasInteractions() {
-        const canvas = document.getElementById("cropCanvas");
-        cropCanvasCtx = canvas.getContext("2d");
-
-        canvas.onmousedown = (e) => {
-          isDragging = true;
-          dragStart = { x: e.clientX - cropOffset.x, y: e.clientY - cropOffset.y };
-        };
-        window.onmousemove = (e) => {
-          if (!isDragging) return;
-          cropOffset.x = e.clientX - dragStart.x;
-          cropOffset.y = e.clientY - dragStart.y;
-          drawCropCanvas();
-        };
-        window.onmouseup = () => { isDragging = false; };
-
-        canvas.ontouchstart = (e) => {
-          if (e.touches.length === 1) {
-            isDragging = true;
-            dragStart = { x: e.touches[0].clientX - cropOffset.x, y: e.touches[0].clientY - cropOffset.y };
-          }
-        };
-        canvas.ontouchmove = (e) => {
-          if (!isDragging || e.touches.length !== 1) return;
-          cropOffset.x = e.touches[0].clientX - cropOffset.x;
-          cropOffset.y = e.touches[0].clientY - cropOffset.y;
-          drawCropCanvas();
-        };
-        canvas.ontouchend = () => { isDragging = false; };
+        const canvas=document.getElementById('cropCanvas'); if(!canvas) return;
+        cropCanvasCtx=canvas.getContext('2d');
+        const point=e=>({x:e.clientX,y:e.clientY});
+        canvas.onpointerdown=e=>{isDragging=true; canvas.setPointerCapture?.(e.pointerId); dragStart={x:e.clientX-cropOffset.x,y:e.clientY-cropOffset.y};};
+        canvas.onpointermove=e=>{if(!isDragging)return;cropOffset.x=e.clientX-dragStart.x;cropOffset.y=e.clientY-dragStart.y;clampCropOffset();drawCropCanvas();};
+        canvas.onpointerup=canvas.onpointercancel=()=>{isDragging=false;};
       }
 
-      function onCropZoomChange(val) {
-        cropScale = Number(val);
-        drawCropCanvas();
-      }
+      function onCropZoomChange(val) { cropScale=Math.max(1,Number(val)||1); clampCropOffset(); drawCropCanvas(); }
 
       function drawCropCanvas() {
-        if (!cropCanvasCtx || !cropImageObj) return;
-        const canvas = document.getElementById("cropCanvas");
-        cropCanvasCtx.clearRect(0, 0, canvas.width, canvas.height);
-
-        cropCanvasCtx.save();
-        cropCanvasCtx.translate(canvas.width / 2 + cropOffset.x, canvas.height / 2 + cropOffset.y);
-        cropCanvasCtx.scale(cropScale, cropScale);
-
-        const imgWidth = cropImageObj.width;
-        const imgHeight = cropImageObj.height;
-        const size = Math.min(imgWidth, imgHeight);
-        
-        cropCanvasCtx.drawImage(
-          cropImageObj,
-          (imgWidth - size) / 2, (imgHeight - size) / 2, size, size,
-          -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height
-        );
-        cropCanvasCtx.restore();
+        if(!cropCanvasCtx||!cropImageObj)return;
+        const canvas=document.getElementById('cropCanvas');
+        clampCropOffset();
+        cropCanvasCtx.clearRect(0,0,canvas.width,canvas.height);
+        cropCanvasCtx.fillStyle='#ececf0'; cropCanvasCtx.fillRect(0,0,canvas.width,canvas.height);
+        const scale=cropBaseScale*cropScale;
+        const w=cropImageObj.naturalWidth*scale, h=cropImageObj.naturalHeight*scale;
+        const x=(canvas.width-w)/2+cropOffset.x, y=(canvas.height-h)/2+cropOffset.y;
+        cropCanvasCtx.imageSmoothingEnabled=true; cropCanvasCtx.imageSmoothingQuality='high';
+        cropCanvasCtx.drawImage(cropImageObj,x,y,w,h);
       }
 
       function confirmCroppedImage() {
-        const canvas = document.getElementById("cropCanvas");
-        state.profilePhoto = canvas.toDataURL("image/png");
-        localStorage.setItem("JUAN_PROFILE_PHOTO", state.profilePhoto);
-        closeModal("cropModal");
-        updateProfileDisplay();
-        showToast("Profile photo updated.");
+        const canvas=document.getElementById('cropCanvas'); if(!canvas||!cropImageObj)return;
+        // Store a compact 512px JPEG rather than a huge original image.
+        const output=document.createElement('canvas'); output.width=512; output.height=512;
+        output.getContext('2d').drawImage(canvas,0,0,512,512);
+        state.profilePhoto=output.toDataURL('image/jpeg',0.9);
+        localStorage.setItem('JUAN_PROFILE_PHOTO',state.profilePhoto);
+        closeModal('cropModal'); updateProfileDisplay(); showToast('Profile photo updated.');
       }
 
       function removeProfilePhoto() {requestDestructivePin('Remove Profile Photo','Remove the saved workspace profile photo?',()=>{localStorage.removeItem("JUAN_PROFILE_PHOTO");state.profilePhoto="";updateProfileDisplay();showToast("Profile photo removed.");});}

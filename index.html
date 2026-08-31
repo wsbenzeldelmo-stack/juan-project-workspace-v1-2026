@@ -16,7 +16,7 @@
 <link href="./manifest.webmanifest" rel="manifest"/>
 <link href="./assets/apple-touch-icon.png" rel="apple-touch-icon"/>
 <link href="./assets/favicon-64.png" rel="icon" sizes="64x64" type="image/png"/>
-<link href="./css/core.css" rel="stylesheet"/><link href="./css/visual-language.css" rel="stylesheet"/><link href="./css/responsive.css" rel="stylesheet"/><link href="./css/overview-assistant.css" rel="stylesheet"/><link href="./css/management-layout.css" rel="stylesheet"/><link href="./css/interactions-scroll.css" rel="stylesheet"/><link href="./css/project-catalog.css" rel="stylesheet"/><link href="./css/items-security-performance.css" rel="stylesheet"/><link href="./css/payments-invoice-urgency.css" rel="stylesheet"/><link href="./css/catalog-calendar-receipts.css" rel="stylesheet"/><link href="./css/typography-guided-assistant.css" rel="stylesheet"/></head>
+<link href="./css/core.css" rel="stylesheet"/><link href="./css/visual-language.css" rel="stylesheet"/><link href="./css/responsive.css" rel="stylesheet"/><link href="./css/overview-assistant.css" rel="stylesheet"/><link href="./css/management-layout.css" rel="stylesheet"/><link href="./css/interactions-scroll.css" rel="stylesheet"/><link href="./css/project-catalog.css" rel="stylesheet"/><link href="./css/items-security-performance.css" rel="stylesheet"/><link href="./css/payments-invoice-urgency.css" rel="stylesheet"/><link href="./css/catalog-calendar-receipts.css" rel="stylesheet"/><link href="./css/typography-guided-assistant.css" rel="stylesheet"/><link href="./css/mobile-viewer.css" rel="stylesheet"/></head>
 <body>
 <!--
   JUAN PROJECT WORKSPACE — MODULAR BUILD
@@ -551,7 +551,7 @@
 <!-- Profile Section -->
 <div class="card">
 <h2 class="card-title mb-4">Profile</h2>
-<div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+<div class="profile-photo-editor-row" style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
 <img alt="Profile Photo" class="user-avatar" id="settingsAvatarPreview" src="data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'&gt;&lt;rect width='64' height='64' fill='%2319ba75'/&gt;&lt;text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' fill='white' font-family='sans-serif' font-size='22' font-weight='bold'&gt;BD&lt;/text&gt;&lt;/svg&gt;" style="width: 64px; height: 64px; font-size: 20px;"/>
 <div>
 <input accept="image/jpeg,image/png,image/webp" id="profilePhotoFileInput" onchange="app.handleProfilePhotoUpload(event)" style="display:none;" type="file"/>
@@ -974,6 +974,29 @@
 </div>
 </div>
 </div>
+<!-- MODAL: PROFILE PHOTO EDITOR -->
+<div class="modal-backdrop" id="cropModal">
+  <div class="modal-card profile-crop-modal">
+    <div class="modal-header">
+      <div><div class="section-kicker">PROFILE PHOTO</div><h3 class="modal-title">Adjust Photo</h3></div>
+      <button class="modal-close" type="button" onclick="app.closeModal('cropModal')">×</button>
+    </div>
+    <div class="profile-crop-body">
+      <div class="crop-stage">
+        <canvas id="cropCanvas" width="480" height="480" aria-label="Profile photo crop preview"></canvas>
+        <div class="crop-circle-guide"></div>
+      </div>
+      <div class="crop-controls">
+        <div class="crop-zoom-row"><span>−</span><input id="cropZoomRange" type="range" min="1" max="3" step="0.01" value="1" oninput="app.onCropZoomChange(this.value)"><span>+</span></div>
+        <div class="crop-help">Drag to reposition · use the slider to zoom</div>
+      </div>
+      <div class="crop-actions">
+        <button class="btn btn-secondary" type="button" onclick="app.closeModal('cropModal')">Cancel</button>
+        <button class="btn btn-primary" type="button" onclick="app.confirmCroppedImage()">Use Photo</button>
+      </div>
+    </div>
+  </div>
+</div>
 <script src="./js/app.js"></script>
 <div class="modal-backdrop" id="overviewListModal">
 <div class="modal-card modal-wide overview-list-modal-card">
@@ -985,5 +1008,6 @@
 <script src="./js/assistant-bridge.js"></script>
 <script src="./js/assistant.js"></script>
 <script src="./js/pwa.js"></script>
+<script src="./js/mobile-viewer.js"></script>
 </body>
 </html>
