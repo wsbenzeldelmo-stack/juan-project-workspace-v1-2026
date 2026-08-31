@@ -2,7 +2,7 @@
  * JUAN PROJECT WORKSPACE — Offline cache
  * Update CACHE_NAME when you intentionally want every browser to refresh cached assets.
  */
-const CACHE_NAME = 'juan-project-workspace-v1-2026-cache-1';
+const CACHE_NAME = 'juan-project-workspace-v1-2026-cache-113';
 const CORE_ASSETS = [
   "./",
   "./index.html",
@@ -18,10 +18,12 @@ const CORE_ASSETS = [
   "./css/payments-invoice-urgency.css",
   "./css/catalog-calendar-receipts.css",
   "./css/typography-guided-assistant.css",
+  "./css/mobile-viewer.css",
   "./js/app.js",
   "./js/assistant-bridge.js",
   "./js/assistant.js",
   "./js/pwa.js",
+  "./js/mobile-viewer.js",
   "./assets/apple-touch-icon.png",
   "./assets/icon-192.png",
   "./assets/icon-512.png",
