@@ -618,11 +618,11 @@
 <!-- Data Backup & Recovery Section -->
 <div class="card">
 <h2 class="card-title mb-4">Data Backup &amp; Restore</h2>
-<p class="text-sm text-secondary mb-4">Export your complete database backup or restore previously saved data safely.</p>
+<p class="text-sm text-secondary mb-4">Export your complete workspace backup or replace the current browser database with a previously saved JUAN JSON backup.</p>
 <div class="action-buttons-group">
 <button class="btn btn-primary btn-sm" onclick="app.exportDataBackup()">Export JSON Backup</button>
 <input accept=".json" id="backupFileInput" onchange="app.importDataBackup(event)" style="display:none;" type="file"/>
-<button class="btn btn-secondary btn-sm" onclick="document.getElementById('backupFileInput').click()">Restore / Import Data</button>
+<button class="btn btn-secondary btn-sm" onclick="document.getElementById('backupFileInput').click()">Restore JSON Backup</button>
 </div>
 </div>
 <!-- Protected Workspace Reset -->

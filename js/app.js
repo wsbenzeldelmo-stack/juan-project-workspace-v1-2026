@@ -810,7 +810,7 @@ function formatCurrency(amount) {
         const titleEl=document.getElementById('confirmModalTitle'),descEl=document.getElementById('confirmModalDescription'),actionBtn=document.getElementById('confirmModalActionBtn');if(!titleEl||!descEl||!actionBtn){if(window.confirm(`${title}
 
 ${description}`))actionCallback();return;}
-        const label=String(actionBtnLabel||'Confirm'),destructive=/delete|remove|discard|reset|permanent|exit/i.test(label+' '+title);titleEl.innerText=title;descEl.innerText=description;actionBtn.innerText=label;actionBtn.classList.toggle('btn-danger',destructive);actionBtn.classList.toggle('btn-confirm',!destructive);const modal=document.querySelector('#confirmationModal .compact-validation-modal'),graphic=document.getElementById('confirmModalGraphic');modal?.classList.toggle('destructive-validation',destructive);modal?.classList.toggle('confirm-validation',!destructive);if(graphic)graphic.innerHTML=destructive?`<svg class="icon-svg lg" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2M19 6l-1 15H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>`:`<svg class="icon-svg lg" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>`;actionBtn.onclick=()=>{closeModal('confirmationModal');showActionStatus('Processing','Please wait…',false);setTimeout(()=>{closeModal('actionStatusModal');actionCallback();},320);};openModal('confirmationModal');
+        const label=String(actionBtnLabel||'Confirm'),destructive=/delete|remove|discard|reset|permanent|replace|overwrite|exit/i.test(label+' '+title);titleEl.innerText=title;descEl.innerText=description;actionBtn.innerText=label;actionBtn.classList.toggle('btn-danger',destructive);actionBtn.classList.toggle('btn-confirm',!destructive);const modal=document.querySelector('#confirmationModal .compact-validation-modal'),graphic=document.getElementById('confirmModalGraphic');modal?.classList.toggle('destructive-validation',destructive);modal?.classList.toggle('confirm-validation',!destructive);if(graphic)graphic.innerHTML=destructive?`<svg class="icon-svg lg" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2M19 6l-1 15H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>`:`<svg class="icon-svg lg" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>`;actionBtn.onclick=()=>{closeModal('confirmationModal');showActionStatus('Processing','Please wait…',false);setTimeout(()=>{closeModal('actionStatusModal');actionCallback();},320);};openModal('confirmationModal');
       }
       function showActionStatus(title,message,success=false){
         const modal=document.getElementById('actionStatusModal'),graphic=document.getElementById('actionStatusGraphic'),t=document.getElementById('actionStatusTitle'),m=document.getElementById('actionStatusMessage');if(!modal||!graphic)return;if(t)t.textContent=title;if(m)m.textContent=message;graphic.innerHTML=success?`<span class="action-check"><svg class="icon-svg lg" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>`:`<span class="action-spinner"></span>`;openModal('actionStatusModal');
@@ -3050,61 +3050,124 @@ ${description}`))actionCallback();return;}
         showToast("Data backup exported successfully.");
       }
 
+      /**
+       * Restore a JUAN Workspace JSON backup.
+       *
+       * IMPORTANT: Restore is intentionally a REPLACE operation, not a merge.
+       * The older importer skipped records when IDs already existed, which made
+       * a valid backup appear to do nothing on a freshly seeded workspace.
+       *
+       * Owner profile, theme, and connection settings are kept. Operational
+       * workspace data is replaced by the selected backup after confirmation
+       * and the destructive-action PIN check.
+       */
       function importDataBackup(e) {
-        const file = e.target.files[0];
+        const input = e?.target;
+        const file = input?.files?.[0];
         if (!file) return;
 
         const reader = new FileReader();
         reader.onload = function(evt) {
           try {
             const data = JSON.parse(evt.target.result);
-            if (!data || (!data.projects && !data.clients)) {
-              showToast("Invalid backup file format.");
+            const projectsValid = Array.isArray(data?.projects);
+            const clientsValid = Array.isArray(data?.clients);
+
+            if (!data || (!projectsValid && !clientsValid)) {
+              showToast("Invalid JUAN Workspace backup file.");
+              if (input) input.value = "";
               return;
             }
 
+            const projectCount = projectsValid ? data.projects.length : 0;
+            const clientCount = clientsValid ? data.clients.length : 0;
+            const serviceCount = Array.isArray(data.soloServices) ? data.soloServices.length : 0;
+            const packageCount = Array.isArray(data.packagesList) ? data.packagesList.length : 0;
+            const backupVersion = String(data.version || "Unknown");
+
+            // Clear the file picker now so the same backup can be selected again
+            // even if the user cancels the confirmation/PIN dialog.
+            if (input) input.value = "";
+
             showConfirmationDialog(
-              "Restore / Import Data",
-              "Importing backup data will safely merge records without overwriting existing duplicates. Proceed?",
-              "Import",
-              () => {
-                if (data.clients && Array.isArray(data.clients)) {
-                  data.clients.forEach(c => {
-                    if (!state.clients.some(sc => sc.id === c.id)) state.clients.push(c);
-                  });
-                }
+              "Restore JSON Backup",
+              `Backup v${backupVersion} contains ${projectCount} project${projectCount === 1 ? "" : "s"}, ${clientCount} client${clientCount === 1 ? "" : "s"}, ${serviceCount} service${serviceCount === 1 ? "" : "s"}, and ${packageCount} package${packageCount === 1 ? "" : "s"}. Restoring will replace the current workspace data in this browser.`,
+              "Replace & Restore",
+              () => requestDestructivePin(
+                "Restore Backup",
+                "This will replace the current projects, clients, templates, services, packages, tasks, and active order/cart data with the selected backup.",
+                () => {
+                  try {
+                    // Deep-copy backup records so the in-memory state is isolated
+                    // from the parsed FileReader object.
+                    state.clients = clientsValid ? JSON.parse(JSON.stringify(data.clients)) : [];
+                    state.projects = projectsValid ? JSON.parse(JSON.stringify(data.projects)) : [];
+                    state.templates = Array.isArray(data.templates) ? JSON.parse(JSON.stringify(data.templates)) : [];
+                    state.soloServices = Array.isArray(data.soloServices) ? JSON.parse(JSON.stringify(data.soloServices)) : [];
+                    state.packagesList = Array.isArray(data.packagesList)
+                      ? normalizeBroadcastPackageNames(JSON.parse(JSON.stringify(data.packagesList)))
+                      : [];
 
-                if (data.projects && Array.isArray(data.projects)) {
-                  data.projects.forEach(p => {
-                    if (!state.projects.some(sp => sp.id === p.id)) state.projects.push(p);
-                  });
-                }
+                    // Rebuild catalog categories from restored services/packages.
+                    state.catalogCategories = [...new Set([
+                      ...state.soloServices.map(item => String(item?.category || "").trim()),
+                      ...state.packagesList.map(item => String(item?.category || "").trim())
+                    ].filter(Boolean))];
 
-                if (data.templates && Array.isArray(data.templates)) {
-                  data.templates.forEach(t => {
-                    if (!state.templates.some(st => st.id === t.id)) state.templates.push(t);
-                  });
-                }
+                    // A restore should not keep unrelated temporary work from the
+                    // browser that existed before the backup was selected.
+                    state.tasks = [];
+                    state.cart.items = [];
+                    state.cart.selectedClientId = "";
+                    state.cart.projectName = "";
+                    state.cart.discountVal = 0;
+                    state.cart.startDate = "";
+                    state.cart.deadlineDate = "";
+                    state.cart.deadlineManuallySet = false;
+                    state.cart.rushFee = 0;
+                    state.cart.rushDaysEarly = 0;
 
-                if (data.soloServices && Array.isArray(data.soloServices)) {
-                  state.soloServices = data.soloServices;
-                }
+                    // Keep the public JP-001, JP-002 ... sequence continuous even
+                    // when a legacy backup contains duplicate/misaligned numbers.
+                    renumberProjectSequence();
 
-                if (data.packagesList && Array.isArray(data.packagesList)) {
-                  state.packagesList = normalizeBroadcastPackageNames(data.packagesList);
-                }
+                    persistProjectsState();
+                    persistClientsState();
+                    persistTemplatesState();
+                    persistCatalogState();
+                    persistTasksState();
+                    localStorage.removeItem("JUAN_CART_STATE");
 
-                persistProjectsState();
-                persistTemplatesState();
-                persistCatalogState();
-                persistClientsState();
-                renderCurrentView();
-                showToast("Data restored successfully.");
-              }
+                    // Prevent the built-in sample seeder from replacing a restored
+                    // legacy-only backup on the next page load.
+                    localStorage.setItem("JUAN_LEGACY_SEEDED", "1");
+                    localStorage.setItem("JUAN_SAMPLE_DATA_VERSION", SAMPLE_DATA_VERSION);
+                    localStorage.setItem("JUAN_LAST_BACKUP_RESTORE", new Date().toISOString());
+                    localStorage.setItem("JUAN_LAST_BACKUP_VERSION", backupVersion);
+
+                    renderCurrentView();
+                    renderTemplatesDropdown();
+                    showActionStatus("Backup Restored", `${state.projects.length} projects and ${state.clients.length} clients are now loaded.`, true);
+                    setTimeout(() => closeModal("actionStatusModal"), 1200);
+                    showToast("JSON backup restored successfully.");
+                  } catch (restoreErr) {
+                    console.error("Backup restore failed:", restoreErr);
+                    showToast("Backup was valid, but the workspace could not restore it.");
+                  } finally {
+                    if (input) input.value = "";
+                  }
+                }
+              )
             );
           } catch(err) {
+            console.error("Backup JSON parse failed:", err);
             showToast("Failed to parse backup JSON.");
+            if (input) input.value = "";
           }
+        };
+        reader.onerror = function() {
+          showToast("The selected backup file could not be read.");
+          if (input) input.value = "";
         };
         reader.readAsText(file);
       }

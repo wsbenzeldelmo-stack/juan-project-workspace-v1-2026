@@ -48,3 +48,9 @@ For Vercel and Safari Add to Dock, see `docs/DEPLOYMENT.md`.
 ## Data note
 
 The app uses browser-side storage for much of its local/offline data. Git versions the **code**, not the user's browser database. Always use the app's backup/export functionality before risky data migrations.
+## Restoring a JSON workspace backup
+
+Open **Settings → Data Backup & Restore → Restore JSON Backup**. The restore flow validates the file, shows a record summary, asks for confirmation and the destructive-action PIN, then replaces the current browser workspace data with the backup.
+
+A Vercel deployment hosts the application code; it does not turn the JSON file into a shared cloud database. Restored data is saved to the browser's local workspace storage on that device. Use Supabase when you want the same database to sync across devices.
+
