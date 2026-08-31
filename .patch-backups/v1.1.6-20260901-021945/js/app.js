@@ -148,8 +148,6 @@ function formatCurrency(amount) {
     const SAMPLE_DATA_VERSION = "PAYMENT_TRACKER_2025_001_054_CONTINUOUS_V2";
     const LEGACY_SHEET_RECORDS = [{"ref":"2025-001-001","client":"imahemultimediaproductions@gmail.com","project":"FUN AND LAUGH WITH RON","project_type":"Social Media Managing","amount_due":13000.0,"amount_received":13000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-002","client":"yvonnemaedelgado@gmail.com","project":"iREPORT","project_type":"TV Broadcast Package","amount_due":10000.0,"amount_received":10000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-003","client":"trishakayemesana@gmail.com","project":"SIMULCAST","project_type":"TV Broadcast Package","amount_due":10000.0,"amount_received":10000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-004","client":"dkian032@gmail.com","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":3000.0,"amount_received":3000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-005","client":"dalumpinesmargaret@gmail.com","project":"THE PULSE NEWS","project_type":"Logo Animation","amount_due":800.0,"amount_received":800.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-006","client":"ramosdenmar03@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":11500.0,"amount_received":11500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-007","client":"ardienjamesgais@gmail.com","project":"DEPED X","project_type":"TV Broadcast Package","amount_due":4300.0,"amount_received":4300.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-008","client":"kztksem88@gmail.com","project":"HORIZON NEWS CENTRAL","project_type":"Blender Workshop","amount_due":1500.0,"amount_received":1500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-009","client":"oliver.villaruel@deped.gov.ph","project":"TUTOK PILIPINAS","project_type":"TV Broadcast Package","amount_due":8300.0,"amount_received":8300.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-010","client":"dimaanolorraine37@gmail.com","project":"BANTAY PILIPINAS","project_type":"TV Broadcast Package","amount_due":7500.0,"amount_received":7500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-011","client":"janellerinn@gmail.com","project":"MASID","project_type":"TV Broadcast Package","amount_due":7500.0,"amount_received":7500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-012","client":"ramosdenmar03@gmail.com","project":"KAMPUS KONEK 2","project_type":"TV Broadcast Package","amount_due":13000.0,"amount_received":13000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-013","client":"nikkazara29@gmail.com","project":"TOP NEWS","project_type":"TV Broadcast Package","amount_due":5000.0,"amount_received":5000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-014","client":"mamadoaalexanderissaiah@gmail.com","project":"ALISTO PUNTO","project_type":"TV Broadcast Package","amount_due":11000.0,"amount_received":11000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-015","client":"earljohnmapa12@gmail.com","project":"CAMPUS PATROL","project_type":"Logo Animation","amount_due":6000.0,"amount_received":6000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-016","client":"annefelicityrufo1@gmail.com","project":"CAMPUS PATROL","project_type":"OBB and CBB","amount_due":1700.0,"amount_received":1700.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-017","client":"sosadanica07@gmail.com","project":"DSPC TV","project_type":"OBB and CBB","amount_due":1700.0,"amount_received":1700.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-018","client":"ashleymaeramos001@gmail.com","project":"RONDA PILIPINAS","project_type":"OBB and CBB","amount_due":1700.0,"amount_received":1700.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-019","client":"leisoriano25@gmail.com","project":"RONDA PILIPINAS","project_type":"Blender Workshop","amount_due":2000.0,"amount_received":2000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-020","client":"bacalaaj@gmail.com","project":"SUBIC","project_type":"Logo Animation","amount_due":2720.0,"amount_received":2720.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-021","client":"oliver.villaruel@deped.gov.ph","project":"KAMPUS KONEK RSPC","project_type":"TV Broadcast Package","amount_due":10000.0,"amount_received":10000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-022","client":"calmorinjareen@gmail.com","project":"STRONGER CHAMPS PATROL","project_type":"TV Broadcast Package","amount_due":12100.0,"amount_received":12100.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-023","client":"danrowey2009@gmail.com","project":"BROADKAST PILIPINAS","project_type":"TV Broadcast Package","amount_due":7950.0,"amount_received":7950.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-024","client":"rapaconnicolo7@gmail.com","project":"CAMPUS PATROL RSPC","project_type":"TV Broadcast Package","amount_due":16450.0,"amount_received":16450.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-025","client":"mamadoaalexanderissaiah@gmail.com","project":"ALISTO PUNTO RSPC","project_type":"TV Broadcast Package","amount_due":10000.0,"amount_received":10000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-026","client":"apriljoy.tabingo@deped.gov.ph","project":"KAMPUS BALITAAN RSPC","project_type":"TV Broadcast Package","amount_due":8550.0,"amount_received":8550.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-027","client":"NATHANIEL VILLEGAS","project":"WATCH","project_type":"Interactive 3D Model","amount_due":6000.0,"amount_received":6000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-028","client":"michaelquinto33@gmail.com","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":12200.0,"amount_received":12200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-029","client":"acunamika67@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":13200.0,"amount_received":13200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-030","client":"caliaoalthea6@gmail.com","project":"CAMPUS ON SCREEN","project_type":"TV Broadcast Package","amount_due":5075.0,"amount_received":5075.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-031","client":"macarimbangesmail18@gmail.com","project":"THE NEWS AUTHORITY","project_type":"Headline Rundown","amount_due":2000.0,"amount_received":2000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-032","client":"santos.amielelijah@gmail.com","project":"SINAG BALITA","project_type":"TV Broadcast Package","amount_due":7500.0,"amount_received":7500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-033","client":"annefelicityrufo1@gmail.com","project":"KAMPUS KONEK","project_type":"OBB","amount_due":1200.0,"amount_received":1200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-034","client":"Name","project":"MEMORIES","project_type":"TV Broadcast Package","amount_due":1200.0,"amount_received":1200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-035","client":"oliver.villaruel@deped.gov.ph","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":6600.0,"amount_received":1200.0,"payment_status":"Downpayment","pending":5400.0},{"ref":"2025-001-036","client":"kyledylan1921@gmail.com","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":8300.0,"amount_received":8300.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-037","client":"iannebaristol2005@gmail.com","project":"PICE-MUSC","project_type":"Logo Animation","amount_due":1500.0,"amount_received":1500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-038","client":"jetcastre5@gmail.com","project":"NEWSKO KONEK","project_type":"Logo Animation","amount_due":1200.0,"amount_received":1200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-039","client":"oliver.villaruel@deped.gov.ph","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":2000.0,"amount_received":0.0,"payment_status":"Pending","pending":2000.0},{"ref":"2025-001-040","client":"sittieazhimagyusoph@gmail.com","project":"NOVARE","project_type":"Logo Animation","amount_due":5150.0,"amount_received":5150.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-041","client":"tjmercado1515@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":13300.0,"amount_received":4800.0,"payment_status":"Downpayment","pending":8500.0},{"ref":"2025-001-042","client":"allieyahbautista@gmail.com","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":11500.0,"amount_received":3284.0,"payment_status":"Pending","pending":8216.0},{"ref":"2025-001-043","client":"scharlesleendon@gmail.com","project":"RAMONIAN PULSE","project_type":"TV Broadcast Package","amount_due":7900.0,"amount_received":7900.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-044","client":"tagapulot.brianaziv@gmail.com","project":"ALUBIJID NCHS","project_type":"Logo Animation","amount_due":2500.0,"amount_received":2500.0,"payment_status":"Pending","pending":0.0},{"ref":"2025-001-045","client":"ardienjamesgais@gmail.com","project":"AKSYON PILIPINAS","project_type":"TV Broadcast Package","amount_due":4300.0,"amount_received":4300.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-046","client":"mtyap.pas@gmail.com","project":"ABS MANDIRIGMA","project_type":"TV Broadcast Package","amount_due":7500.0,"amount_received":0.0,"payment_status":"Pending","pending":7500.0},{"ref":"2025-001-047","client":"scharlesleendon@gmail.com","project":"RAMONIAN PULSE","project_type":"Video Editing","amount_due":6500.0,"amount_received":6500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-048","client":"babonmichaelneil@gmail.com","project":"TINIG BAYBAYIN","project_type":"TV Broadcast Package","amount_due":11800.0,"amount_received":10700.0,"payment_status":"Downpayment","pending":1100.0},{"ref":"2025-001-049","client":"caliguirankathleengrace@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":10800.0,"amount_received":5400.0,"payment_status":"Downpayment","pending":5400.0},{"ref":"2025-001-050","client":"brylevicmudo@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":7900.0,"amount_received":4000.0,"payment_status":"Downpayment","pending":3900.0},{"ref":"2025-001-051","client":"sharanfaten9@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":9500.0,"amount_received":4500.0,"payment_status":"Downpayment","pending":5000.0},{"ref":"2025-001-052","client":"mykellpatigayon949@gmail.com","project":"USAPANG NATIONALIAN","project_type":"Logo Animation","amount_due":1500.0,"amount_received":1500.0,"payment_status":"Downpayment","pending":0.0},{"ref":"2025-001-053","client":"ramosdenmar03@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":15000.0,"amount_received":0.0,"payment_status":"Downpayment","pending":15000.0},{"ref":"2025-001-054","client":"barejechad05@gmail.com","project":"CAMPUS NEWS","project_type":"TV Broadcast Package","amount_due":8500.0,"amount_received":4100.0,"payment_status":"Downpayment","pending":4400.0}];
     const app = (function() {
-      const SYSTEM_MAINTENANCE_FEE = 19;
-      const REVISION_FEE_PER_REVISION = 500;
       let supabaseClient = null;
 
       let state = {
@@ -348,7 +346,7 @@ function formatCurrency(amount) {
         // One continuous Project ID sequence, starting at JP-001 with no exceptions.
         renumberProjectSequence();
         // Normalize the system-defined maintenance rule for restored/older projects too.
-        state.projects.forEach(p=>{p.system_maintenance_charge=projectHasPackage(p)?SYSTEM_MAINTENANCE_FEE:0;if(!Number.isFinite(Number(p.revision_count)))p.revision_count=0;p.revision_fee_per_revision=REVISION_FEE_PER_REVISION;});ensureContinuousClientIds();persistClientsState();
+        state.projects.forEach(p=>{p.system_maintenance_charge=projectHasPackage(p)?1:0;});
         persistProjectsState();
         state.isConnected = false;
         updateConnectionStatus("connected", "OFFLINE · LOCAL");
@@ -672,40 +670,14 @@ function formatCurrency(amount) {
         return `+63 ${a}${b?` ${b}`:''}${c?` ${c}`:''}`.trim();
       }
 
-      function enforceWordLimit(el,maxWords,counterId){
-        if(!el)return;const max=Math.max(1,Number(maxWords||1));let words=String(el.value||'').trim().split(/\s+/).filter(Boolean);
-        if(words.length>max){words=words.slice(0,max);el.value=words.join(' ');}
-        const count=String(el.value||'').trim()?String(el.value||'').trim().split(/\s+/).filter(Boolean).length:0;const counter=document.getElementById(counterId);if(counter)counter.textContent=`${count} / ${max} words`;
-      }
-
-      function syncPinBoxes(targetId){
-        const target=document.getElementById(targetId),grid=document.querySelector(`.pin-code-grid[data-pin-target="${targetId}"]`);if(!target||!grid)return;target.value=[...grid.querySelectorAll('.pin-digit')].map(x=>String(x.value||'').replace(/\D/g,'').slice(-1)).join('').slice(0,6);
-      }
-      function clearPinBoxes(targetId){const grid=document.querySelector(`.pin-code-grid[data-pin-target="${targetId}"]`),target=document.getElementById(targetId);if(target)target.value='';if(grid){grid.querySelectorAll('.pin-digit').forEach(x=>{x.value='';x.classList.remove('is-invalid')});setTimeout(()=>grid.querySelector('.pin-digit')?.focus(),60);}}
-      function handlePinDigitInput(event,targetId){const input=event.currentTarget;input.value=String(input.value||'').replace(/\D/g,'').slice(-1);syncPinBoxes(targetId);if(input.value)input.nextElementSibling?.classList?.contains('pin-digit')&&input.nextElementSibling.focus();}
-      function handlePinDigitKeydown(event,targetId){const input=event.currentTarget;if(event.key==='Backspace'&&!input.value&&input.previousElementSibling?.classList?.contains('pin-digit')){input.previousElementSibling.focus();}if(event.key==='Enter'){event.preventDefault();syncPinBoxes(targetId);targetId==='resetDataPinInput'?confirmResetDataPin():confirmDestructivePin();}}
-
       function clientFirstProject(client){
         if(!client)return null;
         const matches=state.projects.filter(p=>!p.deleted&&(p.client_id===client.id||(!p.client_id&&p.client_name===client.name)||p.client_name===client.name));
         return matches.sort((a,b)=>projectNumber(a)-projectNumber(b)||new Date(a.created_at||0)-new Date(b.created_at||0))[0]||null;
       }
-      function ensureContinuousClientIds(){
-        const ordered=state.clients.slice().sort((a,b)=>{
-          const an=Number(a.client_number),bn=Number(b.client_number),av=Number.isFinite(an)&&an>0,bv=Number.isFinite(bn)&&bn>0;
-          if(av&&bv&&an!==bn)return an-bn; if(av!==bv)return av?-1:1;
-          const ap=clientFirstProject(a),bp=clientFirstProject(b),apn=ap?projectNumber(ap):Number.MAX_SAFE_INTEGER,bpn=bp?projectNumber(bp):Number.MAX_SAFE_INTEGER;
-          if(apn!==bpn)return apn-bpn;
-          const ac=new Date(a.created_at||0).getTime()||0,bc=new Date(b.created_at||0).getTime()||0;if(ac!==bc)return ac-bc;
-          return String(a.name||a.email||a.id||'').localeCompare(String(b.name||b.email||b.id||''));
-        });
-        ordered.forEach((client,index)=>{client.client_number=index+1;});
-        return ordered;
-      }
       function clientDisplayId(client){
-        if(!client)return 'CL-—';
-        if(!Number.isFinite(Number(client.client_number))||Number(client.client_number)<1)ensureContinuousClientIds();
-        return `CL-${String(Number(client.client_number)||1).padStart(3,'0')}`;
+        const first=clientFirstProject(client);
+        return first?`CL-${String(projectNumber(first)).padStart(3,'0')}`:'CL-—';
       }
 
       function updateProfileDisplay() {
@@ -859,17 +831,27 @@ ${description}`))actionCallback();return;}
 
       const WORKSPACE_RESET_PIN = "729333";
       function requestDestructivePin(title,description,callback){
-        state.pendingDestructiveAction=typeof callback==='function'?callback:null;const titleEl=document.getElementById('destructivePinTitle'),desc=document.getElementById('destructivePinDescription'),input=document.getElementById('destructivePinInput'),error=document.getElementById('destructivePinError');if(titleEl)titleEl.textContent=title||'Confirm deletion';if(desc)desc.textContent=(description||'This action changes or removes saved data.')+' Enter your 6-digit PIN to continue.';clearPinBoxes('destructivePinInput');if(error)error.classList.add('hidden');openModal('destructivePinModal');setTimeout(()=>document.querySelector('.pin-code-grid[data-pin-target="destructivePinInput"] .pin-digit')?.focus(),70);
+        state.pendingDestructiveAction=typeof callback==='function'?callback:null;const titleEl=document.getElementById('destructivePinTitle'),desc=document.getElementById('destructivePinDescription'),input=document.getElementById('destructivePinInput'),error=document.getElementById('destructivePinError');if(titleEl)titleEl.textContent=title||'Confirm deletion';if(desc)desc.textContent=(description||'This action changes or removes saved data.')+' Enter your 6-digit PIN to continue.';if(input){input.value='';input.classList.remove('is-invalid');}if(error)error.classList.add('hidden');openModal('destructivePinModal');setTimeout(()=>input?.focus(),70);
       }
-      function confirmDestructivePin(){const input=document.getElementById('destructivePinInput'),error=document.getElementById('destructivePinError'),pin=String(input?.value||'').replace(/\D/g,'').slice(0,6);if(pin!==WORKSPACE_RESET_PIN){document.querySelectorAll('.pin-code-grid[data-pin-target="destructivePinInput"] .pin-digit').forEach(x=>x.classList.add('is-invalid'));if(error)error.classList.remove('hidden');return;}if(error)error.classList.add('hidden');document.querySelectorAll('.pin-code-grid[data-pin-target="destructivePinInput"] .pin-digit').forEach(x=>x.classList.remove('is-invalid'));const action=state.pendingDestructiveAction;state.pendingDestructiveAction=null;closeModal('destructivePinModal');if(action)action();}
+      function confirmDestructivePin(){const input=document.getElementById('destructivePinInput'),error=document.getElementById('destructivePinError'),pin=String(input?.value||'').replace(/\D/g,'').slice(0,6);if(pin!==WORKSPACE_RESET_PIN){if(input){input.classList.add('is-invalid');input.select();}if(error)error.classList.remove('hidden');return;}if(error)error.classList.add('hidden');if(input)input.classList.remove('is-invalid');const action=state.pendingDestructiveAction;state.pendingDestructiveAction=null;closeModal('destructivePinModal');if(action)action();}
 
       function openResetDataModal(){
-        const error=document.getElementById('resetDataPinError');clearPinBoxes('resetDataPinInput');if(error)error.classList.add('hidden');openModal('resetDataPinModal');setTimeout(()=>document.querySelector('.pin-code-grid[data-pin-target=\"resetDataPinInput\"] .pin-digit')?.focus(),80);
+        const input=document.getElementById('resetDataPinInput'),error=document.getElementById('resetDataPinError');
+        if(input){input.value='';input.classList.remove('is-invalid');}
+        if(error)error.classList.add('hidden');
+        openModal('resetDataPinModal');
+        setTimeout(()=>input?.focus(),80);
       }
       function confirmResetDataPin(){
-        const input=document.getElementById('resetDataPinInput'),error=document.getElementById('resetDataPinError');syncPinBoxes('resetDataPinInput');const pin=String(input?.value||'').replace(/\D/g,'').slice(0,6);
-        if(pin!==WORKSPACE_RESET_PIN){document.querySelectorAll('.pin-code-grid[data-pin-target=\"resetDataPinInput\"] .pin-digit').forEach(x=>x.classList.add('is-invalid'));if(error)error.classList.remove('hidden');return;}
-        document.querySelectorAll('.pin-code-grid[data-pin-target=\"resetDataPinInput\"] .pin-digit').forEach(x=>x.classList.remove('is-invalid'));if(error)error.classList.add('hidden');
+        const input=document.getElementById('resetDataPinInput'),error=document.getElementById('resetDataPinError');
+        const pin=String(input?.value||'').replace(/\D/g,'').slice(0,6);
+        if(pin!==WORKSPACE_RESET_PIN){
+          if(input){input.classList.add('is-invalid');input.select();}
+          if(error)error.classList.remove('hidden');
+          return;
+        }
+        if(input)input.classList.remove('is-invalid');
+        if(error)error.classList.add('hidden');
         closeModal('resetDataPinModal');
         showConfirmationDialog(
           'Reset all workspace data?',
@@ -1055,16 +1037,16 @@ ${description}`))actionCallback();return;}
         return Array.isArray(items)&&items.some(i=>String(i?.type||'').toUpperCase()==='PACKAGE');
       }
       function getProjectMaintenanceFee(proj) {
-        return projectHasPackage(proj)?SYSTEM_MAINTENANCE_FEE:0;
+        // System-defined rule: exactly ₱1 once when the project contains any package.
+        return projectHasPackage(proj)?1:0;
       }
-      function getProjectRevisionFee(proj){
-        const count=Math.max(0,Math.floor(Number(proj?.revision_count||0)));return count*REVISION_FEE_PER_REVISION;
-      }
-      function getProjectInvoiceTotal(proj){return Math.max(0,Number(proj?.total_amount||0))+getProjectMaintenanceFee(proj)+getProjectRevisionFee(proj);}
 
       function getProjectBalance(proj) {
-        const paid=getProjectPaid(proj),invoiceTotal=getProjectInvoiceTotal(proj);
-        return Math.max(0,invoiceTotal-paid);
+        const maintenance=getProjectMaintenanceFee(proj);
+        const paid=getProjectPaid(proj),invoiceTotal=Math.max(0,Number(proj?.total_amount||0))+maintenance;
+        const computed=Math.max(0,invoiceTotal-paid);
+        if(maintenance<=0){const stored=Number(proj?.pending_amount);if(proj?.pending_amount!==undefined&&proj?.pending_amount!==null&&Number.isFinite(stored))return Math.max(0,stored);}
+        return computed;
       }
 
       function getProjectProgress(proj) {
@@ -1425,7 +1407,7 @@ ${description}`))actionCallback();return;}
         if(!start||!due)return {duration:null,daysEarly:0,baseFee:0,fee:0,standardDays:standard,deliverableCount:Math.max(0,Number(deliverableCount||0)),loadFactor:load.factor,loadLabel:load.label};
         const duration=Math.max(0,Math.round((due-start)/86400000)),daysEarly=Math.max(0,standard-duration);
         const baseFee=daysEarly>0?Math.ceil(daysEarly/4)*500:0;
-        const fee=baseFee;
+        const fee=Math.round((baseFee*load.factor)*100)/100;
         return {duration,daysEarly,baseFee,fee,standardDays:standard,deliverableCount:Math.max(0,Number(deliverableCount||0)),loadFactor:load.factor,loadLabel:load.label};
       }
       function setListSort(scope,value){
@@ -1540,7 +1522,7 @@ ${description}`))actionCallback();return;}
           const displayStatus=getProjectPaymentStatus(p);
           const statusKey=displayStatus.toLowerCase();
           const badgeClass=statusKey.includes('completed')?'badge-green':'badge-orange';
-          return `<tr class="clickable-row" onclick="app.openProjectDetails('${p.id}','payment-tracker')"><td><strong class="project-id-cell">${escapeHtml(formatProjectId(p))}</strong></td><td><strong>${escapeHtml(p.title||'Untitled Project')}</strong></td><td>${escapeHtml(p.client_name||p.client_email||"—")}</td><td>${formatCurrency(getProjectInvoiceTotal(p))}</td><td>${formatCurrency(paid)}</td><td class="${bal?'text-danger':''}">${formatCurrency(bal)}</td><td>${escapeHtml(formatProjectDate((p.delivery_status==='Delivered'||p.status==='Completed')?p.payment_due_date:''))}</td><td><span class="badge ${badgeClass}">${escapeHtml(displayStatus.toUpperCase())}</span></td></tr>`;
+          return `<tr class="clickable-row" onclick="app.openProjectDetails('${p.id}','payment-tracker')"><td><strong class="project-id-cell">${escapeHtml(formatProjectId(p))}</strong></td><td><strong>${escapeHtml(p.title||'Untitled Project')}</strong></td><td>${escapeHtml(p.client_name||p.client_email||"—")}</td><td>${formatCurrency(p.total_amount||0)}</td><td>${formatCurrency(paid)}</td><td class="${bal?'text-danger':''}">${formatCurrency(bal)}</td><td>${escapeHtml(formatProjectDate((p.delivery_status==='Delivered'||p.status==='Completed')?p.payment_due_date:''))}</td><td><span class="badge ${badgeClass}">${escapeHtml(displayStatus.toUpperCase())}</span></td></tr>`;
         }).join("")||`<tr><td colspan="8" class="text-center text-muted py-4">No matching invoice or payment records.</td></tr>`;
       }
       function setPaymentFilter(filter){ state.paymentFilter=filter; renderPaymentsView(); }
@@ -1550,15 +1532,15 @@ ${description}`))actionCallback();return;}
       }
       function milestoneAmountLabel(value){return Number(value)>=1000000?`₱${(Number(value)/1000000).toFixed(Number(value)%1000000?1:0)}M`:`₱${Math.round(Number(value)/1000)}K`;}
       function milestoneReachedDate(level){
-        const ordered=state.projects.filter(p=>!p.deleted&&getProjectInvoiceTotal(p)>0).map(p=>({p,date:parseDateSafe(p.start_date||p.record_date||p.created_at)})).sort((a,b)=>(a.date?.getTime()??Infinity)-(b.date?.getTime()??Infinity)||projectNumber(a.p)-projectNumber(b.p));
-        let total=0,lastDate=null;for(const x of ordered){total+=getProjectInvoiceTotal(x.p);if(x.date)lastDate=x.date;if(total>=Number(level))return lastDate||new Date()}return null;
+        const ordered=state.projects.filter(p=>!p.deleted&&Number(p.total_amount||0)>0).map(p=>({p,date:parseDateSafe(p.start_date||p.record_date||p.created_at)})).sort((a,b)=>(a.date?.getTime()??Infinity)-(b.date?.getTime()??Infinity)||projectNumber(a.p)-projectNumber(b.p));
+        let total=0,lastDate=null;for(const x of ordered){total+=Number(x.p.total_amount||0);if(x.date)lastDate=x.date;if(total>=Number(level))return lastDate||new Date()}return null;
       }
       function spawnMilestoneConfetti(){
         const box=document.getElementById('milestoneConfetti');if(!box)return;box.innerHTML='';
         for(let i=0;i<42;i++){const s=document.createElement('i');s.style.left=`${5+Math.random()*90}%`;s.style.animationDelay=`${Math.random()*.45}s`;s.style.animationDuration=`${1.8+Math.random()*1.4}s`;s.style.transform=`rotate(${Math.random()*180}deg)`;box.appendChild(s)}
       }
       function openRevenueMilestone(level){
-        const total=state.projects.filter(p=>!p.deleted).reduce((s,p)=>s+getProjectInvoiceTotal(p),0);level=Number(level||0);if(!level||total<level)return;
+        const total=state.projects.filter(p=>!p.deleted).reduce((s,p)=>s+Number(p.total_amount||0)+Math.max(0,getProjectMaintenanceFee(p)),0);level=Number(level||0);if(!level||total<level)return;
         const reached=milestoneReachedDate(level),dateText=reached?reached.toLocaleDateString('en-PH',{month:'long',day:'numeric',year:'numeric'}):'this journey';
         const amount=milestoneAmountLabel(level),caption=`JUAN PROJECT reached the ${amount} revenue milestone on ${dateText}. Another level unlocked.`;
         state.activeMilestoneShare={level,amount,dateText,caption};
@@ -1573,7 +1555,7 @@ ${description}`))actionCallback();return;}
 
       function renderReportsView(){
         const box=document.getElementById('reportsContent');if(!box)return;
-        const projects=state.projects.filter(p=>!p.deleted),payments=getAllPayments(),totalReceivables=projects.reduce((s,p)=>s+getProjectInvoiceTotal(p),0),collected=payments.reduce((s,p)=>s+Number(p.amount_paid||p.amount||0),0),outstanding=Math.max(0,totalReceivables-collected),active=projects.filter(p=>p.status!=='Completed'&&p.delivery_status!=='Delivered'&&!p.archived_at).length,completed=projects.length-active,collectionRate=totalReceivables?Math.round(collected/totalReceivables*100):0,currentMonth=getLocalDateString(new Date()).slice(0,7),monthCollected=payments.filter(x=>String(x.payment_date||x.created_at||'').slice(0,7)===currentMonth).reduce((s,x)=>s+Number(x.amount_paid||x.amount||0),0),overdue=projects.filter(isPaymentCollectionOverdue).reduce((s,p)=>s+getProjectBalance(p),0);
+        const projects=state.projects.filter(p=>!p.deleted),payments=getAllPayments(),totalReceivables=projects.reduce((s,p)=>s+Number(p.total_amount||0)+Math.max(0,getProjectMaintenanceFee(p)),0),collected=payments.reduce((s,p)=>s+Number(p.amount_paid||p.amount||0),0),outstanding=Math.max(0,totalReceivables-collected),active=projects.filter(p=>p.status!=='Completed'&&p.delivery_status!=='Delivered'&&!p.archived_at).length,completed=projects.length-active,collectionRate=totalReceivables?Math.round(collected/totalReceivables*100):0,currentMonth=getLocalDateString(new Date()).slice(0,7),monthCollected=payments.filter(x=>String(x.payment_date||x.created_at||'').slice(0,7)===currentMonth).reduce((s,x)=>s+Number(x.amount_paid||x.amount||0),0),overdue=projects.filter(isPaymentCollectionOverdue).reduce((s,p)=>s+getProjectBalance(p),0);
         const monthMap={};payments.forEach(x=>{const k=String(x.payment_date||x.created_at||'').slice(0,7);if(k)monthMap[k]=(monthMap[k]||0)+Number(x.amount_paid||x.amount||0)});const recent=Object.entries(monthMap).sort((a,b)=>a[0].localeCompare(b[0])).slice(-8),maxVal=Math.max(1,...recent.map(x=>x[1])),pts=recent.map(([k,v],i)=>{const x=recent.length===1?250:24+i*(452/Math.max(1,recent.length-1)),y=132-v/maxVal*96;return `${x.toFixed(1)},${y.toFixed(1)}`}).join(' '),labels=recent.map(([k],i)=>{const x=recent.length===1?250:24+i*(452/Math.max(1,recent.length-1)),d=new Date(k+'-01T12:00:00');return `<text x="${x}" y="160" text-anchor="middle" class="report-chart-label">${d.toLocaleDateString('en-PH',{month:'short'})}</text>`}).join('');
         const pendingCount=projects.filter(p=>getProjectPaymentStatus(p)==='Pending').length,downCount=projects.filter(p=>getProjectPaymentStatus(p)==='Downpayment').length,paidCount=projects.filter(p=>getProjectPaymentStatus(p)==='Completed').length,totalCount=Math.max(1,pendingCount+downCount+paidCount);
         const levels=[10000,50000,100000,300000,500000,750000,1000000],achieved=levels.filter(x=>totalReceivables>=x),next=levels.find(x=>totalReceivables<x)||null,prev=achieved.length?achieved[achieved.length-1]:0,levelProgress=next?Math.max(0,Math.min(100,(totalReceivables-prev)/(next-prev)*100)):100,levelHtml=levels.map(v=>`<button type="button" class="revenue-level ${totalReceivables>=v?'achieved clickable-milestone':''} ${next===v?'next':''}" ${totalReceivables>=v?`onclick="app.openRevenueMilestone(${v})" title="View ${milestoneAmountLabel(v)} milestone"`:'disabled'}><span class="revenue-level-dot">${totalReceivables>=v?'✓':''}</span><strong>${milestoneAmountLabel(v)}</strong></button>`).join('');
@@ -1645,17 +1627,13 @@ ${description}`))actionCallback();return;}
       }
 
       function renderClientProfile(){
-        ensureContinuousClientIds();
-        const id=state.activeClientId,c=state.clients.find(x=>x.id===id);if(!c)return;const cid=clientDisplayId(c),projects=state.projects.filter(p=>!p.deleted&&(p.client_id===id||p.client_name===c.name)),paid=projects.reduce((s,p)=>s+getProjectPaid(p),0),total=projects.reduce((s,p)=>s+getProjectInvoiceTotal(p),0);
-        document.getElementById('clientProfileName').innerText=c.name||'Client';document.getElementById('clientProfileEmail').innerText=`${cid}${c.email?` · ${c.email}`:''}`;const saveState=document.getElementById('clientProfileSaveState');if(saveState)saveState.textContent='Saved';
-        const paymentRows=projects.flatMap(p=>(p.payments||[]).map(pay=>({project:p,payment:pay}))).sort((a,b)=>new Date(b.payment.payment_date||b.payment.created_at||0)-new Date(a.payment.payment_date||a.payment.created_at||0));
-        document.getElementById('clientProfileContent').innerHTML=`<div class="client-profile-layout"><div class="card client-profile-card"><div class="client-profile-identity"><div class="client-profile-avatar">${escapeHtml((c.name||'C').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase())}</div><div><span class="client-id-pill">${escapeHtml(cid)}</span><h2>${escapeHtml(c.name||'Client')}</h2><p>Client details are saved automatically.</p></div></div><div class="client-profile-form"><div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="clientProfileNameInput" placeholder="Full name or business name" value="${escapeHtml(c.name||'')}" onchange="app.autosaveClientProfileField()"></div><div class="form-group"><label class="form-label">Email</label><input class="form-control" id="clientProfileEmailInput" type="email" placeholder="client@example.com" value="${escapeHtml(c.email||'')}" onchange="app.autosaveClientProfileField()"></div><div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="clientProfilePhoneInput" inputmode="tel" placeholder="+63 963 754 4777" value="${escapeHtml(normalizePhilippinePhone(c.phone)||c.phone||'')}" onblur="this.value=app.normalizePhilippinePhone(this.value);app.autosaveClientProfileField()"></div><div class="form-group"><label class="form-label">Address</label><input class="form-control" id="clientProfileAddressInput" placeholder="City, Province" value="${escapeHtml(c.address||'')}" onchange="app.autosaveClientProfileField()"></div></div></div><div class="client-stat-grid client-profile-stats"><div class="mini-stat"><div class="label">Projects</div><div class="value">${projects.length}</div></div><div class="mini-stat"><div class="label">Project Value</div><div class="value">${formatCurrency(total)}</div></div><div class="mini-stat"><div class="label">Paid</div><div class="value">${formatCurrency(paid)}</div></div><div class="mini-stat"><div class="label">Outstanding</div><div class="value">${formatCurrency(Math.max(0,total-paid))}</div></div></div></div><div class="card mt-6"><div class="card-header"><div><div class="section-kicker">HISTORY</div><h2 class="card-title">Projects</h2></div></div><div class="table-responsive"><table class="data-table unified-table"><thead><tr><th>Project ID</th><th>Project</th><th>Value</th><th>Balance</th><th>Status</th></tr></thead><tbody>${projects.sort((a,b)=>projectNumber(a)-projectNumber(b)).map(p=>`<tr onclick="app.openProjectDetails('${p.id}')" style="cursor:pointer"><td><strong>${escapeHtml(formatProjectId(p))}</strong></td><td>${escapeHtml(p.title)}</td><td>${formatCurrency(getProjectInvoiceTotal(p))}</td><td>${formatCurrency(getProjectBalance(p))}</td><td>${escapeHtml(p.status||'')}</td></tr>`).join('')||`<tr><td colspan="5" class="text-muted text-center">No projects.</td></tr>`}</tbody></table></div></div><div class="card mt-6"><div class="card-header"><div><div class="section-kicker">FINANCE</div><h2 class="card-title">Payment History</h2></div></div>${paymentRows.length?`<div class="payment-transaction-list">${paymentRows.map(({project,payment})=>`<div class="payment-transaction-row client-history-payment"><div class="payment-transaction-main"><strong>${escapeHtml(formatProjectId(project))} · ${escapeHtml(project.title||'Project')}</strong><span>${escapeHtml(payment.payment_method||payment.method||'Payment')}${payment.reference_no?` · Ref ${escapeHtml(payment.reference_no)}`:''}</span></div><div class="payment-transaction-value"><strong>+${formatCurrency(payment.amount_paid||payment.amount||0)}</strong><span>${escapeHtml(payment.payment_date||'')}</span></div></div>`).join('')}</div>`:`<div class="payment-history-empty"><strong>No payment history</strong><span>Recorded client payments will appear here.</span></div>`}</div>`;
+        const id=state.activeClientId,c=state.clients.find(x=>x.id===id);if(!c)return;const cid=clientDisplayId(c),projects=state.projects.filter(p=>!p.deleted&&(p.client_id===id||p.client_name===c.name)),paid=projects.reduce((s,p)=>s+getProjectPaid(p),0),total=projects.reduce((s,p)=>s+Number(p.total_amount||0)+Math.max(0,getProjectMaintenanceFee(p)),0);
+        document.getElementById('clientProfileName').innerText=c.name||'Client';document.getElementById('clientProfileEmail').innerText=`${cid}${c.email?` · ${c.email}`:''}`;document.getElementById('clientProfileEditBtn').onclick=()=>saveClientProfileChanges();
+        document.getElementById('clientProfileContent').innerHTML=`<div class="client-profile-layout"><div class="card client-profile-card"><div class="client-profile-identity"><div class="client-profile-avatar">${escapeHtml((c.name||'C').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase())}</div><div><span class="client-id-pill">${escapeHtml(cid)}</span><h2>${escapeHtml(c.name||'Client')}</h2><p>Client record inherited from the first project ID.</p></div></div><div class="client-profile-form"><div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="clientProfileNameInput" value="${escapeHtml(c.name||'')}"></div><div class="form-group"><label class="form-label">Email</label><input class="form-control" id="clientProfileEmailInput" value="${escapeHtml(c.email||'')}"></div><div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="clientProfilePhoneInput" value="${escapeHtml(normalizePhilippinePhone(c.phone)||c.phone||'')}"></div><div class="form-group"><label class="form-label">Address</label><input class="form-control" id="clientProfileAddressInput" value="${escapeHtml(c.address||'')}"></div></div></div><div class="client-stat-grid client-profile-stats"><div class="mini-stat"><div class="label">Projects</div><div class="value">${projects.length}</div></div><div class="mini-stat"><div class="label">Total Project Value</div><div class="value">${formatCurrency(total)}</div></div><div class="mini-stat"><div class="label">Paid</div><div class="value">${formatCurrency(paid)}</div></div><div class="mini-stat"><div class="label">Outstanding</div><div class="value">${formatCurrency(Math.max(0,total-paid))}</div></div></div></div><div class="card mt-6"><div class="card-header"><h2 class="card-title">Projects</h2></div><div class="table-responsive"><table class="data-table"><thead><tr><th>Project ID</th><th>Project</th><th>Value</th><th>Balance</th><th>Status</th></tr></thead><tbody>${projects.sort((a,b)=>projectNumber(a)-projectNumber(b)).map(p=>`<tr onclick="app.openProjectDetails('${p.id}')" style="cursor:pointer"><td><strong>${escapeHtml(formatProjectId(p))}</strong></td><td>${escapeHtml(p.title)}</td><td>${formatCurrency(Number(p.total_amount||0)+getProjectMaintenanceFee(p))}</td><td>${formatCurrency(getProjectBalance(p))}</td><td>${escapeHtml(p.status||'')}</td></tr>`).join('')||`<tr><td colspan="5" class="text-muted text-center">No projects.</td></tr>`}</tbody></table></div></div><div class="card mt-6"><div class="card-header"><h2 class="card-title">Payment History</h2></div>${projects.flatMap(p=>(p.payments||[]).map(pay=>`<div class="summary-row"><span>${escapeHtml(formatProjectId(p))} · ${escapeHtml(pay.payment_date||'')}</span><strong>${formatCurrency(pay.amount_paid||pay.amount||0)}</strong></div>`)).join('')||`<div class="text-muted">No payment history.</div>`}</div>`;
       }
-      function autosaveClientProfileField(){
-        const c=state.clients.find(x=>x.id===state.activeClientId);if(!c)return;const name=document.getElementById('clientProfileNameInput')?.value.trim()||'',email=document.getElementById('clientProfileEmailInput')?.value.trim()||'',phone=normalizePhilippinePhone(document.getElementById('clientProfilePhoneInput')?.value||''),address=document.getElementById('clientProfileAddressInput')?.value.trim()||'',status=document.getElementById('clientProfileSaveState');
-        if(!name||!email){if(status)status.textContent='Check required fields';return;}c.name=name;c.email=email;c.phone=phone;c.address=address;state.projects.forEach(p=>{if(p.client_id===c.id){p.client_name=name;p.client_email=email;p.client_phone=phone;p.client_address=address;}});persistClientsState();persistProjectsState();if(status){status.textContent='Saved';status.classList.add('is-saved');setTimeout(()=>status.classList.remove('is-saved'),700);}document.getElementById('clientProfileName').innerText=name;document.getElementById('clientProfileEmail').innerText=`${clientDisplayId(c)} · ${email}`;if(supabaseClient&&state.isConnected)syncClientToDatabase(c);
+      function saveClientProfileChanges(){
+        const c=state.clients.find(x=>x.id===state.activeClientId);if(!c)return;const name=document.getElementById('clientProfileNameInput')?.value.trim()||'',email=document.getElementById('clientProfileEmailInput')?.value.trim()||'',phone=normalizePhilippinePhone(document.getElementById('clientProfilePhoneInput')?.value||''),address=document.getElementById('clientProfileAddressInput')?.value.trim()||'';if(!name||!email||!phone){showToast('Full name, email, and phone are required.');return;}c.name=name;c.email=email;c.phone=phone;c.address=address;state.projects.forEach(p=>{if(p.client_id===c.id){p.client_name=name;p.client_email=email;p.client_phone=phone;p.client_address=address;}});persistClientsState();persistProjectsState();renderClientProfile();showToast('Client changes saved.');if(supabaseClient&&state.isConnected)syncClientToDatabase(c);
       }
-      function saveClientProfileChanges(){autosaveClientProfileField();}
 
       function openClientProfile(id){state.activeClientId=id;navigateTo("client-profile");}
 
@@ -1697,14 +1675,14 @@ ${description}`))actionCallback();return;}
         const unpaidDeliveredProjects = state.projects.filter(p => {
           if (p.deleted || p.delivery_status !== "Delivered") return false;
           const totalPaid = (p.payments || []).reduce((sum, pay) => sum + Number(pay.amount_paid), 0);
-          return (getProjectInvoiceTotal(p) - totalPaid) > 0;
+          return (p.total_amount - totalPaid) > 0;
         });
 
         if (unpaidDeliveredProjects.length > 0 && paymentDueSection) {
           paymentDueSection.classList.remove("hidden");
           unpaidDeliveredProjects.forEach(proj => {
             const totalPaid = (proj.payments || []).reduce((sum, pay) => sum + Number(pay.amount_paid), 0);
-            const remaining = Math.max(0, getProjectInvoiceTotal(proj) - totalPaid);
+            const remaining = Math.max(0, proj.total_amount - totalPaid);
             paymentDueContainer.innerHTML += `
               <div class="card mb-4" style="border-left: 4px solid var(--status-orange);">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
@@ -1735,9 +1713,9 @@ ${description}`))actionCallback();return;}
         activeProjects.forEach(proj => {
           const totalPaid = (proj.payments || []).reduce((sum, p) => sum + Number(p.amount_paid), 0);
           proj.paidAmount = totalPaid;
-          proj.balanceAmount = Math.max(0, getProjectInvoiceTotal(proj) - totalPaid);
+          proj.balanceAmount = Math.max(0, proj.total_amount - totalPaid);
 
-          const evalStatus = evaluatePaymentStatus(getProjectInvoiceTotal(proj), totalPaid, proj.approval_status, proj.payment_due_date);
+          const evalStatus = evaluatePaymentStatus(proj.total_amount, totalPaid, proj.approval_status, proj.payment_due_date);
           proj.paymentStatus = evalStatus.status;
 
           if (evalStatus.status === "PENDING" && evalStatus.daysOverdue > 0) {
@@ -1771,7 +1749,7 @@ ${description}`))actionCallback();return;}
               </div>
               <div class="text-right">
                 <div style="font-size:16px; font-weight:700;">Balance: ${formatCurrency(proj.balanceAmount)}</div>
-                <div style="font-size:12px; color:var(--text-tertiary);">Total: ${formatCurrency(getProjectInvoiceTotal(proj))}</div>
+                <div style="font-size:12px; color:var(--text-tertiary);">Total: ${formatCurrency(proj.total_amount)}</div>
               </div>
             </div>
           `;
@@ -1801,14 +1779,14 @@ ${description}`))actionCallback();return;}
         const monthlyData = {};
 
         state.projects.filter(p => !p.deleted).forEach(proj => {
-          totalRevenue += getProjectInvoiceTotal(proj);
+          totalRevenue += Number(proj.total_amount || 0);
 
           const projMonthKey = (proj.created_at || new Date().toISOString()).substring(0, 7);
           if (!monthlyData[projMonthKey]) {
             monthlyData[projMonthKey] = { ordersCount: 0, paymentsSum: 0, totalAmountSum: 0 };
           }
           monthlyData[projMonthKey].ordersCount += 1;
-          monthlyData[projMonthKey].totalAmountSum += getProjectInvoiceTotal(proj);
+          monthlyData[projMonthKey].totalAmountSum += Number(proj.total_amount || 0);
 
           (proj.payments || []).forEach(pay => {
             const payAmount = Number(pay.amount_paid || 0);
@@ -2060,7 +2038,7 @@ ${description}`))actionCallback();return;}
 
         const rushFee = Number(state.cart.rushFee || 0);
         const workloadRushFee = Number(state.cart.workloadRushFee || 0);
-        const maintenanceFee=state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0;
+        const maintenanceFee=state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?1:0;
         const total = Math.max(0, subtotal - discountAmount + rushFee + workloadRushFee + maintenanceFee);
 
         document.getElementById("summarySubtotal").innerText = formatCurrency(grossSubtotal); const itemDiscRow=document.getElementById("summaryItemDiscountRow"),itemDiscEl=document.getElementById("summaryItemDiscount");if(itemDiscRow)itemDiscRow.style.display=itemDiscountTotal>0?"flex":"none";if(itemDiscEl)itemDiscEl.innerText=`- ${formatCurrency(itemDiscountTotal)}`;
@@ -2077,7 +2055,6 @@ ${description}`))actionCallback();return;}
         const maintenanceRow=document.getElementById("summaryMaintenanceRow"),maintenanceEl=document.getElementById("summaryMaintenance");
         if(maintenanceRow)maintenanceRow.style.display=maintenanceFee>0?"flex":"none";
         if(maintenanceEl)maintenanceEl.innerText=`+ ${formatCurrency(maintenanceFee)}`;
-        const additionalLabel=document.getElementById('summaryAdditionalFeesLabel');if(additionalLabel)additionalLabel.style.display=(rushFee+workloadRushFee+maintenanceFee)>0?'flex':'none';
         document.getElementById("summaryTotal").innerText = formatCurrency(total);
 
         persistCartState();
@@ -2200,7 +2177,7 @@ ${description}`))actionCallback();return;}
         const factorsEl=document.getElementById('rushFactorsSummary');
         if(factorsEl){
           const currentLoad=Number(workloadRush.active||0);
-          factorsEl.innerHTML=`<span>${daysEarly>0?`${daysEarly} day${daysEarly===1?'':'s'} earlier · `:''}${workloadRush.rate?`Current workload +${workloadRush.rate}%`:'Standard workload'}</span>`;
+          factorsEl.innerHTML=`<span><b>Project Timeline</b>${durationDays} day${durationDays===1?'':'s'}</span><span><b>Project Workload</b>${workloadCount} deliverable${workloadCount===1?'':'s'} · ${rushCalc.loadLabel}</span><span><b>Current Workload</b>${currentLoad} active · ${workloadRush.rate?`+${workloadRush.rate}%`:'Standard'}</span>`;
         }
 
         // A valid deadline is required before showing the card.
@@ -2290,7 +2267,9 @@ ${description}`))actionCallback();return;}
           <div class="font-bold mb-2">Order Items:</div>
           ${state.cart.items.map(i => `<div class="summary-row"><span>${i.name} (x${i.qty})</span><span>${formatCurrency(i.price * i.qty)}</span></div>`).join("")}
           <div class="divider"></div>
-          ${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0)+ (state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0))>0?`<div class="summary-section-label additional-fees-heading">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))>0?`<div class="summary-row compact-fee-row"><span>Rush Fee</span><span>${formatCurrency(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))}</span></div>`:''}${state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-row compact-fee-row"><span>System Maintenance Fee</span><span>${formatCurrency(SYSTEM_MAINTENANCE_FEE)}</span></div>`:''}
+          ${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))>0?`<div class="summary-section-label">Additional Fees</div><div class="summary-row compact-fee-row"><span>Rush Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('rush')">i</button></span><span>${formatCurrency(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))}</span></div>`:(state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-section-label">Additional Fees</div>`:'')}${state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-row compact-fee-row"><span>System Maintenance Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('maintenance')">i</button></span><span>${formatCurrency(1)}</span></div>`:''}
+          <div class="summary-row"><span>Included Revisions</span><span>1</span></div>
+          <div class="summary-row"><span>Additional Revisions</span><span>From ${formatCurrency(500)} / revision</span></div>
           <div class="summary-row summary-total"><span>Total Amount</span><span>${document.getElementById("summaryTotal").innerText}</span></div>
         `;
 
@@ -2472,14 +2451,12 @@ ${description}`))actionCallback();return;}
           rush_base_fee: Number(calculateRushFromTimeline(state.cart.startDate,state.cart.deadlineDate,standardProductionDaysForCart(),projectWorkloadDeliverableCountFromItems(state.cart.items)).baseFee||0),
           rush_load_factor: Number(calculateRushFromTimeline(state.cart.startDate,state.cart.deadlineDate,standardProductionDaysForCart(),projectWorkloadDeliverableCountFromItems(state.cart.items)).loadFactor||1),
           rush_project_workload: Number(projectWorkloadDeliverableCountFromItems(state.cart.items)||0),
-          system_maintenance_charge: state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE') ? SYSTEM_MAINTENANCE_FEE : 0,
+          system_maintenance_charge: state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE') ? 1 : 0,
           project_type: "",
           priority: (()=>{const start=parseDateSafe(state.cart.startDate),due=parseDateSafe(state.cart.deadlineDate),standard=standardProductionDaysForCart(),days=start&&due?Math.ceil((due-start)/86400000):standard;return rushFee>0||days<standard;})(),
           project_items: state.cart.items.map((i,index) => ({ id:i.id||`oi_new_${Date.now()}_${index}`, name: i.name, price: i.price, qty: i.qty, type: i.type, item_discount:String(i.type||'').toUpperCase()==='PACKAGE'?0:Number(i.item_discount||0), product_code:i.product_code||i.code||null, category:i.category||"" })),
-          included_revisions: 0,
-          revision_count: 0,
-          revision_fee_per_revision: REVISION_FEE_PER_REVISION,
-          additional_revision_fee: REVISION_FEE_PER_REVISION,
+          included_revisions: 1,
+          additional_revision_fee: 500,
           notes: "",
           created_at: new Date().toISOString(),
           invoice_number: null,
@@ -2549,7 +2526,7 @@ ${description}`))actionCallback();return;}
       }
 
       function getProjectPaymentStatus(proj){
-        const total=getProjectInvoiceTotal(proj),paid=Math.max(0,getProjectPaid(proj)),balance=Math.max(0,total-paid);
+        const total=Math.max(0,Number(proj?.total_amount||0))+getProjectMaintenanceFee(proj),paid=Math.max(0,getProjectPaid(proj)),balance=Math.max(0,total-paid);
         if(total>0&&balance<=0)return 'Completed';
         if(paid>0)return 'Downpayment';
         return 'Pending';
@@ -2570,7 +2547,7 @@ ${description}`))actionCallback();return;}
         if(tab==='project-data')populateProjectData(proj);
         if(tab==='payment-tracker')renderPaymentTracker(proj);
         if(tab==='invoice')renderInvoicePaper(proj);
-        if(tab==='notes'){const notes=document.getElementById('projectNotesTextarea');notes.value=proj.notes||'';enforceWordLimit(notes,120,'projectNotesWordCount');}
+        if(tab==='notes')document.getElementById('projectNotesTextarea').value=proj.notes||'';
       }
 
       async function saveInvoicePDF() {
@@ -2643,14 +2620,13 @@ ${description}`))actionCallback();return;}
         if(!proj)return;const client=getProjectClientRecord(proj)||{};
         const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v??''};
         set('projectDataClientName',proj.client_name||client.name||'');set('projectDataClientEmail',proj.client_email||client.email||'');set('projectDataClientPhone',proj.client_phone||client.phone||'');set('projectDataClientAddress',proj.client_address||client.address||'');
-        set('projectDataProjectId',formatProjectId(proj));set('projectDataProjectName',proj.title||'');set('projectDataStartDate',proj.start_date||'');set('projectDataDeadline',proj.deadline_date||'');set('projectDataRevisionCount',Math.max(0,Number(proj.revision_count||0)));setTimeout(()=>refreshProjectDataRushPreview(false),0);
+        set('projectDataProjectId',formatProjectId(proj));set('projectDataProjectName',proj.title||'');set('projectDataStartDate',proj.start_date||'');set('projectDataDeadline',proj.deadline_date||'');setTimeout(()=>refreshProjectDataRushPreview(false),0);
         const priorityEl=document.getElementById('projectDataPriority');if(priorityEl)priorityEl.checked=projectIsPriority(proj);
       }
       function openProjectData(projId){
         if(projId&&projId!==state.activeProjectId){openProjectDetails(projId);setTimeout(()=>switchProjectTab('project-data'),0);return;}
         switchProjectTab('project-data');
       }
-      function openProjectDataClientProfile(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const client=getProjectClientRecord(proj);if(!client){showToast('No linked client profile was found.');return;}openClientProfile(client.id);}
       function refreshProjectDataRushPreview(forceDeadline=false){
         const startEl=document.getElementById('projectDataStartDate'),deadlineEl=document.getElementById('projectDataDeadline'),live=document.getElementById('projectDataRushLive');
         if(!startEl||!deadlineEl)return;
@@ -2659,7 +2635,7 @@ ${description}`))actionCallback();return;}
         const workload=calculateWorkloadRushSurcharge(proj?projectNumber(proj):nextProjectNumber(),calc.fee,proj?.id||'',proj?.workload_at_booking);
         if(live){
           if(calc.duration===null)live.innerHTML='';
-          else if(calc.fee>0) live.innerHTML=`<span>${calc.duration} day timeline</span><strong class="rush-live-active">Rush Fee ${formatCurrency(calc.fee+Number(workload.fee||0))}</strong>`;
+          else if(calc.fee>0) live.innerHTML=`<span>${calc.duration} day timeline</span><strong class="rush-live-active">Rush Production +${formatCurrency(calc.fee)}${workload.fee>0?` · Workload ${workload.rate}% +${formatCurrency(workload.fee)}`:''}</strong>`;
           else live.innerHTML=`<span>${calc.duration} day timeline</span><strong>Standard ${standard}-day production</strong>`;
         }
       }
@@ -2675,9 +2651,12 @@ ${description}`))actionCallback();return;}
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
         const previousStart=proj.start_date||'',previousDeadline=proj.deadline_date||'';
         proj.title=document.getElementById('projectDataProjectName')?.value??proj.title??'';
+        proj.client_name=document.getElementById('projectDataClientName')?.value??proj.client_name??'';
+        proj.client_email=document.getElementById('projectDataClientEmail')?.value??proj.client_email??'';
+        proj.client_phone=normalizePhilippinePhone(document.getElementById('projectDataClientPhone')?.value??proj.client_phone??'');
+        proj.client_address=document.getElementById('projectDataClientAddress')?.value??proj.client_address??'';
         proj.start_date=document.getElementById('projectDataStartDate')?.value||'';
         proj.deadline_date=document.getElementById('projectDataDeadline')?.value||'';
-        proj.revision_count=Math.max(0,Math.floor(Number(document.getElementById('projectDataRevisionCount')?.value||0)));proj.revision_fee_per_revision=REVISION_FEE_PER_REVISION;
         if(proj.delivery_status!=='Delivered'){proj.payment_due_date='';proj.invoice_due_date='';}
         const start=parseDateSafe(proj.start_date),due=parseDateSafe(proj.deadline_date),rushCalc=calculateRushFromTimeline(proj.start_date,proj.deadline_date,standardProductionDaysForProject(proj),projectWorkloadDeliverableCount(proj));
         if(start&&due){
@@ -2691,9 +2670,12 @@ ${description}`))actionCallback();return;}
         proj.priority=autoPriority||!!document.getElementById('projectDataPriority')?.checked;
         const priorityEl=document.getElementById('projectDataPriority');if(priorityEl&&autoPriority)priorityEl.checked=true;
         proj.updated_at=new Date().toISOString();
+        const client=getProjectClientRecord(proj);if(client){client.name=proj.client_name;client.email=proj.client_email;client.phone=proj.client_phone;client.address=proj.client_address;persistClientsState();}
         persistProjectsState();
         const titleEl=document.getElementById('projDetailTitle'),clientEl=document.getElementById('projDetailClient');if(titleEl)titleEl.innerText=proj.title||'Untitled Project';if(clientEl)clientEl.innerText=[formatProjectId(proj),proj.client_email||'No email'].join('  |  ');
-        renderProjectOrderItems(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);
+        if(previousStart!==proj.start_date||previousDeadline!==proj.deadline_date){
+          renderProjectOrderItems(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);
+        }
       }
       function saveProjectData(){autosaveProjectData();}
 
@@ -2718,7 +2700,7 @@ ${description}`))actionCallback();return;}
         const itemDiscountTotal=items.reduce((sum,item)=>{if(String(item.type||'').toUpperCase()==='PACKAGE')return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0);
         const subtotal=Math.max(0,grossSubtotal-itemDiscountTotal);
         proj.subtotal_amount = subtotal;proj.item_discount_amount=itemDiscountTotal;
-        proj.system_maintenance_charge=items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0;
+        proj.system_maintenance_charge=items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?1:0;
         const discount = Math.max(0, Number(proj.discount_amount || 0));
         const stdDays=standardProductionDaysForProject(proj);
         if(proj.start_date&&(!proj.deadline_date||proj.deadline_auto===true)){proj.deadline_date=addDaysToDateString(proj.start_date,stdDays);proj.deadline_auto=true;}
@@ -2732,7 +2714,7 @@ ${description}`))actionCallback();return;}
         proj.workload_rush_rate=workload.rate;proj.workload_rush_fee=workload.fee;
         if(!Number.isFinite(Number(proj.workload_at_booking)))proj.workload_at_booking=workload.active;
         proj.total_amount = Math.max(0, subtotal - discount + rush + Number(workload.fee||0));
-        proj.pending_amount = Math.max(0, getProjectInvoiceTotal(proj) - getProjectPaid(proj));
+        proj.pending_amount = Math.max(0, proj.total_amount + getProjectMaintenanceFee(proj) - getProjectPaid(proj));
         if(!proj.project_type){const cats=[...new Set(items.map(i=>String(i.category||'').trim()).filter(Boolean))];proj.project_type=cats.length===1?cats[0]:(cats.length>1?'Mixed Services':'');}
         proj.updated_at = new Date().toISOString();
       }
@@ -2767,7 +2749,7 @@ ${description}`))actionCallback();return;}
           const line=Number(item.price||0)*Math.max(1,Number(item.qty||1)),lineDisc=String(item.type||'').toUpperCase()==='PACKAGE'?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-lineDisc,menuId=`orderItemMenu_${index}`;return `<div class="order-item-row"><div class="order-item-main"><strong>${escapeHtml(item.name||'Untitled Item')}</strong><span>${escapeHtml(visibleCategory)} · Qty ${Math.max(1,Number(item.qty||1))}${lineDisc?` · Discount ${formatCurrency(lineDisc)}`:''}</span></div><div class="order-item-price"><strong>${formatCurrency(net)}</strong><span>${formatCurrency(Number(item.price||0))} each</span></div><div class="order-item-actions"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Order item options" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openProjectOrderItemModal(${index})">Edit Order Item</button><button class="popover-action text-danger" onclick="app.requestDeleteProjectOrderItem(${index},event)">Remove Order Item</button></div></div></div></div>`;
         }).join('') : `<div class="text-muted py-4">No order items recorded. Add items when you are ready.</div>`;
         const grossSubtotal=items.reduce((sum,item)=>sum+Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1)),0),itemDiscountTotal=items.reduce((sum,item)=>{if(String(item.type||'').toUpperCase()==='PACKAGE')return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0),subtotal=Math.max(0,grossSubtotal-itemDiscountTotal),discount=Math.max(0,Number(proj.discount_amount||0)),rush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),workloadRate=Math.max(0,Number(proj.workload_rush_rate||0)),total=Number(proj.total_amount||Math.max(0,subtotal-discount+rush+workloadFee));
-        const combinedRush=rush+workloadFee,maintenance=Math.max(0,getProjectMaintenanceFee(proj)),revisionFee=getProjectRevisionFee(proj),displayTotal=total+maintenance+revisionFee;box.innerHTML=`${rows}<div class="project-items-total"><div><span>Items subtotal</span><strong>${formatCurrency(grossSubtotal)}</strong></div>${itemDiscountTotal?`<div><span>Item discounts</span><strong>− ${formatCurrency(itemDiscountTotal)}</strong></div>`:''}${discount?`<div><span>Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:''}${(combinedRush||revisionFee||maintenance)?`<div class="project-fee-heading"><span>Additional Fees</span><button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${combinedRush?`<div class="rush-line compact-fee-row"><span>Rush Fee</span><strong>+ ${formatCurrency(combinedRush)}</strong></div>`:''}${revisionFee?`<div class="rush-line compact-fee-row"><span>Revision Fee</span><strong>+ ${formatCurrency(revisionFee)}</strong></div>`:''}${maintenance?`<div class="rush-line compact-fee-row"><span>System Maintenance Fee</span><strong>+ ${formatCurrency(maintenance)}</strong></div>`:''}<div class="project-items-grand-total"><span>Project Total</span><strong>${formatCurrency(displayTotal)}</strong></div></div>`;
+        const combinedRush=rush+workloadFee,maintenance=Math.max(0,getProjectMaintenanceFee(proj)),displayTotal=total+maintenance;box.innerHTML=`${rows}<div class="project-items-total"><div><span>Items subtotal</span><strong>${formatCurrency(grossSubtotal)}</strong></div>${itemDiscountTotal?`<div><span>Item discounts</span><strong>− ${formatCurrency(itemDiscountTotal)}</strong></div>`:''}${discount?`<div><span>Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:''}${combinedRush?`<div class="rush-line compact-fee-row"><span>Rush Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('rush')">i</button></span><strong>+ ${formatCurrency(combinedRush)}</strong></div>`:''}${maintenance?`<div class="rush-line compact-fee-row"><span>System Maintenance Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('maintenance')">i</button></span><strong>+ ${formatCurrency(maintenance)}</strong></div>`:''}<div class="project-items-grand-total"><span>Project Total</span><strong>${formatCurrency(displayTotal)}</strong></div></div>`;
       }
       function getProjectCatalogChoices(query=''){
         const q=String(query||'').trim().toLowerCase();
@@ -2780,18 +2762,16 @@ ${description}`))actionCallback();return;}
       }
       function openProjectOrderBatchModal(){
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
-        state.projectOrderBatchSelection={};state.projectOrderBatchChoiceCache=[];state.projectOrderBatchCategory='ALL';
+        state.projectOrderBatchSelection={};state.projectOrderBatchChoiceCache=[];
         const search=document.getElementById('projectOrderBatchSearch'),name=document.getElementById('projectBatchCustomName'),qty=document.getElementById('projectBatchCustomQty'),price=document.getElementById('projectBatchCustomPrice');
         if(search)search.value='';if(name)name.value='';if(qty)qty.value='1';if(price)price.value='';
         renderProjectOrderBatchChoices('');renderProjectOrderBatchSelected();openModal('projectOrderBatchModal');setTimeout(()=>search?.focus(),70);
       }
       function projectBatchKey(item){return String(item.code||item.product_code||item.name||'').toLowerCase()+'|'+String(item.type||'SOLO').toUpperCase();}
       function renderProjectOrderBatchChoices(query=''){
-        const box=document.getElementById('projectOrderBatchChoices');if(!box)return;ensureCatalogCategories();const category=state.projectOrderBatchCategory||'ALL',filters=document.getElementById('projectOrderBatchServiceFilters');if(filters){filters.innerHTML=['ALL',...state.catalogCategories].map(c=>{const label=c==='ALL'?'All':displayCategory(c),enc=encodeURIComponent(c);return `<button type="button" class="filter-pill ${category===c?'active':''}" onclick="app.setProjectOrderBatchCategory(decodeURIComponent('${enc}'))">${escapeHtml(label)}</button>`}).join('');}
-        const items=getProjectCatalogChoices(query).filter(x=>x.name&&(category==='ALL'||String(x.category||'')===category));state.projectOrderBatchChoiceCache=items;const selected=state.projectOrderBatchSelection||{};
-        box.innerHTML=items.map((x,i)=>{const key=projectBatchKey(x),checked=!!selected[key];return `<label class="project-batch-choice"><input type="checkbox" ${checked?'checked':''} onchange="app.toggleProjectOrderBatchChoice(${i},this.checked)"><span><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(String(x.category||'').trim()||(x.type==='PACKAGE'?'Package':'Item'))} · ${formatCurrency(x.price)}</small></span><em>${x.type==='PACKAGE'?'Package':'Item'}</em></label>`}).join('')||`<div class="typeahead-empty">No matching Shop items.</div>`;
+        const box=document.getElementById('projectOrderBatchChoices');if(!box)return;const items=getProjectCatalogChoices(query).filter(x=>x.name);state.projectOrderBatchChoiceCache=items;const selected=state.projectOrderBatchSelection||{};
+        box.innerHTML=items.map((x,i)=>{const key=projectBatchKey(x),checked=!!selected[key];return `<label class="project-batch-choice"><input type="checkbox" ${checked?'checked':''} onchange="app.toggleProjectOrderBatchChoice(${i},this.checked)"><span><strong>${escapeHtml(x.name)}</strong><small>${escapeHtml(String(x.category||'').trim()||(x.type==='PACKAGE'?'Package':'Service'))} · ${formatCurrency(x.price)}</small></span><em>${x.type==='PACKAGE'?'Package':'Service'}</em></label>`}).join('')||`<div class="typeahead-empty">No matching catalog items.</div>`;
       }
-      function setProjectOrderBatchCategory(category){state.projectOrderBatchCategory=category||'ALL';renderProjectOrderBatchChoices(document.getElementById('projectOrderBatchSearch')?.value||'');}
       function toggleProjectOrderBatchChoice(index,checked){const item=(state.projectOrderBatchChoiceCache||[])[Number(index)];if(!item)return;if(!state.projectOrderBatchSelection)state.projectOrderBatchSelection={};const key=projectBatchKey(item);if(checked)state.projectOrderBatchSelection[key]={...item,qty:1,item_discount:0};else delete state.projectOrderBatchSelection[key];renderProjectOrderBatchSelected();}
       function addCustomProjectBatchItem(){const name=document.getElementById('projectBatchCustomName')?.value.trim()||'',qty=Math.max(1,Math.round(Number(document.getElementById('projectBatchCustomQty')?.value||1))),price=Math.max(0,Number(document.getElementById('projectBatchCustomPrice')?.value||0));if(!name){showToast('Enter a custom item name.');return}if(!state.projectOrderBatchSelection)state.projectOrderBatchSelection={};const item={kind:'CUSTOM',code:'',name,price,category:'',type:'SOLO',qty,item_discount:0};state.projectOrderBatchSelection['custom|'+Date.now()+'|'+name.toLowerCase()]=item;document.getElementById('projectBatchCustomName').value='';document.getElementById('projectBatchCustomQty').value='1';document.getElementById('projectBatchCustomPrice').value='';renderProjectOrderBatchSelected();}
       function renderProjectOrderBatchSelected(){const box=document.getElementById('projectOrderBatchSelected'),count=document.getElementById('projectOrderBatchCount'),totalEl=document.getElementById('projectOrderBatchTotal'),btn=document.getElementById('projectOrderBatchAddBtn'),entries=Object.entries(state.projectOrderBatchSelection||{}),total=entries.reduce((sum,[,x])=>{const line=Number(x.price||0)*Math.max(1,Number(x.qty||1)),disc=String(x.type||'').toUpperCase()==='PACKAGE'?0:Math.min(line,Math.max(0,Number(x.item_discount||0)));return sum+line-disc;},0);state.projectOrderBatchSelectedKeys=entries.map(([key])=>key);if(count)count.textContent=`${entries.length} item${entries.length===1?'':'s'}`;if(totalEl)totalEl.textContent=formatCurrency(total);if(btn){btn.disabled=!entries.length;btn.textContent=entries.length?`Add ${entries.length} Item${entries.length===1?'':'s'}`:'Add Selected Items';}if(box)box.innerHTML=entries.length?entries.map(([key,x],index)=>`<div class="project-batch-selected-row"><div><strong>${escapeHtml(x.name)}</strong><span>${formatCurrency(x.price||0)} each</span></div><div class="batch-qty-control"><label>Qty</label><input class="form-control" type="number" min="1" value="${Math.max(1,Number(x.qty||1))}" onchange="app.updateProjectOrderBatchQty(${index},this.value)"></div>${String(x.type||'').toUpperCase()!=='PACKAGE'?`<div class="batch-discount-control"><label>Discount ₱</label><input class="form-control" type="number" min="0" step="0.01" value="${Number(x.item_discount||0)}" onchange="app.updateProjectOrderBatchDiscount(${index},this.value)"></div>`:''}<button type="button" class="icon-more-button" aria-label="Remove selected item" onclick="app.removeProjectOrderBatchChoice(${index})">×</button></div>`).join(''):'';}
@@ -2880,7 +2860,7 @@ ${description}`))actionCallback();return;}
         const overdue=active.filter(p=>{const d=parseDateSafe(p.deadline_date);return d&&d<now}).sort((a,b)=>parseDateSafe(a.deadline_date)-parseDateSafe(b.deadline_date));
         const dueSoon=active.filter(p=>{const d=parseDateSafe(p.deadline_date);return d&&d>=now&&d<=week}).sort((a,b)=>parseDateSafe(a.deadline_date)-parseDateSafe(b.deadline_date));
         const unfinished=active.flatMap(p=>(p.deliverables||[]).filter(d=>!d.completed).map(d=>({project:p.title,name:d.item_name||d.name||'Deliverable',deadline:d.deadline||p.deadline_date||''})));
-        const revenue=all.reduce((s,p)=>s+getProjectInvoiceTotal(p),0), received=getAllPayments().reduce((s,p)=>s+Number(p.amount_paid||p.amount||0),0), receivables=Math.max(0,revenue-received);
+        const revenue=all.reduce((s,p)=>s+Number(p.total_amount||0)+Math.max(0,getProjectMaintenanceFee(p)),0), received=getAllPayments().reduce((s,p)=>s+Number(p.amount_paid||p.amount||0),0), receivables=Math.max(0,revenue-received);
         const monthKey=new Date().toISOString().slice(0,7), monthRevenue=getAllPayments().filter(x=>String(x.payment_date||x.created_at||'').slice(0,7)===monthKey).reduce((s,x)=>s+Number(x.amount_paid||x.amount||0),0);
         if(/help|what can you|can you do/.test(q)) return 'I can answer from this workspace about active or completed projects, deadlines, overdue work, deliverables, clients, payments, receivables, and revenue. I do not use outside information.';
         if(/overdue|late|past due/.test(q)) return overdue.length?`${overdue.length} overdue project${overdue.length===1?'':'s'}:\n${overdue.slice(0,8).map((p,i)=>`${i+1}. ${assistantProjectSummary(p)}`).join('\n')}`:'There are no overdue active projects in the workspace.';
@@ -2945,7 +2925,7 @@ ${description}`))actionCallback();return;}
           if(record){Object.assign(record,{amount_paid:draft.amount,amount:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no,notes:draft.notes,updated_at:new Date().toISOString()});if(draft.receipt_data)Object.assign(record,{receipt_data:draft.receipt_data,receipt_name:draft.receipt_name,receipt_type:draft.receipt_type});}
         }
         if(!record){record={id:'pay_'+Date.now(),project_id:proj.id,amount_paid:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no,notes:draft.notes,receipt_data:draft.receipt_data||'',receipt_name:draft.receipt_name||'',receipt_type:draft.receipt_type||'',created_at:new Date().toISOString()};if(!proj.payments)proj.payments=[];proj.payments.push(record);}
-        proj.pending_amount=Math.max(0,getProjectInvoiceTotal(proj)-getProjectPaid(proj));proj.payment_status=getProjectPaymentStatus(proj);persistProjectsState();
+        proj.pending_amount=Math.max(0,Number(proj.total_amount||0)+Math.max(0,getProjectMaintenanceFee(proj))-getProjectPaid(proj));proj.payment_status=getProjectPaymentStatus(proj);persistProjectsState();
         if(supabaseClient&&state.isConnected){try{if(draft.editingId)await supabaseClient.from('payments').update({amount_paid:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no}).eq('id',draft.editingId);else await supabaseClient.from('payments').insert([{project_id:proj.id,amount_paid:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no}]);}catch(e){console.warn('Payment sync unavailable:',e.message);}}
         renderPaymentTracker(proj);renderInvoicePaper(proj);renderPaymentsView();renderOverviewDashboard();showActionStatus('Payment Successful',draft.editingId?'Payment changes were saved.':'Payment was recorded successfully.',true);state.editingPaymentId=null;setTimeout(()=>closeModal('actionStatusModal'),750);
       }
@@ -2962,7 +2942,7 @@ ${description}`))actionCallback();return;}
       }
 
       function renderPaymentTracker(proj) {
-        const overviewEl=document.getElementById('paymentCalculationsOverview'),listEl=document.getElementById('paymentHistoryList'),maintenance=Math.max(0,getProjectMaintenanceFee(proj)),revisionFee=getProjectRevisionFee(proj),total=getProjectInvoiceTotal(proj),payments=(proj.payments||[]).slice(),totalPaid=payments.reduce((sum,p)=>sum+Number(p.amount_paid||p.amount||0),0),remaining=Math.max(0,total-totalPaid),status=getInvoiceStatus({...proj,total_amount:total},remaining),statusClass=status==='PAID'?'paid':status==='DOWNPAYMENT'?'partial':'unpaid';
+        const overviewEl=document.getElementById('paymentCalculationsOverview'),listEl=document.getElementById('paymentHistoryList'),maintenance=Math.max(0,getProjectMaintenanceFee(proj)),total=Number(proj.total_amount||0)+maintenance,payments=(proj.payments||[]).slice(),totalPaid=payments.reduce((sum,p)=>sum+Number(p.amount_paid||p.amount||0),0),remaining=Math.max(0,total-totalPaid),status=getInvoiceStatus({...proj,total_amount:total},remaining),statusClass=status==='PAID'?'paid':status==='DOWNPAYMENT'?'partial':'unpaid';
         const metricIcon=(type)=>({status:'<path d="M5 12l4 4L19 6"/>',total:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/>',paid:'<path d="M12 3v18M7 8l5-5 5 5"/>',balance:'<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>'}[type]);
         if(overviewEl)overviewEl.innerHTML=`<div class="payment-overview-grid payment-overview-balanced"><div class="payment-metric-card payment-status-card ${statusClass}"><span class="payment-metric-icon"><svg class="icon-svg" viewBox="0 0 24 24">${metricIcon('status')}</svg></span><div><span>Payment Status</span><strong>${escapeHtml(status)}</strong></div></div><div class="payment-metric-card"><span class="payment-metric-icon"><svg class="icon-svg" viewBox="0 0 24 24">${metricIcon('total')}</svg></span><div><span>Invoice Total</span><strong class="number-animate">${formatCurrency(total)}</strong></div></div><div class="payment-metric-card paid"><span class="payment-metric-icon"><svg class="icon-svg" viewBox="0 0 24 24">${metricIcon('paid')}</svg></span><div><span>Total Paid</span><strong class="number-animate">${formatCurrency(totalPaid)}</strong></div></div><div class="payment-metric-card ${remaining>0?'due':'paid'}"><span class="payment-metric-icon"><svg class="icon-svg" viewBox="0 0 24 24">${metricIcon('balance')}</svg></span><div><span>Balance Due</span><strong class="number-animate">${formatCurrency(remaining)}</strong></div></div></div>`;
         if(listEl){
@@ -2976,26 +2956,27 @@ ${description}`))actionCallback();return;}
       /* ==========================================================================
          INVOICE GENERATOR & EMAIL REMINDERS
          ========================================================================== */
-      function openFeeInfo(type='all'){
+      function openFeeInfo(type){
         const title=document.getElementById('feeInfoTitle'),body=document.getElementById('feeInfoBody');if(!title||!body)return;
-        const content={
-          rush:{name:'Rush Fee',copy:'For an earlier project turnaround. ₱500 is added for every 4 days earlier than the standard timeline, plus the applicable current-workload surcharge from JP-052 onward.'},
-          revision:{name:'Revision Fee',copy:'₱500 for every recorded revision.'},
-          maintenance:{name:'System Maintenance Fee',copy:'₱19 once for projects that contain a Package. It supports the JUAN Project management system and service operations.'}
-        };
-        if(type!=='all'&&content[type]){title.textContent=content[type].name;body.innerHTML=`<div class="fee-info-copy compact-fee-info"><p>${escapeHtml(content[type].copy)}</p></div>`;}else{title.textContent='Additional Fees';body.innerHTML=`<div class="fee-info-list">${Object.values(content).map(x=>`<div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.copy)}</span></div>`).join('')}</div>`;}
+        if(type==='maintenance'){
+          title.textContent='System Maintenance Fee';
+          body.innerHTML=`<div class="fee-info-copy"><p>Supports the JUAN Project management system and digital service infrastructure.</p><div class="fee-info-rule"><strong>Applied when</strong><span>An order contains at least one Package. It is charged once per project.</span></div></div>`;
+        }else{
+          title.textContent='Rush Fee';
+          body.innerHTML=`<div class="fee-info-copy"><p>An accelerated-production charge automatically selected by the Workspace for qualifying projects.</p><div class="fee-factor-list"><div><span>Project Timeline</span><small>Requested production time</small></div><div><span>Project Workload</span><small>Number and complexity of deliverables</small></div><div><span>Current Workload</span><small>Active production workload at booking</small></div></div><div class="fee-info-rule"><strong>Starting from JP-052</strong><span>The final Rush Fee includes the applicable current-workload adjustment. Existing projects keep their saved fee.</span></div></div>`;
+        }
         openModal('feeInfoModal');
       }
       function renderInvoicePaper(proj) {
         const paper=document.getElementById('invoicePaperPrintable');if(!paper||!proj)return;
         const invoiceNo=ensureInvoiceNumber(proj),storedSubtotal=Math.max(0,Number(proj.subtotal_amount||0)),discount=Math.max(0,Number(proj.discount_amount||0));
-        const baseRush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),rush=baseRush+workloadFee,revisionFee=getProjectRevisionFee(proj),maintenance=Math.max(0,getProjectMaintenanceFee(proj));
-        const projectTotal=Math.max(0,Number(proj.total_amount||0)),inferredSubtotal=Math.max(0,projectTotal-baseRush-workloadFee+discount),subtotal=storedSubtotal>0?storedSubtotal:inferredSubtotal,additionalFees=rush+revisionFee+maintenance,invoiceTotal=Math.max(0,subtotal-discount+additionalFees);
+        const baseRush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),rush=baseRush+workloadFee,maintenance=Math.max(0,getProjectMaintenanceFee(proj));
+        const projectTotal=Math.max(0,Number(proj.total_amount||0)),inferredSubtotal=Math.max(0,projectTotal-baseRush-workloadFee+discount),subtotal=storedSubtotal>0?storedSubtotal:inferredSubtotal,additionalFees=rush+maintenance,invoiceTotal=Math.max(0,subtotal-discount+additionalFees);
         const paid=(proj.payments||[]).reduce((sum,p)=>sum+Number(p.amount_paid||p.amount||0),0),balance=Math.max(0,invoiceTotal-paid),status=getInvoiceStatus({...proj,total_amount:invoiceTotal},balance);
         const issue=getLocalDateString(new Date()),due=proj.invoice_due_date||proj.payment_due_date||proj.deadline_date||'',statusClass=status==='UNPAID'?'unpaid':status==='DOWNPAYMENT'?'partial':'paid',issueLabel=new Date(issue+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}),dueLabel=due?new Date(due+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'—';
         const items=Array.isArray(proj.project_items)&&proj.project_items.length?proj.project_items:(Array.isArray(proj.items)?proj.items:[]);
         const itemRows=items.map(item=>{const qty=Math.max(1,Number(item.qty||1)),unit=Math.max(0,Number(item.price||0)),line=qty*unit,itemDisc=String(item.type||'').toUpperCase()==='PACKAGE'?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-itemDisc;return `<tr><td><strong>${escapeHtml(item.name||'Item')}</strong>${itemDisc?`<small>Item discount −${formatCurrency(itemDisc)}</small>`:''}</td><td>${qty}</td><td>${formatCurrency(net)}</td></tr>`}).join('')||`<tr><td>Project Services</td><td>1</td><td>${formatCurrency(subtotal)}</td></tr>`;
-        paper.innerHTML=`<div class="invoice-header invoice-header-v68"><div class="invoice-brand-block"><h2>${escapeHtml(state.settings.businessName||'JUAN PROJECT')}</h2><div>${escapeHtml(state.ownerEmail||'')}</div><div>${escapeHtml(state.ownerPhone||'')}</div></div><div class="invoice-header-stack"><div class="invoice-label">Invoice</div><div class="invoice-number">${invoiceNo}</div><span class="invoice-status ${statusClass}">${status}</span><div class="invoice-issued-date">Issued ${issueLabel}</div></div></div><div class="invoice-meta-grid"><div><div class="invoice-label">Bill To</div><div class="font-bold">${escapeHtml(proj.client_name||'—')}</div><div class="text-sm text-secondary">${escapeHtml(proj.client_email||'')}</div></div><div><div class="invoice-label">Project</div><div class="font-bold">${escapeHtml(proj.title||'—')}</div><div class="text-sm text-secondary">Due ${dueLabel}</div></div></div><div class="invoice-items-wrap"><table class="invoice-items-table"><thead><tr><th>Order Item</th><th>Qty</th><th>Price</th></tr></thead><tbody>${itemRows}</tbody></table></div><div class="invoice-simple-summary"><div class="invoice-simple-row"><span>Subtotal</span><strong>${formatCurrency(subtotal)}</strong></div><div class="invoice-simple-row"><span>Discount</span><strong class="${discount?'text-danger':''}">${discount?`− ${formatCurrency(discount)}`:formatCurrency(0)}</strong></div>${additionalFees?`<div class="invoice-simple-section additional-fees-heading">Additional Fees <button type="button" class="mini-info-button screen-only" onclick="app.openFeeInfo('all')">i</button></div>${rush?`<div class="invoice-simple-row invoice-fee-row"><span>Rush Fee</span><strong>${formatCurrency(rush)}</strong></div>`:''}${revisionFee?`<div class="invoice-simple-row invoice-fee-row"><span>Revision Fee</span><strong>${formatCurrency(revisionFee)}</strong></div>`:''}${maintenance?`<div class="invoice-simple-row invoice-fee-row"><span>System Maintenance Fee</span><strong>${formatCurrency(maintenance)}</strong></div>`:''}<div class="invoice-simple-row invoice-additional-total"><span>Additional Fees</span><strong>${formatCurrency(additionalFees)}</strong></div>`:''}<div class="invoice-simple-row invoice-grand-total"><span>TOTAL</span><strong>${formatCurrency(invoiceTotal)}</strong></div><div class="invoice-simple-row"><span>Amount Paid</span><strong>${formatCurrency(paid)}</strong></div><div class="invoice-simple-row invoice-balance-row"><span>Balance</span><strong style="color:${balance?'var(--status-red)':'var(--status-green)'}">${formatCurrency(balance)}</strong></div></div><div class="text-sm text-tertiary invoice-thankyou">Thank you for choosing ${escapeHtml(state.settings.businessName||'JUAN PROJECT')}.</div>`;
+        paper.innerHTML=`<div class="invoice-header invoice-header-v68"><div class="invoice-brand-block"><h2>${escapeHtml(state.settings.businessName||'JUAN PROJECT')}</h2><div>${escapeHtml(state.ownerEmail||'')}</div><div>${escapeHtml(state.ownerPhone||'')}</div></div><div class="invoice-header-stack"><div class="invoice-label">Invoice</div><div class="invoice-number">${invoiceNo}</div><span class="invoice-status ${statusClass}">${status}</span><div class="invoice-issued-date">Issued ${issueLabel}</div></div></div><div class="invoice-meta-grid"><div><div class="invoice-label">Bill To</div><div class="font-bold">${escapeHtml(proj.client_name||'—')}</div><div class="text-sm text-secondary">${escapeHtml(proj.client_email||'')}</div></div><div><div class="invoice-label">Project</div><div class="font-bold">${escapeHtml(proj.title||'—')}</div><div class="text-sm text-secondary">Due ${dueLabel}</div></div></div><div class="invoice-items-wrap"><table class="invoice-items-table"><thead><tr><th>Order Item</th><th>Qty</th><th>Price</th></tr></thead><tbody>${itemRows}</tbody></table></div><div class="invoice-simple-summary"><div class="invoice-simple-row"><span>Subtotal</span><strong>${formatCurrency(subtotal)}</strong></div><div class="invoice-simple-row"><span>Discount</span><strong class="${discount?'text-danger':''}">${discount?`− ${formatCurrency(discount)}`:formatCurrency(0)}</strong></div><div class="invoice-simple-section">Additional Fees</div>${rush?`<div class="invoice-simple-row invoice-fee-row"><span>Rush Fee <button type="button" class="mini-info-button screen-only" onclick="app.openFeeInfo('rush')">i</button></span><strong>${formatCurrency(rush)}</strong></div>`:''}${maintenance?`<div class="invoice-simple-row invoice-fee-row"><span>System Maintenance Fee <button type="button" class="mini-info-button screen-only" onclick="app.openFeeInfo('maintenance')">i</button></span><strong>${formatCurrency(maintenance)}</strong></div>`:''}<div class="invoice-simple-row invoice-additional-total"><span>Additional Fees</span><strong>${formatCurrency(additionalFees)}</strong></div><div class="invoice-simple-row invoice-grand-total"><span>TOTAL</span><strong>${formatCurrency(invoiceTotal)}</strong></div><div class="invoice-simple-row"><span>Amount Paid</span><strong>${formatCurrency(paid)}</strong></div><div class="invoice-simple-row invoice-balance-row"><span>Balance</span><strong style="color:${balance?'var(--status-red)':'var(--status-green)'}">${formatCurrency(balance)}</strong></div></div><div class="text-sm text-tertiary invoice-thankyou">Thank you for choosing ${escapeHtml(state.settings.businessName||'JUAN PROJECT')}.</div>`;
       }
 
       function sendDeadlineReminderEmail(projId = null) {
@@ -3026,7 +3007,7 @@ ${description}`))actionCallback();return;}
         }
 
         const totalPaid = (proj.payments || []).reduce((sum, p) => sum + Number(p.amount_paid), 0);
-        const remaining = Math.max(0, getProjectInvoiceTotal(proj) - totalPaid);
+        const remaining = Math.max(0, proj.total_amount - totalPaid);
 
         const subject = encodeURIComponent(`Invoice Balance Reminder: ${proj.title}`);
         const body = encodeURIComponent(`Hi ${proj.client_name},\n\nThis is a friendly reminder regarding the outstanding balance of ${formatCurrency(remaining)} for project "${proj.title}".\n\nThank you,\n${state.ownerName}`);
@@ -3047,7 +3028,7 @@ ${description}`))actionCallback();return;}
           id: 'tmpl_' + Date.now(),
           name: `${proj.title} (Template)`,
           deliverables: (proj.deliverables || []).map(d => d.item_name),
-          total_amount: getProjectInvoiceTotal(proj)
+          total_amount: proj.total_amount
         };
 
         state.templates.push(template);
@@ -3277,13 +3258,13 @@ ${description}`))actionCallback();return;}
           return `<div class="history-card">
             <div class="history-card-head">
               <div style="min-width:0;cursor:pointer" onclick="app.openProjectDetails('${proj.id}')"><div class="history-card-title">${escapeHtml(proj.title||'Untitled Project')}</div><div class="history-card-sub">${escapeHtml(proj.client_name||'No client')} • ${escapeHtml(formatProjectId(proj))}</div></div>
-              <div class="history-card-actions"><div class="text-right"><div class="font-bold">${formatCurrency(getProjectInvoiceTotal(proj))}</div><div class="text-sm text-muted">${escapeHtml(proj.deadline_date||String(proj.created_at||'').slice(0,10)||'No date')}</div></div><div class="popover-wrap" id="historyProjectMenu_${String(proj.id).replace(/[^a-zA-Z0-9_-]/g,'')}"><button class="icon-more-button vertical-more" title="Project options" onclick="event.stopPropagation();app.togglePopover('historyProjectMenu_${String(proj.id).replace(/[^a-zA-Z0-9_-]/g,'')}',event)">⋮</button><div class="popover-panel project-row-menu"><button class="popover-action" onclick="event.stopPropagation();app.openEditProjectModal('${proj.id}')">Edit Project</button><button class="popover-action text-danger" onclick="event.stopPropagation();app.deleteProjectById('${proj.id}')">Delete Project</button></div></div></div>
+              <div class="history-card-actions"><div class="text-right"><div class="font-bold">${formatCurrency(proj.total_amount||0)}</div><div class="text-sm text-muted">${escapeHtml(proj.deadline_date||String(proj.created_at||'').slice(0,10)||'No date')}</div></div><button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();app.openEditProjectModal('${proj.id}')">Edit</button></div>
             </div>
             <details class="history-details"><summary>View complete record</summary><div class="history-detail-grid">
               <div class="history-detail-item"><div class="history-detail-label">Record date</div><div class="history-detail-value">${escapeHtml(proj.record_date||proj.start_date||String(proj.created_at||'').slice(0,10)||'—')}</div></div>
               <div class="history-detail-item"><div class="history-detail-label">Client email</div><div class="history-detail-value">${escapeHtml(proj.client_email||'—')}</div></div>
               <div class="history-detail-item"><div class="history-detail-label">Project type</div><div class="history-detail-value">${escapeHtml(proj.project_type||getProjectType(proj)||'—')}</div></div>
-              <div class="history-detail-item"><div class="history-detail-label">Amount due</div><div class="history-detail-value">${formatCurrency(getProjectInvoiceTotal(proj))}</div></div>
+              <div class="history-detail-item"><div class="history-detail-label">Amount due</div><div class="history-detail-value">${formatCurrency(proj.total_amount||0)}</div></div>
               <div class="history-detail-item"><div class="history-detail-label">Amount received</div><div class="history-detail-value">${formatCurrency(paid)}</div></div>
               <div class="history-detail-item"><div class="history-detail-label">Payment status</div><div class="history-detail-value">${escapeHtml(paymentStatus)}</div></div>
               <div class="history-detail-item"><div class="history-detail-label">Pending amount</div><div class="history-detail-value">${formatCurrency(pending)}</div></div>
@@ -3296,16 +3277,15 @@ ${description}`))actionCallback();return;}
          CLIENTS DIRECTORY & EDIT CLIENT WORKFLOW
          ========================================================================== */
       function renderClients(){
-        ensureContinuousClientIds();persistClientsState();
         const grid=document.getElementById('clientsListGrid');if(!grid)return;const q=(document.getElementById('clientsSearch')?.value||'').trim().toLowerCase(),pref=state.listSorts?.clients||'id';let clients=state.clients.slice().filter(c=>`${clientDisplayId(c)} ${c.name||''} ${c.email||''} ${c.phone||''} ${c.address||''}`.toLowerCase().includes(q));
-        if(pref==='az')clients.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));else if(pref==='za')clients.sort((a,b)=>String(b.name||'').localeCompare(String(a.name||'')));else clients.sort((a,b)=>Number(a.client_number||0)-Number(b.client_number||0));
+        if(pref==='az')clients.sort((a,b)=>String(a.name||'').localeCompare(String(b.name||'')));else if(pref==='za')clients.sort((a,b)=>String(b.name||'').localeCompare(String(a.name||'')));else clients.sort((a,b)=>{const ap=clientFirstProject(a),bp=clientFirstProject(b),an=ap?projectNumber(ap):Number.MAX_SAFE_INTEGER,bn=bp?projectNumber(bp):Number.MAX_SAFE_INTEGER;return an-bn||String(a.name||'').localeCompare(String(b.name||''))});
         const sortEl=document.getElementById('clientsSort');if(sortEl)sortEl.value=pref;if(!clients.length){grid.innerHTML=`<div class="card text-center text-muted py-4">${q?'No matching clients.':'No clients registered yet.'}</div>`;return}
         const rows=clients.map((c,idx)=>{const count=state.projects.filter(p=>!p.deleted&&(p.client_id===c.id||p.client_name===c.name)).length,menuId=`clientMenu${idx}`;return `<tr class="clickable-row" onclick="app.openClientProfile('${c.id}')"><td><strong>${escapeHtml(clientDisplayId(c))}</strong></td><td><strong>${escapeHtml(c.name||'—')}</strong></td><td>${escapeHtml(c.email||'—')}</td><td>${escapeHtml(normalizePhilippinePhone(c.phone)||c.phone||'—')}</td><td class="client-address-cell">${escapeHtml(c.address||'—')}</td><td>${count}</td><td class="text-right" onclick="event.stopPropagation()"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Client options" aria-label="Options for ${escapeHtml(c.name||'client')}" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditClientModal('${c.id}')">Edit Client</button><button class="popover-action text-danger" onclick="app.removeClient('${c.id}')">Delete Client</button></div></div></td></tr>`}).join('');grid.innerHTML=`<div class="card table-card clients-directory-card"><div class="table-responsive"><table class="data-table unified-table clients-unified-table"><thead><tr><th>Client ID</th><th>Full Name</th><th>Email</th><th>Phone</th><th>Address</th><th>Projects</th><th class="actions-col"></th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
       }
 
       function removeClient(clientId){
         const client=state.clients.find(c=>c.id===clientId);if(!client)return;const projectCount=state.projects.filter(p=>!p.deleted&&(p.client_id===clientId||p.client_name===client.name)).length;
-        requestDestructivePin('Remove Client',`Remove "${client.name}" from the directory? ${projectCount?`${projectCount} saved project record${projectCount===1?'':'s'} will keep their client snapshot.`:'No project records will be removed.'}`,async()=>{state.clients=state.clients.filter(c=>c.id!==clientId);if(state.cart.selectedClientId===clientId){state.cart.selectedClientId='';persistCartState();}ensureContinuousClientIds();persistClientsState();if(supabaseClient&&state.isConnected){try{await supabaseClient.from('clients').delete().eq('id',clientId)}catch(e){console.warn('Client removal database sync failed:',e)}}renderClients();showToast('Client removed from directory.');});
+        requestDestructivePin('Remove Client',`Remove "${client.name}" from the directory? ${projectCount?`${projectCount} saved project record${projectCount===1?'':'s'} will keep their client snapshot.`:'No project records will be removed.'}`,async()=>{state.clients=state.clients.filter(c=>c.id!==clientId);if(state.cart.selectedClientId===clientId){state.cart.selectedClientId='';persistCartState();}persistClientsState();if(supabaseClient&&state.isConnected){try{await supabaseClient.from('clients').delete().eq('id',clientId)}catch(e){console.warn('Client removal database sync failed:',e)}}renderClients();showToast('Client removed from directory.');});
       }
 
       function openEditClientModal(clientId) {
@@ -3317,7 +3297,7 @@ ${description}`))actionCallback();return;}
         document.getElementById("editClientEmail").value = client.email || "";
         document.getElementById("editClientPhone").value = client.phone || "";
         document.getElementById("editClientAddress").value = client.address || "";
-        document.getElementById("editClientNotes").value = client.notes || ""; enforceWordLimit(document.getElementById("editClientNotes"),80,"editClientNotesCount");
+        document.getElementById("editClientNotes").value = client.notes || "";
 
         document.getElementById("editClientNameError").innerText = "";
         document.getElementById("editClientEmailError").innerText = "";
@@ -3449,7 +3429,7 @@ ${description}`))actionCallback();return;}
       }
       function renderPricelist(){
         ensureCatalogCategories();const serviceList=document.getElementById('catalogCategoryList'),itemsBody=document.getElementById('catalogServicesBody'),packagesBody=document.getElementById('catalogPackagesBody'),filters=document.getElementById('catalogManagerFilters');if(!serviceList||!itemsBody||!packagesBody||!filters)return;
-        const q=(document.getElementById('catalogManagerSearch')?.value||'').trim().toLowerCase(),pref=state.listSorts?.catalog||'default',selected=state.catalogManagerCategory||'ALL';if(selected==='ALL')state.catalogManagerFilter='All Items';else if(!['Items','Packages'].includes(state.catalogManagerFilter))state.catalogManagerFilter='Items';const filter=state.catalogManagerFilter;filters.innerHTML=selected==='ALL'?'':['Items','Packages'].map(n=>`<button class="filter-pill ${filter===n?'active':''}" onclick="app.setCatalogManagerFilter('${n}')">${n}</button>`).join('');filters.style.display=selected==='ALL'?'none':'flex';const sortEl=document.getElementById('catalogSort');if(sortEl)sortEl.value=pref;
+        const q=(document.getElementById('catalogManagerSearch')?.value||'').trim().toLowerCase(),filter=state.catalogManagerFilter||'All Items',pref=state.listSorts?.catalog||'default',selected=state.catalogManagerCategory||'ALL';filters.innerHTML=['All Items','Items','Packages'].map(n=>`<button class="filter-pill ${filter===n?'active':''}" onclick="app.setCatalogManagerFilter('${n}')">${n}</button>`).join('');const sortEl=document.getElementById('catalogSort');if(sortEl)sortEl.value=pref;
         const categories=['ALL',...state.catalogCategories];if(pref==='az')categories.splice(1,categories.length-1,...categories.slice(1).sort((a,b)=>String(a).localeCompare(String(b))));if(pref==='za')categories.splice(1,categories.length-1,...categories.slice(1).sort((a,b)=>String(b).localeCompare(String(a))));
         serviceList.innerHTML=categories.map((service,index)=>{const label=service==='ALL'?'All':displayCategory(service),itemCount=service==='ALL'?state.soloServices.length:state.soloServices.filter(s=>String(s.category||'')===service).length,packageCount=service==='ALL'?state.packagesList.length:state.packagesList.filter(p=>String(p.category||'')===service).length,enc=encodeURIComponent(service),draggable=service!=='ALL'&&pref==='default';return `<button class="catalog-category-item ${selected===service?'active':''}" ${draggable?'draggable="true"':''} data-service-index="${index-1}" ondragstart="app.startCatalogServiceDrag(event,${index-1})" ondragover="app.allowCatalogServiceDrop(event)" ondrop="app.dropCatalogService(event,${index-1})" onclick="app.selectCatalogCategory(decodeURIComponent('${enc}'))"><span class="service-drag-handle" aria-hidden="true">${service==='ALL'?'':'⋮⋮'}</span><span class="service-nav-copy"><strong>${escapeHtml(label)}</strong><small>${itemCount} item${itemCount===1?'':'s'}${packageCount?` · ${packageCount} package${packageCount===1?'':'s'}`:''}</small></span>${service!=='ALL'?`<span class="catalog-category-more vertical-more" onclick="event.stopPropagation();app.openCatalogCategoryMenu(decodeURIComponent('${enc}'),this,event)">⋮</span>`:''}</button>`}).join('');
         let items=state.soloServices.filter(item=>(selected==='ALL'||String(item.category||'')===selected)&&(`${item.name||''} ${item.category||''} ${item.description||''}`).toLowerCase().includes(q)),packages=state.packagesList.filter(pkg=>(selected==='ALL'||String(pkg.category||'')===selected)&&`${pkg.name||''} ${pkg.category||''} ${pkg.description||''} ${(pkg.includedServiceNames||[]).join(' ')}`.toLowerCase().includes(q));const cmp=pref==='za'?(a,b)=>String(b.name||'').localeCompare(String(a.name||'')):(a,b)=>String(a.name||'').localeCompare(String(b.name||''));if(pref!=='default'){items.sort(cmp);packages.sort(cmp)}
@@ -3457,11 +3437,11 @@ ${description}`))actionCallback();return;}
         if(selected==='ALL'){
           packageCard.style.display='none';itemCard.style.display=filter==='Packages'?'none':'';if(head)head.innerHTML='<tr><th>Item / Package</th><th>Description / Inclusions</th><th>Price</th><th class="actions-col"></th></tr>';
           const itemRows=items.map((item,i)=>{const menu=`shopItem_${i}`;return `<tr><td><strong>${escapeHtml(item.name)}</strong><small class="row-subtype">${escapeHtml(displayCategory(item.category||''))} · Item</small></td><td class="catalog-desc-cell">${escapeHtml(item.description||'')}</td><td><strong>${formatCurrency(item.price||0)}</strong></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditServiceModal('${item.product_code}')">Edit Item</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogItem('${item.product_code}')">Delete Item</button></div></div></td></tr>`}).join('');
-          const packageRows=packages.map((pkg,i)=>{const inc=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames:[],menu=`shopPkg_${i}`;return `<tr class="package-row"><td><strong>${escapeHtml(normalizeBroadcastPackageName(pkg.name))}</strong><small class="row-subtype">${escapeHtml(packageDisplayDescription(pkg)||displayCategory(pkg.category||''))}</small></td><td><details class="catalog-inclusions-accordion"><summary>${inc.length} item${inc.length===1?'':'s'}</summary><div>${inc.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div></details></td><td><strong>${formatCurrency(pkg.sellingPrice||0)}</strong><small class="row-price-note">Original ${formatCurrency(pkg.originalPrice||0)}</small></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditPackageModal('${pkg.product_code}')">Edit Package</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogPackage('${pkg.product_code}')">Delete Package</button></div></div></td></tr>`}).join('');itemsBody.innerHTML=(filter==='Packages'?'':itemRows)+(filter==='Items'?'':packageRows)||`<tr><td colspan="4" class="text-center text-muted py-4">No matching Shop items.</td></tr>`;
+          const packageRows=packages.map((pkg,i)=>{const inc=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames:[],menu=`shopPkg_${i}`;return `<tr class="package-row"><td><strong>${escapeHtml(normalizeBroadcastPackageName(pkg.name))}</strong><small class="row-subtype">${escapeHtml(displayCategory(pkg.category||''))} · Package</small></td><td><details class="catalog-inclusions-accordion"><summary>${inc.length} item${inc.length===1?'':'s'}</summary><div>${inc.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div></details></td><td><strong>${formatCurrency(pkg.sellingPrice||0)}</strong><small class="row-price-note">Original ${formatCurrency(pkg.originalPrice||0)}</small></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditPackageModal('${pkg.product_code}')">Edit Package</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogPackage('${pkg.product_code}')">Delete Package</button></div></div></td></tr>`}).join('');itemsBody.innerHTML=(filter==='Packages'?'':itemRows)+(filter==='Items'?'':packageRows)||`<tr><td colspan="4" class="text-center text-muted py-4">No matching Shop items.</td></tr>`;
         }else{
           itemCard.style.display=filter==='Packages'?'none':'';packageCard.style.display=filter==='Items'?'none':'';if(head)head.innerHTML='<tr><th>Item / Service</th><th>Description</th><th>Price</th><th class="actions-col"></th></tr>';
           itemsBody.innerHTML=items.map((item,i)=>{const menu=`shopItem_${i}`;return `<tr><td><strong>${escapeHtml(item.name)}</strong></td><td class="catalog-desc-cell">${escapeHtml(item.description||'')}</td><td><strong>${formatCurrency(item.price||0)}</strong></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditServiceModal('${item.product_code}')">Edit Item</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogItem('${item.product_code}')">Delete Item</button></div></div></td></tr>`}).join('')||`<tr><td colspan="4" class="text-center text-muted py-4">No matching items in this Service.</td></tr>`;
-          packagesBody.innerHTML=packages.map((pkg,i)=>{const inc=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames:[],menu=`shopPkg_${i}`;return `<tr><td><strong>${escapeHtml(normalizeBroadcastPackageName(pkg.name))}</strong>${packageDisplayDescription(pkg)?`<small class="row-subtype">${escapeHtml(packageDisplayDescription(pkg))}</small>`:''}</td><td><details class="catalog-inclusions-accordion"><summary>${inc.length} item${inc.length===1?'':'s'}</summary><div>${inc.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div></details></td><td>${formatCurrency(pkg.originalPrice||0)}</td><td><strong>${formatCurrency(pkg.sellingPrice||0)}</strong></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditPackageModal('${pkg.product_code}')">Edit Package</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogPackage('${pkg.product_code}')">Delete Package</button></div></div></td></tr>`}).join('')||`<tr><td colspan="5" class="text-center text-muted py-4">No packages in this Service.</td></tr>`;
+          packagesBody.innerHTML=packages.map((pkg,i)=>{const inc=Array.isArray(pkg.includedServiceNames)?pkg.includedServiceNames:[],menu=`shopPkg_${i}`;return `<tr><td><strong>${escapeHtml(normalizeBroadcastPackageName(pkg.name))}</strong></td><td><details class="catalog-inclusions-accordion"><summary>${inc.length} item${inc.length===1?'':'s'}</summary><div>${inc.map(x=>`<span>${escapeHtml(x)}</span>`).join('')}</div></details></td><td>${formatCurrency(pkg.originalPrice||0)}</td><td><strong>${formatCurrency(pkg.sellingPrice||0)}</strong></td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openEditPackageModal('${pkg.product_code}')">Edit Package</button><button class="popover-action text-danger" onclick="app.quickDeleteCatalogPackage('${pkg.product_code}')">Delete Package</button></div></div></td></tr>`}).join('')||`<tr><td colspan="5" class="text-center text-muted py-4">No packages in this Service.</td></tr>`;
         }
       }
       function startCatalogServiceDrag(event,index){state.draggedCatalogServiceIndex=index;event.dataTransfer.effectAllowed='move';event.currentTarget.classList.add('is-dragging');}
@@ -3471,27 +3451,26 @@ ${description}`))actionCallback();return;}
       function quickDeleteCatalogItem(code){const svc=state.soloServices.find(s=>s.product_code===code);if(!svc)return;const bundles=state.packagesList.filter(p=>(p.includedServiceNames||[]).includes(svc.name));requestDestructivePin('Delete Item',`Delete "${svc.name}"?${bundles.length?` It will also be removed from ${bundles.length} Package${bundles.length===1?'':'s'}.`:''}`,()=>{state.soloServices=state.soloServices.filter(s=>s.product_code!==code);state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>n!==svc.name);const selected=new Set(p.includedServiceNames);p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));});persistCatalogState();renderPricelist();renderServiceCatalog();showToast('Item deleted.');});}
       function quickDeleteCatalogPackage(code){const pkg=state.packagesList.find(p=>p.product_code===code);if(!pkg)return;requestDestructivePin('Delete Package',`Delete "${pkg.name}"?`,()=>{state.packagesList=state.packagesList.filter(p=>p.product_code!==code);persistCatalogState();renderPricelist();renderServiceCatalog();showToast('Package deleted.');});}
 
-      function setCatalogManagerFilter(filter){if(state.catalogManagerCategory==='ALL'){state.catalogManagerFilter='All Items';}else state.catalogManagerFilter=filter==='Packages'?'Packages':'Items';renderPricelist()}
-      function selectCatalogCategory(category){state.catalogManagerCategory=category;state.catalogManagerFilter=category==='ALL'?'All Items':'Items';renderPricelist()}
-      function switchPricelistTab(tab){state.catalogManagerFilter=tab==='PACKAGE'?'Packages':'Items';renderPricelist()}
+      function setCatalogManagerFilter(filter){state.catalogManagerFilter=filter==='Services'?'Items':filter;renderPricelist()}
+      function selectCatalogCategory(category){state.catalogManagerCategory=category;renderPricelist()}
+      function switchPricelistTab(tab){state.catalogManagerFilter=tab==='PACKAGE'?'Packages':'Services';renderPricelist()}
       function filterPricelistTable(){renderPricelist()}
       function openCatalogCategoryModal(existing=''){ensureCatalogCategories();document.getElementById('catalogCategoryOldName').value=existing||'';document.getElementById('catalogCategoryName').value=existing||'';document.getElementById('catalogCategoryModalTitle').textContent=existing?'Edit Service':'Add Service';document.getElementById('catalogCategoryDeleteBtn')?.classList.toggle('hidden',!existing);openModal('catalogCategoryModal')}
       function saveCatalogCategory(){const old=document.getElementById('catalogCategoryOldName').value.trim(),name=document.getElementById('catalogCategoryName').value.trim();if(!name){showToast('Item name is required.');return}ensureCatalogCategories();const dup=state.catalogCategories.some(c=>c.toLowerCase()===name.toLowerCase()&&c!==old);if(dup){showToast('That Service already exists.');return}if(old){const idx=state.catalogCategories.indexOf(old);if(idx>-1)state.catalogCategories[idx]=name;state.soloServices.forEach(s=>{if(String(s.category||'')===old)s.category=name});state.packagesList.forEach(pkg=>{if(String(pkg.category||'')===old)pkg.category=name});if(state.catalogManagerCategory===old)state.catalogManagerCategory=name}else state.catalogCategories.push(name);persistCatalogState();closeModal('catalogCategoryModal');renderPricelist();renderServiceCatalog();showToast(old?'Service updated.':'Service added.')}
       function openCatalogServiceModal(code=''){
-        ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a Service first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select a Service first, then add an Item.');return}const item=code?state.soloServices.find(s=>s.product_code===code):null;document.getElementById('catalogServiceModalTitle').textContent=item?'Edit Item':'Add Item';document.getElementById('catalogServiceCode').value=item?.product_code||'';document.getElementById('catalogServiceName').value=item?.name||'';document.getElementById('catalogServiceDescription').value=item?.description||'';enforceWordLimit(document.getElementById('catalogServiceDescription'),60,'catalogServiceDescriptionCount');document.getElementById('catalogServicePrice').value=item?.price??'';document.getElementById('catalogServiceDeleteBtn')?.classList.toggle('hidden',!item);const sel=document.getElementById('catalogServiceCategory');sel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');sel.value=item?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);openModal('catalogServiceModal')
+        ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a Service first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select a Service first, then add an Item.');return}const item=code?state.soloServices.find(s=>s.product_code===code):null;document.getElementById('catalogServiceModalTitle').textContent=item?'Edit Item':'Add Item';document.getElementById('catalogServiceCode').value=item?.product_code||'';document.getElementById('catalogServiceName').value=item?.name||'';document.getElementById('catalogServiceDescription').value=item?.description||'';document.getElementById('catalogServicePrice').value=item?.price??'';document.getElementById('catalogServiceDeleteBtn')?.classList.toggle('hidden',!item);const sel=document.getElementById('catalogServiceCategory');sel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');sel.value=item?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);openModal('catalogServiceModal')
       }
       function saveCatalogService(){const code=document.getElementById('catalogServiceCode').value,name=document.getElementById('catalogServiceName').value.trim(),category=document.getElementById('catalogServiceCategory').value,desc=document.getElementById('catalogServiceDescription').value.trim(),price=Number(document.getElementById('catalogServicePrice').value);if(!name||!category||!Number.isFinite(price)||price<0){showToast('Enter a valid Item name, Service, and price.');return}if(code){const item=state.soloServices.find(s=>s.product_code===code);if(item)Object.assign(item,{name:name.toUpperCase(),category,description:desc,price,active:true,type:'SOLO'})}else{const nums=state.soloServices.map(s=>Number(String(s.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.soloServices.push({product_code:`SRV-${String(next).padStart(3,'0')}`,name:name.toUpperCase(),category,description:desc,price,active:true,type:'SOLO'})}persistCatalogState();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast(code?'Item updated.':'Item added.')}
-      function packageDisplayDescription(pkg){const d=String(pkg?.description||'').trim();return /^includes\s*:/i.test(d)?'':d;}
       function renderPackageServiceChoices(query=''){
         const box=document.getElementById('catalogPackageServiceChoices');if(!box)return;const q=String(query||'').toLowerCase(),category=document.getElementById('catalogPackageCategory')?.value||'',selected=new Set(state.packageBuilderSelectedNames||[]),items=state.soloServices.filter(s=>(!category||String(s.category||'')===category)&&(`${s.name||''} ${s.category||''}`).toLowerCase().includes(q));box.innerHTML=items.map(s=>`<label class="package-service-choice"><input type="checkbox" value="${escapeHtml(s.name)}" data-price="${Number(s.price||0)}" ${selected.has(s.name)?'checked':''} onchange="app.togglePackageBuilderService(this.value,this.checked)"><span><strong>${escapeHtml(s.name)}</strong><small>${escapeHtml(displayCategory(s.category||''))} · Item · ${formatCurrency(s.price||0)}</small></span></label>`).join('')||`<div class="typeahead-empty">No matching Items in this Service</div>`;updatePackagePriceSummary()
       }
       function togglePackageBuilderService(name,checked){const set=new Set(state.packageBuilderSelectedNames||[]);if(checked)set.add(name);else set.delete(name);state.packageBuilderSelectedNames=[...set];updatePackagePriceSummary()}
       function updatePackagePriceSummary(){const selected=new Set(state.packageBuilderSelectedNames||[]),total=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0),el=document.getElementById('catalogPackageOriginalTotal');if(el)el.textContent=formatCurrency(total)}
       function openCatalogPackageModal(code=''){
-        ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a Service and Items first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select the Service where this Package belongs.');return}const pkg=code?state.packagesList.find(p=>p.product_code===code):null;state.packageBuilderSelectedNames=[...(pkg?.includedServiceNames||[])];document.getElementById('catalogPackageModalTitle').textContent=pkg?'Edit Package':'Create Package';document.getElementById('catalogPackageCode').value=pkg?.product_code||'';document.getElementById('catalogPackageName').value=pkg?normalizeBroadcastPackageName(pkg.name):'';document.getElementById('catalogPackageDescription').value=packageDisplayDescription(pkg);enforceWordLimit(document.getElementById('catalogPackageDescription'),80,'catalogPackageDescriptionCount');document.getElementById('catalogPackageSellingPrice').value=pkg?.sellingPrice??'';document.getElementById('catalogPackageDeleteBtn')?.classList.toggle('hidden',!pkg);const categorySel=document.getElementById('catalogPackageCategory');categorySel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(displayCategory(c))}</option>`).join('');categorySel.value=pkg?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);document.getElementById('catalogPackageServiceSearch').value='';renderPackageServiceChoices('');openModal('catalogPackageModal')
+        ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a Service and Items first.');return}if(state.catalogManagerCategory==='ALL'&&!code){showToast('Select the Service where this Package belongs.');return}const pkg=code?state.packagesList.find(p=>p.product_code===code):null;state.packageBuilderSelectedNames=[...(pkg?.includedServiceNames||[])];document.getElementById('catalogPackageModalTitle').textContent=pkg?'Edit Package':'Create Package';document.getElementById('catalogPackageCode').value=pkg?.product_code||'';document.getElementById('catalogPackageName').value=pkg?normalizeBroadcastPackageName(pkg.name):'';document.getElementById('catalogPackageSellingPrice').value=pkg?.sellingPrice??'';document.getElementById('catalogPackageDeleteBtn')?.classList.toggle('hidden',!pkg);const categorySel=document.getElementById('catalogPackageCategory');categorySel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(displayCategory(c))}</option>`).join('');categorySel.value=pkg?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);document.getElementById('catalogPackageServiceSearch').value='';renderPackageServiceChoices('');openModal('catalogPackageModal')
       }
       function saveCatalogPackage(){
-        const code=document.getElementById('catalogPackageCode').value,name=document.getElementById('catalogPackageName').value.trim(),category=document.getElementById('catalogPackageCategory').value,description=document.getElementById('catalogPackageDescription')?.value.trim()||'',selling=Number(document.getElementById('catalogPackageSellingPrice').value),included=[...(state.packageBuilderSelectedNames||[])],selected=new Set(included),original=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);if(!name||!category||!included.length||!Number.isFinite(selling)||selling<0){showToast('Add a Package name, Service, at least one Item, and a valid offer price.');return}const payload={name:name.toUpperCase(),category,description,type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:true};if(code){const pkg=state.packagesList.find(p=>p.product_code===code);if(pkg)Object.assign(pkg,payload)}else{const nums=state.packagesList.map(p=>Number(String(p.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.packagesList.push({product_code:`PKG-${String(next).padStart(3,'0')}`,...payload})}persistCatalogState();closeModal('catalogPackageModal');renderPricelist();renderServiceCatalog();showToast(code?'Package updated.':'Package created.')
+        const code=document.getElementById('catalogPackageCode').value,name=document.getElementById('catalogPackageName').value.trim(),category=document.getElementById('catalogPackageCategory').value,selling=Number(document.getElementById('catalogPackageSellingPrice').value),included=[...(state.packageBuilderSelectedNames||[])],selected=new Set(included),original=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);if(!name||!category||!included.length||!Number.isFinite(selling)||selling<0){showToast('Add a Package name, Service, at least one Item, and a valid offer price.');return}const payload={name:name.toUpperCase(),category,description:'Includes:\n'+included.map(x=>'• '+x).join('\n'),type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:true};if(code){const pkg=state.packagesList.find(p=>p.product_code===code);if(pkg)Object.assign(pkg,payload)}else{const nums=state.packagesList.map(p=>Number(String(p.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.packagesList.push({product_code:`PKG-${String(next).padStart(3,'0')}`,...payload})}persistCatalogState();closeModal('catalogPackageModal');renderPricelist();renderServiceCatalog();showToast(code?'Package updated.':'Package created.')
       }
       function deleteCatalogCategory(){const name=document.getElementById('catalogCategoryOldName')?.value.trim();if(!name)return;const usedServices=state.soloServices.filter(s=>String(s.category||'')===name).length,usedPackages=state.packagesList.filter(p=>String(p.category||'')===name).length;requestDestructivePin('Delete Service',`Delete "${name}"? ${usedServices+usedPackages?`It contains ${usedServices} item${usedServices===1?'':'s'} and ${usedPackages} package${usedPackages===1?'':'s'}; move or delete them first.`:'The Service is empty.'}`,()=>{if(usedServices||usedPackages){showToast('Move or delete the items in this category first.');return;}state.catalogCategories=state.catalogCategories.filter(c=>c!==name);if(state.catalogManagerCategory===name)state.catalogManagerCategory='ALL';persistCatalogState();closeModal('catalogCategoryModal');renderPricelist();showToast('Service deleted.');});}
       function deleteCatalogService(){const code=document.getElementById('catalogServiceCode')?.value;if(!code)return;const svc=state.soloServices.find(s=>s.product_code===code);if(!svc)return;const bundles=state.packagesList.filter(p=>(p.includedServiceNames||[]).includes(svc.name));requestDestructivePin('Delete Item',`Delete "${svc.name}"?${bundles.length?` It will also be removed from ${bundles.length} package${bundles.length===1?'':'s'}.`:''}`,()=>{state.soloServices=state.soloServices.filter(s=>s.product_code!==code);state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>n!==svc.name);const selected=new Set(p.includedServiceNames);p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));});persistCatalogState();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast('Item deleted.');});}
@@ -3567,7 +3546,7 @@ ${description}`))actionCallback();return;}
         if (!state.activeProjectId) return;
         const proj = state.projects.find(p => p.id === state.activeProjectId);
         if (!proj) return;
-        const notesEl=document.getElementById('projectNotesTextarea');enforceWordLimit(notesEl,120,'projectNotesWordCount');proj.notes = notesEl.value.trim();
+        proj.notes = document.getElementById("projectNotesTextarea").value.trim();
         proj.updated_at = new Date().toISOString();
         persistProjectsState();
         if (supabaseClient && state.isConnected) {
@@ -3676,7 +3655,6 @@ ${description}`))actionCallback();return;}
         saveProjectData,
         scheduleProjectDataAutosave,
         autosaveProjectData,
-        openProjectDataClientProfile,
         switchProjectTab,
         saveInvoicePDF,
         saveInvoiceImage,
@@ -3739,10 +3717,6 @@ ${description}`))actionCallback();return;}
         openEditClientModal,
         submitEditClient,
         handleProfilePhotoUpload,
-        normalizePhilippinePhone,
-        enforceWordLimit,
-        handlePinDigitInput,
-        handlePinDigitKeydown,
         onCropZoomChange,
         confirmCroppedImage,
         removeProfilePhoto,
@@ -3789,7 +3763,6 @@ ${description}`))actionCallback();return;}
         removeClient,
         renderClientProfile,
         saveClientProfileChanges,
-        autosaveClientProfileField,
         handleLegacyCSVImport,
         importPastedSheetData,
         openEditProjectModal,
@@ -3800,7 +3773,6 @@ ${description}`))actionCallback();return;}
         openProjectOrderBatchModal,
         mobileOpenProjectOrderBatch,
         renderProjectOrderBatchChoices,
-        setProjectOrderBatchCategory,
         toggleProjectOrderBatchChoice,
         addCustomProjectBatchItem,
         renderProjectOrderBatchSelected,

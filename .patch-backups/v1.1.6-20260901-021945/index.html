@@ -72,8 +72,8 @@
 <section class="view active" id="view-my-works">
 <header class="page-header">
 <div>
-<div class="greeting-subtitle">Overview</div>
-<h1 class="page-title">Project Command Center</h1>
+<div class="greeting-subtitle">Project Command Center</div>
+<h1 class="page-title">Overview</h1>
 </div>
 <div style="display: flex; gap: 12px; align-items: center;">
 <button class="btn btn-primary" onclick="app.navigateTo('new-order')">
@@ -227,7 +227,7 @@
 </div>
 <div class="form-group">
 <label class="form-label">Phone Number</label>
-<input class="form-control" id="newClientPhone" inputmode="tel" placeholder="+63 963 754 4777" type="text" onblur="this.value=app.normalizePhilippinePhone(this.value)"/>
+<input class="form-control" id="newClientPhone" placeholder="+63 900 000 0000" type="text"/>
 </div>
 <div class="form-group">
 <label class="form-label">Address</label>
@@ -241,7 +241,7 @@
 <div><div class="section-kicker">SHOP</div><h2 class="card-title">Items &amp; Packages</h2></div>
 <button class="btn btn-secondary btn-sm" onclick="app.openCustomProductModal()">
 <svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
-                  Add Custom Item
+                  Custom Item
                 </button>
 </div>
 <!-- Catalog Segmented Filter -->
@@ -289,9 +289,10 @@
 <div class="cart-summary-rows">
 <div class="summary-row"><span>Subtotal</span><span id="summarySubtotal">₱ 0.00</span></div><div class="summary-row" id="summaryItemDiscountRow" style="display:none"><span>Item Discounts</span><span id="summaryItemDiscount">- ₱ 0.00</span></div>
 <div class="summary-row text-danger" id="summaryDiscountRow"><span>Discount</span><span id="summaryDiscount">-₱ 0.00</span></div>
-<div class="summary-section-label additional-fees-heading" id="summaryAdditionalFeesLabel" style="display:none">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')" aria-label="About additional fees">i</button></div>
-<div class="summary-row compact-fee-row" id="summaryRushRow" style="display:none"><span>Rush Fee</span><span id="summaryRushFee">+₱ 0.00</span></div>
-<div class="summary-row compact-fee-row" id="summaryMaintenanceRow" style="display:none"><span>System Maintenance Fee</span><span id="summaryMaintenance">+₱ 0.00</span></div>
+<div class="summary-section-label" id="summaryAdditionalFeesLabel">Additional Fees</div>
+<div class="summary-row" id="summaryRushRow"><span>Rush Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('rush')" aria-label="About Rush Fee">i</button></span><span id="summaryRushFee">+₱ 0.00</span></div>
+<div class="summary-row" id="summaryMaintenanceRow" style="display:none"><span>System Maintenance Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('maintenance')" aria-label="About System Maintenance Fee">i</button></span><span id="summaryMaintenance">+₱ 0.00</span></div>
+<div class="summary-row" id="summaryFileDeliveryRow"><span>File Delivery</span><span id="summaryFileDelivery">+₱ 0.00</span></div>
 <div class="divider"></div>
 <div class="summary-row summary-total"><span>Total</span><span id="summaryTotal">₱ 0.00</span></div>
 </div>
@@ -358,7 +359,7 @@
 </section>
 <!-- VIEW: CLIENT PROFILE -->
 <section class="view" id="view-client-profile">
-<header class="page-header"><div><button class="btn-text mb-2" onclick="app.navigateTo('clients')">← Back to Clients</button><div class="greeting-subtitle" id="clientProfileEmail"></div><h1 class="page-title" id="clientProfileName">Client</h1></div><div class="client-profile-save-state" id="clientProfileSaveState">Saved</div></header>
+<header class="page-header"><div><button class="btn-text mb-2" onclick="app.navigateTo('clients')">← Back to Clients</button><div class="greeting-subtitle" id="clientProfileEmail"></div><h1 class="page-title" id="clientProfileName">Client</h1></div><button class="btn btn-primary" id="clientProfileEditBtn" onclick="app.saveClientProfileChanges()">Save Changes</button></header>
 <div id="clientProfileContent"></div>
 </section>
 <!-- VIEW 3: PROJECT DETAILS -->
@@ -406,13 +407,13 @@
 </div>
 <div class="tab-content" id="projTab-project-data">
 <div class="project-data-grid">
-<div class="card project-data-card project-client-display-card" onclick="app.openProjectDataClientProfile()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();app.openProjectDataClientProfile();}">
-<div class="card-header"><div><div class="section-kicker">CLIENT</div><h3 class="card-title">Client Information</h3><div class="text-sm text-muted mt-1">View client profile to edit contact details.</div></div><span class="client-card-arrow">›</span></div>
-<div class="project-data-form-grid project-client-readonly-grid">
-<div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="projectDataClientName" readonly tabindex="-1"/></div>
-<div class="form-group"><label class="form-label">Email Address</label><input class="form-control" id="projectDataClientEmail" readonly tabindex="-1" type="email"/></div>
-<div class="form-group"><label class="form-label">Phone Number</label><input class="form-control" id="projectDataClientPhone" readonly tabindex="-1"/></div>
-<div class="form-group"><label class="form-label">Address</label><input class="form-control" id="projectDataClientAddress" readonly tabindex="-1"/></div>
+<div class="card project-data-card">
+<div class="card-header"><div><div class="section-kicker">CLIENT</div><h3 class="card-title">Client Information</h3></div></div>
+<div class="project-data-form-grid">
+<div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="projectDataClientName" oninput="app.scheduleProjectDataAutosave()"/></div>
+<div class="form-group"><label class="form-label">Email Address</label><input class="form-control" id="projectDataClientEmail" oninput="app.scheduleProjectDataAutosave()" type="email"/></div>
+<div class="form-group"><label class="form-label">Phone Number</label><input class="form-control" id="projectDataClientPhone" oninput="app.scheduleProjectDataAutosave()"/></div>
+<div class="form-group"><label class="form-label">Address</label><input class="form-control" id="projectDataClientAddress" oninput="app.scheduleProjectDataAutosave()"/></div>
 </div>
 </div>
 <div class="card project-data-card project-data-project-card">
@@ -422,7 +423,6 @@
 <div class="form-group"><label class="form-label">Project Name</label><input class="form-control" id="projectDataProjectName" oninput="app.scheduleProjectDataAutosave()"/></div>
 <div class="form-group"><label class="form-label">Project Start Date</label><input class="form-control" id="projectDataStartDate" onchange="app.handleProjectDataStartDateChange();app.scheduleProjectDataAutosave()" type="date"/></div>
 <div class="form-group"><label class="form-label">Project Deadline</label><input class="form-control" id="projectDataDeadline" onchange="app.handleProjectDataDeadlineChange();app.scheduleProjectDataAutosave()" type="date"/><div class="project-data-rush-live" id="projectDataRushLive"></div></div>
-<div class="form-group"><label class="form-label">Revisions</label><input class="form-control" id="projectDataRevisionCount" min="0" step="1" type="number" value="0" oninput="app.scheduleProjectDataAutosave()"/><div class="text-sm text-muted mt-1">₱500 per revision</div></div>
 </div>
 <div class="project-priority-toggle-row">
 <div><strong>Priority</strong></div>
@@ -487,8 +487,7 @@
 <div class="tab-content" id="projTab-notes">
 <div class="card">
 <h3 class="card-title mb-3">Project Notes</h3>
-<textarea class="form-control fixed-notes-field" id="projectNotesTextarea" placeholder="Add specific client requests, asset URLs, or technical constraints..." rows="5" oninput="app.enforceWordLimit(this,120,'projectNotesWordCount')"></textarea>
-<div class="notes-word-count" id="projectNotesWordCount">0 / 120 words</div>
+<textarea class="form-control" id="projectNotesTextarea" placeholder="Add specific client requests, asset URLs, or technical constraints..." rows="6"></textarea>
 <div class="mt-3 text-right">
 <button class="btn btn-primary btn-sm" onclick="app.saveProjectNotes()">Save Notes</button>
 </div>
@@ -499,6 +498,7 @@
 <section class="view" id="view-calendar">
 <header class="page-header">
 <div>
+<div class="greeting-subtitle">Schedule</div>
 <div class="greeting-subtitle">Schedule</div><h1 class="page-title">Calendar</h1>
 </div>
 <div class="calendar-controls"><button class="btn btn-primary btn-sm" onclick="app.openCalendarEventModal()">+ Add Event</button>
@@ -523,19 +523,19 @@
 </section>
 <!-- VIEW 6: CLIENTS -->
 <section class="view" id="view-clients">
-<header class="page-header"><div><div class="greeting-subtitle">Directory</div><h1 class="page-title">Client Directory</h1></div></header>
-<div class="view-toolbar unified-toolbar"><input class="form-control" id="clientsSearch" oninput="app.queueViewRender('clients')" placeholder="Search client ID, name, email, phone, or address..." type="text"/><div class="toolbar-actions"><select class="compact-sort" id="clientsSort" onchange="app.setListSort('clients',this.value)"><option value="id">By ID</option><option value="az">A to Z</option><option value="za">Z to A</option></select></div></div>
+<header class="page-header"><div><div class="greeting-subtitle">Directory</div><h1 class="page-title">Clients Directory</h1></div></header>
+<div class="view-toolbar unified-toolbar"><input class="form-control" id="clientsSearch" oninput="app.queueViewRender('clients')" placeholder="Search client name, email, number, or address..." type="text"/><div class="toolbar-actions"><select class="compact-sort" id="clientsSort" onchange="app.setListSort('clients',this.value)"><option value="id">By ID</option><option value="az">A to Z</option><option value="za">Z to A</option></select></div></div>
 <div id="clientsListGrid"></div>
 </section>
 <!-- VIEW 7: SHOP -->
 <section class="view" id="view-pricelist">
 <header class="page-header">
-<div><div class="greeting-subtitle">Seller</div><h1 class="page-title">Shop</h1></div>
+<div><div class="greeting-subtitle">Seller Shop</div><h1 class="page-title">Shop</h1></div>
 <div class="action-buttons-group"><button class="btn btn-secondary" onclick="app.openCatalogCategoryModal()">+ New Service</button></div>
 </header>
 <div class="view-toolbar unified-toolbar catalog-toolbar"><input class="form-control" id="catalogManagerSearch" oninput="app.queueViewRender('catalog')" placeholder="Search services, items, packages, or inclusions..." type="text"/><div class="toolbar-actions"><select class="compact-sort" id="catalogSort" onchange="app.setListSort('catalog',this.value)"><option value="default">Default</option><option value="az">A to Z</option><option value="za">Z to A</option></select><div class="filter-pills" id="catalogManagerFilters"></div></div></div>
 <div class="catalog-seller-layout shop-seller-layout">
-<aside class="card catalog-category-panel shop-service-panel"><div class="catalog-panel-heading"><div><div class="section-kicker">SHOP</div><h2 class="card-title">Services</h2><div class="text-sm text-muted mt-1">Drag services to change their sequence.</div></div></div><div class="catalog-category-list" id="catalogCategoryList"></div></aside>
+<aside class="card catalog-category-panel shop-service-panel"><div class="catalog-panel-heading"><div><div class="section-kicker">SHOP</div><h2 class="card-title">Services</h2><div class="text-sm text-muted mt-1">Drag services to change their sequence.</div></div><button class="btn btn-secondary btn-sm" onclick="app.openCatalogCategoryModal()">Add</button></div><div class="catalog-category-list" id="catalogCategoryList"></div></aside>
 <div class="catalog-manager-main">
 <div class="card table-card" id="catalogServicesCard"><div class="catalog-panel-heading catalog-table-heading"><div><div class="section-kicker" id="catalogItemsKicker">ITEMS</div><h2 class="card-title" id="catalogSelectedCategoryTitle">All Shop Items</h2></div><div class="catalog-heading-actions"><button class="btn btn-primary btn-sm" id="catalogAddItemBtn" onclick="app.openCatalogServiceModal()">+ Add Item</button><button aria-label="Maximize items" class="icon-action-button" onclick="app.openCatalogSectionFullView('items')" title="Maximize items"><svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="15 3 21 3 21 9"></polyline><line x1="14" x2="21" y1="10" y2="3"></line><polyline points="9 21 3 21 3 15"></polyline><line x1="10" x2="3" y1="14" y2="21"></line></svg></button></div></div><div class="table-responsive"><table class="data-table unified-table catalog-services-table"><thead id="catalogServicesHead"><tr><th>Item / Service</th><th>Description</th><th>Price</th><th class="actions-col"></th></tr></thead><tbody id="catalogServicesBody"></tbody></table></div></div>
 <div class="card table-card" id="catalogPackagesCard"><div class="catalog-panel-heading catalog-table-heading"><div><div class="section-kicker">PACKAGES</div><h2 class="card-title">Packages</h2></div><div class="catalog-heading-actions"><button class="btn btn-secondary btn-sm" onclick="app.openCatalogPackageModal()">Create Package</button><button aria-label="Maximize packages" class="icon-action-button" onclick="app.openCatalogSectionFullView('packages')" title="Maximize packages"><svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="15 3 21 3 21 9"></polyline><line x1="14" x2="21" y1="10" y2="3"></line><polyline points="9 21 3 21 3 15"></polyline><line x1="10" x2="3" y1="14" y2="21"></line></svg></button></div></div><div class="table-responsive"><table class="data-table unified-table catalog-packages-table"><thead><tr><th>Package</th><th>Inclusions</th><th>Original Price</th><th>Offer Price</th><th class="actions-col"></th></tr></thead><tbody id="catalogPackagesBody"></tbody></table></div></div>
@@ -731,7 +731,7 @@
 </div>
 <div class="form-group">
 <label class="form-label">Phone Number *</label>
-<input class="form-control" id="editClientPhone" inputmode="tel" placeholder="+63 963 754 4777" type="text" onblur="this.value=app.normalizePhilippinePhone(this.value)"/>
+<input class="form-control" id="editClientPhone" placeholder="+63 900 000 0000" type="text"/>
 <span class="inline-error" id="editClientPhoneError"></span>
 </div>
 <div class="form-group">
@@ -740,7 +740,7 @@
 </div>
 <div class="form-group">
 <label class="form-label">Notes</label>
-<textarea class="form-control fixed-notes-field" id="editClientNotes" placeholder="Client notes..." rows="3" oninput="app.enforceWordLimit(this,80,'editClientNotesCount')"></textarea><div class="notes-word-count" id="editClientNotesCount">0 / 80 words</div>
+<textarea class="form-control" id="editClientNotes" placeholder="Client notes..." rows="3"></textarea>
 </div>
 </div>
 <div class="modal-footer">
@@ -855,7 +855,7 @@
 <button class="modal-close" onclick="app.closeModal('projectOrderBatchModal')">×</button>
 </div>
 <div class="modal-body">
-<div class="project-batch-toolbar"><div class="form-group project-batch-search"><label class="form-label">Find Items or Packages</label><input autocomplete="off" class="form-control" id="projectOrderBatchSearch" oninput="app.renderProjectOrderBatchChoices(this.value)" placeholder="Search Shop items or packages..."/></div><div class="project-batch-service-filters" id="projectOrderBatchServiceFilters" aria-label="Filter Shop by Service"></div></div>
+<div class="form-group"><label class="form-label">Find Services or Packages</label><input autocomplete="off" class="form-control" id="projectOrderBatchSearch" oninput="app.renderProjectOrderBatchChoices(this.value)" placeholder="Type to search available items..."/></div>
 <div class="project-batch-picker" id="projectOrderBatchChoices"></div>
 <div class="project-batch-custom">
 <div class="project-batch-custom-head"><strong>Custom item</strong><span>Use only when it is not in the Shop.</span></div>
@@ -911,7 +911,7 @@
 <div class="modal-card compact-validation-modal reset-pin-modal">
 <div class="validation-graphic reset-lock-graphic"><svg class="icon-svg lg" viewbox="0 0 24 24"><rect height="10" rx="2" width="14" x="5" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path><path d="M12 14v2"></path></svg></div>
 <div class="validation-copy"><h3 class="modal-title" id="destructivePinTitle">Confirm deletion</h3><p id="destructivePinDescription">Enter your 6-digit PIN to continue.</p></div>
-<div class="form-group reset-pin-field"><label class="form-label">PIN Code</label><div class="pin-code-grid" data-pin-target="destructivePinInput"><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 1" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 2" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 3" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 4" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 5" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 6" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/></div><input id="destructivePinInput" type="hidden"/><span class="inline-error hidden" id="destructivePinError">Incorrect PIN.</span></div>
+<div class="form-group reset-pin-field"><label class="form-label" for="destructivePinInput">PIN Code</label><input autocomplete="off" class="form-control reset-pin-input" id="destructivePinInput" inputmode="numeric" maxlength="6" onkeydown="if(event.key==='Enter'){event.preventDefault();app.confirmDestructivePin();}" placeholder="⋮⋮" type="password"/><span class="inline-error hidden" id="destructivePinError">Incorrect PIN.</span></div>
 <div class="modal-footer validation-actions"><button class="btn btn-secondary" onclick="app.closeModal('destructivePinModal')">Cancel</button><button class="btn btn-danger" onclick="app.confirmDestructivePin()">Continue</button></div>
 </div>
 </div>
@@ -926,8 +926,8 @@
 <p>Enter your 6-digit PIN to continue.</p>
 </div>
 <div class="form-group reset-pin-field">
-<label class="form-label">PIN Code</label>
-<div class="pin-code-grid" data-pin-target="resetDataPinInput"><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 1" oninput="app.handlePinDigitInput(event,'resetDataPinInput')" onkeydown="app.handlePinDigitKeydown(event,'resetDataPinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 2" oninput="app.handlePinDigitInput(event,'resetDataPinInput')" onkeydown="app.handlePinDigitKeydown(event,'resetDataPinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 3" oninput="app.handlePinDigitInput(event,'resetDataPinInput')" onkeydown="app.handlePinDigitKeydown(event,'resetDataPinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 4" oninput="app.handlePinDigitInput(event,'resetDataPinInput')" onkeydown="app.handlePinDigitKeydown(event,'resetDataPinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 5" oninput="app.handlePinDigitInput(event,'resetDataPinInput')" onkeydown="app.handlePinDigitKeydown(event,'resetDataPinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 6" oninput="app.handlePinDigitInput(event,'resetDataPinInput')" onkeydown="app.handlePinDigitKeydown(event,'resetDataPinInput')"/></div><input id="resetDataPinInput" type="hidden"/>
+<label class="form-label" for="resetDataPinInput">PIN Code</label>
+<input autocomplete="off" class="form-control reset-pin-input" id="resetDataPinInput" inputmode="numeric" maxlength="6" onkeydown="if(event.key==='Enter') app.confirmResetDataPin()" pattern="[0-9]*" placeholder="⋮⋮" type="password"/>
 <div class="inline-error hidden" id="resetDataPinError">Incorrect PIN. Please try again.</div>
 </div>
 <div class="modal-footer validation-actions">
@@ -938,12 +938,12 @@
 </div>
 <!-- CATALOG MANAGER MODALS -->
 <div class="modal-backdrop" id="catalogCategoryModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">SHOP SERVICE</div><h3 class="modal-title" id="catalogCategoryModalTitle">Add Service</h3></div><button class="modal-close" onclick="app.closeModal('catalogCategoryModal')">×</button></div><div class="modal-body"><input id="catalogCategoryOldName" type="hidden"/><div class="form-group"><label class="form-label">Service Name</label><input class="form-control" id="catalogCategoryName" placeholder="Service name, e.g. TV Broadcast Graphics"/></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogCategoryDeleteBtn" onclick="app.deleteCatalogCategory()">Delete Service</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogCategoryModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogCategory()">Save Service</button></div></div></div>
-<div class="modal-backdrop" id="catalogServiceModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">SHOP ITEM</div><h3 class="modal-title" id="catalogServiceModalTitle">Add Item</h3></div><button class="modal-close" onclick="app.closeModal('catalogServiceModal')">×</button></div><div class="modal-body"><input id="catalogServiceCode" type="hidden"/><div class="form-group"><label class="form-label">Item Name</label><input class="form-control" id="catalogServiceName" placeholder="Item name"/></div><div class="form-group"><label class="form-label">Service</label><select class="form-control" id="catalogServiceCategory"></select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control fixed-notes-field" id="catalogServiceDescription" placeholder="Briefly describe this item" rows="3" oninput="app.enforceWordLimit(this,60,'catalogServiceDescriptionCount')"></textarea><div class="notes-word-count" id="catalogServiceDescriptionCount">0 / 60 words</div></div><div class="form-group"><label class="form-label">Price (₱)</label><input class="form-control" id="catalogServicePrice" min="0" step="0.01" type="number"/></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogServiceDeleteBtn" onclick="app.deleteCatalogService()">Delete Item</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogServiceModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogService()">Save Item</button></div></div></div>
-<div class="modal-backdrop" id="catalogPackageModal"><div class="modal-card modal-wide"><div class="modal-header"><div><div class="section-kicker">PACKAGE BUILDER</div><h3 class="modal-title" id="catalogPackageModalTitle">Create Package</h3></div><button class="modal-close" onclick="app.closeModal('catalogPackageModal')">×</button></div><div class="modal-body"><input id="catalogPackageCode" type="hidden"/><div class="form-grid"><div class="form-group"><label class="form-label">Package Name</label><input class="form-control" id="catalogPackageName" placeholder="Package name"/></div><div class="form-group"><label class="form-label">Service</label><select class="form-control" id="catalogPackageCategory" onchange="app.renderPackageServiceChoices(document.getElementById('catalogPackageServiceSearch').value)"></select></div></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control fixed-notes-field" id="catalogPackageDescription" rows="3" placeholder="Briefly describe the package" oninput="app.enforceWordLimit(this,80,'catalogPackageDescriptionCount')"></textarea><div class="notes-word-count" id="catalogPackageDescriptionCount">0 / 80 words</div></div><div class="form-group"><label class="form-label">Inclusions</label><div class="text-sm text-muted mb-2">Select existing Items from this Service. Inclusions stay linked to the Shop items.</div><label class="form-label">Find Items</label><input class="form-control" id="catalogPackageServiceSearch" oninput="app.renderPackageServiceChoices(this.value)" placeholder="Type to search available items..."/><div class="package-service-picker" id="catalogPackageServiceChoices"></div></div><div class="package-builder-summary"><div><span>Original item total</span><strong id="catalogPackageOriginalTotal">₱0.00</strong></div><div class="form-group" style="margin:0"><label class="form-label">Offer / Discounted Price (₱)</label><input class="form-control" id="catalogPackageSellingPrice" min="0" step="0.01" type="number"/></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogPackageDeleteBtn" onclick="app.deleteCatalogPackage()">Delete Package</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogPackageModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogPackage()">Save Package</button></div></div></div>
+<div class="modal-backdrop" id="catalogServiceModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">SHOP ITEM</div><h3 class="modal-title" id="catalogServiceModalTitle">Add Item</h3></div><button class="modal-close" onclick="app.closeModal('catalogServiceModal')">×</button></div><div class="modal-body"><input id="catalogServiceCode" type="hidden"/><div class="form-group"><label class="form-label">Item Name</label><input class="form-control" id="catalogServiceName" placeholder="Item name"/></div><div class="form-group"><label class="form-label">Service</label><select class="form-control" id="catalogServiceCategory"></select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control" id="catalogServiceDescription" placeholder="What is included or produced" rows="3"></textarea></div><div class="form-group"><label class="form-label">Price (₱)</label><input class="form-control" id="catalogServicePrice" min="0" step="0.01" type="number"/></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogServiceDeleteBtn" onclick="app.deleteCatalogService()">Delete Item</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogServiceModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogService()">Save Item</button></div></div></div>
+<div class="modal-backdrop" id="catalogPackageModal"><div class="modal-card modal-wide"><div class="modal-header"><div><div class="section-kicker">PACKAGE BUILDER</div><h3 class="modal-title" id="catalogPackageModalTitle">Create Package</h3></div><button class="modal-close" onclick="app.closeModal('catalogPackageModal')">×</button></div><div class="modal-body"><input id="catalogPackageCode" type="hidden"/><div class="form-grid"><div class="form-group"><label class="form-label">Package Name</label><input class="form-control" id="catalogPackageName" placeholder="Package name"/></div><div class="form-group"><label class="form-label">Service</label><select class="form-control" id="catalogPackageCategory" onchange="app.renderPackageServiceChoices(document.getElementById('catalogPackageServiceSearch').value)"></select></div></div><div class="form-group"><label class="form-label">Find Items</label><input class="form-control" id="catalogPackageServiceSearch" oninput="app.renderPackageServiceChoices(this.value)" placeholder="Type to search available items..."/></div><div class="package-service-picker" id="catalogPackageServiceChoices"></div><div class="package-builder-summary"><div><span>Original item total</span><strong id="catalogPackageOriginalTotal">₱0.00</strong></div><div class="form-group" style="margin:0"><label class="form-label">Offer / Discounted Price (₱)</label><input class="form-control" id="catalogPackageSellingPrice" min="0" step="0.01" type="number"/></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogPackageDeleteBtn" onclick="app.deleteCatalogPackage()">Delete Package</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogPackageModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogPackage()">Save Package</button></div></div></div>
 <!-- MODAL: FEE INFORMATION -->
 <div class="modal-backdrop" id="feeInfoModal"><div class="modal-card fee-info-modal-card"><div class="modal-header"><div><div class="section-kicker">ADDITIONAL FEE</div><h3 class="modal-title" id="feeInfoTitle">Fee Information</h3></div><button class="modal-close" onclick="app.closeModal('feeInfoModal')">×</button></div><div class="modal-body" id="feeInfoBody"></div><div class="modal-footer"><span class="modal-footer-spacer"></span><button class="btn btn-primary" onclick="app.closeModal('feeInfoModal')">Got it</button></div></div></div>
 <!-- MODAL: CALENDAR EVENT / MEETING -->
-<div class="modal-backdrop" id="calendarEventModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CALENDAR</div><h3 class="modal-title" id="calendarEventModalTitle">Add Event</h3></div><button class="modal-close" onclick="app.closeModal('calendarEventModal')">×</button></div><div class="modal-body"><input id="calendarEventId" type="hidden"/><div class="form-grid"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="calendarEventType"><option value="Event">Event</option><option value="Meeting">Meeting</option></select></div><div class="form-group"><label class="form-label">Date</label><input class="form-control" id="calendarEventDate" type="date"/></div></div><div class="form-group"><label class="form-label">Title</label><input class="form-control" id="calendarEventTitle" placeholder="Meeting, review, workshop..."/></div><div class="form-grid"><div class="form-group"><label class="form-label">Start Time</label><input class="form-control" id="calendarEventStartTime" type="time"/></div><div class="form-group"><label class="form-label">End Time</label><input class="form-control" id="calendarEventEndTime" type="time"/></div></div><div class="form-group"><label class="form-label">Related Project</label><select class="form-control" id="calendarEventProject"><option value="">None</option></select></div><div class="form-group"><label class="form-label">Notes</label><textarea class="form-control fixed-notes-field" id="calendarEventNotes" rows="3" placeholder="Optional notes" oninput="app.enforceWordLimit(this,80,'calendarEventNotesCount')"></textarea><div class="notes-word-count" id="calendarEventNotesCount">0 / 80 words</div></div></div><div class="modal-footer"><button class="btn btn-text text-danger hidden" id="calendarEventDeleteBtn" onclick="app.deleteCalendarEvent()">Delete Event</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('calendarEventModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCalendarEvent()">Save Event</button></div></div></div>
+<div class="modal-backdrop" id="calendarEventModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">CALENDAR</div><h3 class="modal-title" id="calendarEventModalTitle">Add Event</h3></div><button class="modal-close" onclick="app.closeModal('calendarEventModal')">×</button></div><div class="modal-body"><input id="calendarEventId" type="hidden"/><div class="form-grid"><div class="form-group"><label class="form-label">Type</label><select class="form-control" id="calendarEventType"><option value="Event">Event</option><option value="Meeting">Meeting</option></select></div><div class="form-group"><label class="form-label">Date</label><input class="form-control" id="calendarEventDate" type="date"/></div></div><div class="form-group"><label class="form-label">Title</label><input class="form-control" id="calendarEventTitle" placeholder="Meeting, review, workshop..."/></div><div class="form-grid"><div class="form-group"><label class="form-label">Start Time</label><input class="form-control" id="calendarEventStartTime" type="time"/></div><div class="form-group"><label class="form-label">End Time</label><input class="form-control" id="calendarEventEndTime" type="time"/></div></div><div class="form-group"><label class="form-label">Related Project</label><select class="form-control" id="calendarEventProject"><option value="">None</option></select></div><div class="form-group"><label class="form-label">Notes</label><textarea class="form-control" id="calendarEventNotes" rows="3" placeholder="Optional notes"></textarea></div></div><div class="modal-footer"><button class="btn btn-text text-danger hidden" id="calendarEventDeleteBtn" onclick="app.deleteCalendarEvent()">Delete Event</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('calendarEventModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCalendarEvent()">Save Event</button></div></div></div>
 <!-- JUAN ASSISTANT BUBBLE: optional shortcut + due-today reminder -->
 <div class="assistant-bubble-wrap" id="assistantBubbleWrap">
 <div class="assistant-deadline-nudge" hidden="" id="assistantDeadlineNudge"></div>
