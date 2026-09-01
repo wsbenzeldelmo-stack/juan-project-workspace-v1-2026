@@ -414,10 +414,10 @@
 <div class="card project-data-card project-client-display-card" onclick="app.openProjectDataClientProfile()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();app.openProjectDataClientProfile();}">
 <div class="card-header"><div><div class="section-kicker">CLIENT</div><h3 class="card-title">Client Information</h3><div class="text-sm text-muted mt-1">View client profile to edit contact details.</div></div><span class="client-card-arrow">›</span></div>
 <div class="project-data-form-grid project-client-readonly-grid">
-<div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="projectDataClientName" placeholder="Full name or business name" readonly tabindex="-1"/></div>
-<div class="form-group"><label class="form-label">Email Address</label><input class="form-control" id="projectDataClientEmail" placeholder="client@example.com" readonly tabindex="-1" type="email"/></div>
-<div class="form-group"><label class="form-label">Phone Number</label><input class="form-control" id="projectDataClientPhone" placeholder="+63 963 754 4777" readonly tabindex="-1"/></div>
-<div class="form-group"><label class="form-label">Address</label><input class="form-control" id="projectDataClientAddress" placeholder="City, Province" readonly tabindex="-1"/></div>
+<div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="projectDataClientName" placeholder="— FULL NAME —" readonly tabindex="-1"/></div>
+<div class="form-group"><label class="form-label">Email Address</label><input class="form-control" id="projectDataClientEmail" placeholder="name@example.com" readonly tabindex="-1" type="email"/></div>
+<div class="form-group"><label class="form-label">Phone Number</label><input class="form-control" id="projectDataClientPhone" placeholder="+63 9XX XXX XXXX" readonly tabindex="-1"/></div>
+<div class="form-group"><label class="form-label">Address</label><input class="form-control" id="projectDataClientAddress" placeholder="City / Province / Country" readonly tabindex="-1"/></div>
 </div>
 </div>
 <div class="card project-data-card project-data-project-card">
@@ -596,6 +596,7 @@
 <input class="form-control" disabled="" style="background:var(--bg-subtle);" type="text" value="Workspace Owner"/>
 </div>
 </div>
+<div class="card"><h2 class="card-title mb-4">Secure Cloud Sync</h2><p class="text-sm text-muted mb-4">Cloud credentials stay on the server. This browser receives only a signed HttpOnly session and CSRF token.</p><div class="action-buttons-group"><button class="btn btn-primary" type="button" onclick="app.openCloudLogin()">Connect Cloud</button><button class="btn btn-secondary" type="button" onclick="app.disconnectCloud()">Disconnect</button></div></div>
 <!-- Appearance & Dark Mode Toggle Section -->
 <div class="card">
 <h2 class="card-title mb-4">Appearance &amp; Theme</h2>
@@ -971,8 +972,10 @@
 <button aria-label="Open JUAN Assistant" class="assistant-fab" id="assistantFab" onclick="app.navigateTo('assistant')"><span class="assistant-wave-mark" aria-hidden="true"><i></i><i></i><i></i></span><span class="assistant-fab-badge" hidden="" id="assistantFabBadge">0</span>
 </button>
 </div>
+
+<div class="modal-backdrop" id="cloudLoginModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">SECURE SYNC</div><h3 class="modal-title">Connect Cloud</h3></div><button class="modal-close" onclick="app.closeModal('cloudLoginModal')">×</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Workspace Password</label><input class="form-control" id="cloudPasswordInput" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')app.connectCloud()"/><span class="inline-error" id="cloudLoginError"></span></div><div class="text-sm text-muted">The password is sent only to the same-origin session endpoint and is never stored in localStorage.</div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="app.closeModal('cloudLoginModal')">Cancel</button><button class="btn btn-primary" onclick="app.connectCloud()">Connect</button></div></div></div>
 <div class="toast-container" id="toastContainer"></div>
-<!-- SINGLE JAVASCRIPT LOGIC ENGINE -->
+<!-- SINGLE APPLICATION ENGINE + UNIFIED ASSISTANT ENGINE -->
 <!-- MODAL: FULL PRICELIST -->
 <div class="modal-backdrop" id="catalogFullViewModal">
 <div class="modal-card catalog-full-modal">
@@ -1031,7 +1034,6 @@
 </div>
 </div>
 <script defer="" src="./ocr/tesseract.min.js"></script>
-<script src="./js/assistant-bridge.js"></script>
 <script src="./js/assistant.js"></script>
 <script src="./js/pwa.js"></script>
 <script src="./js/mobile-viewer.js"></script>

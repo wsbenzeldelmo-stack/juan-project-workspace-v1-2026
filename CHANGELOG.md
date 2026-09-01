@@ -1,3 +1,10 @@
+# v8.0.0 — Fresh Supabase + Gemini deployment
+- Added full `sql/install.sql` for brand-new Supabase projects.
+- Added current `sb_secret_...` server-key support via `SUPABASE_SECRET_KEY`.
+- Added normalized project bundle synchronization for project items, deliverables, and payments.
+- Added first-connection bootstrap into an empty database.
+- Preserved legacy service-role fallback only for compatibility.
+
 # JUAN Project Workspace — v1.1.5
 
 ## Shop + Workspace Refinement
@@ -57,3 +64,12 @@ This patch continues from the stable v1.1.4 Workspace. It does **not** include t
 
 ### Cache
 - Service Worker cache bumped to `cache-115` and includes `shop-refinement.css`.
+
+## 2026-09-02 — Security/architecture refactor
+- Unified assistant engine; removed `assistant-bridge.js` duplicate listener layer.
+- Stabilized project/filter/client/receipt responsive rules.
+- Added reliable reconnect-triggered cloud mutation queue flushing.
+- Added secure same-origin session, CSRF, Supabase data proxy, and Gemini proxy serverless routes.
+- Removed client-side Supabase credential configuration.
+- Added RLS/revoke SQL baseline and hardened response headers/CSP.
+- Implemented 7-day single-item / 14-day multi-item defaults, fixed PHP 21 maintenance fee, PHP 500 revision add-ons, 50% project-file add-ons, order drafts, reset-on-submit, sticky Project Data headers, input masks, unified payment ledger styling, and compact stacked receipt totals.

@@ -1,66 +1,12 @@
-/*
- * JUAN PROJECT WORKSPACE — Offline cache
- * Update CACHE_NAME when you intentionally want every browser to refresh cached assets.
- */
-const CACHE_NAME = 'juan-project-workspace-v1-2026-cache-117';
-const CORE_ASSETS = [
-  "./",
-  "./index.html",
-  "./manifest.webmanifest",
-  "./css/core.css",
-  "./css/visual-language.css",
-  "./css/responsive.css",
-  "./css/overview-assistant.css",
-  "./css/management-layout.css",
-  "./css/interactions-scroll.css",
-  "./css/project-catalog.css",
-  "./css/items-security-performance.css",
-  "./css/payments-invoice-urgency.css",
-  "./css/catalog-calendar-receipts.css",
-  "./css/typography-guided-assistant.css",
-  "./css/mobile-viewer.css",
-  "./css/shop-refinement.css",
-  "./js/app.js",
-  "./js/assistant-bridge.js",
-  "./js/assistant.js",
-  "./js/pwa.js",
-  "./js/mobile-viewer.js",
-  "./assets/apple-touch-icon.png",
-  "./assets/icon-192.png",
-  "./assets/icon-512.png",
-  "./assets/icon-1024.png",
-  "./assets/favicon-64.png",
-  "./ocr/tesseract.min.js"
-];
-
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(CORE_ASSETS))
-      .then(() => self.skipWaiting())
-  );
-});
-
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))))
-      .then(() => self.clients.claim())
-  );
-});
-
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  const url = new URL(event.request.url);
-  if (url.origin !== self.location.origin) return;
-
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        const copy = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, copy));
-        return response;
-      })
-      .catch(() => caches.match(event.request).then(hit => hit || caches.match('./index.html')))
-  );
+/* JUAN PROJECT WORKSPACE — resilient offline shell and sync coordinator */
+const CACHE_NAME='juan-project-workspace-v1-2026-cache-118';
+const CORE_ASSETS=['./','./index.html','./manifest.webmanifest','./css/core.css','./css/visual-language.css','./css/responsive.css','./css/overview-assistant.css','./css/management-layout.css','./css/interactions-scroll.css','./css/project-catalog.css','./css/items-security-performance.css','./css/payments-invoice-urgency.css','./css/catalog-calendar-receipts.css','./css/typography-guided-assistant.css','./css/mobile-viewer.css','./css/shop-refinement.css','./js/app.js','./js/assistant.js','./js/pwa.js','./js/mobile-viewer.js','./assets/apple-touch-icon.png','./assets/icon-192.png','./assets/icon-512.png','./assets/icon-1024.png','./assets/favicon-64.png','./ocr/tesseract.min.js'];
+self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE_NAME).then(cache=>cache.addAll(CORE_ASSETS)).then(()=>self.skipWaiting())));
+self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE_NAME).map(k=>caches.delete(k)))).then(()=>self.clients.claim()).then(()=>notifyClients('SW_READY'))));
+async function notifyClients(type,detail={}){const clients=await self.clients.matchAll({type:'window',includeUncontrolled:true});clients.forEach(c=>c.postMessage({type,...detail}));}
+self.addEventListener('message',event=>{if(event.data?.type==='SKIP_WAITING')self.skipWaiting();if(event.data?.type==='NETWORK_ONLINE')event.waitUntil(notifyClients('SYNC_REQUESTED'));});
+self.addEventListener('fetch',event=>{const req=event.request,url=new URL(req.url);if(url.origin!==self.location.origin)return;if(req.method!=='GET')return;
+  if(url.pathname.startsWith('/api/')){event.respondWith(fetch(req,{cache:'no-store'}));return;}
+  if(req.mode==='navigate'){event.respondWith((async()=>{try{const fresh=await fetch(req);const cache=await caches.open(CACHE_NAME);cache.put('./index.html',fresh.clone());return fresh}catch(_){return (await caches.match(req))||(await caches.match('./index.html'))}})());return;}
+  event.respondWith((async()=>{const cached=await caches.match(req);const network=fetch(req).then(async res=>{if(res.ok){const cache=await caches.open(CACHE_NAME);cache.put(req,res.clone())}return res}).catch(()=>null);return cached||(await network)||new Response('Offline',{status:503,headers:{'Content-Type':'text/plain'}})})());
 });

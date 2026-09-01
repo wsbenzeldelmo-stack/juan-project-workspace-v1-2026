@@ -22,11 +22,10 @@ function formatCurrency(amount) {
       const toast = document.createElement("div");
       toast.className = "toast";
       
-      let html = `<span>${message}</span>`;
+      const messageSpan=document.createElement('span');messageSpan.textContent=String(message??'');toast.appendChild(messageSpan);
       if (actionLabel && actionCallback) {
-        html += `<button class="btn btn-sm btn-primary" style="padding: 2px 8px; font-size: 12px; margin-left: 8px;">${actionLabel}</button>`;
+        const action=document.createElement('button');action.className='btn btn-sm btn-primary';action.style.cssText='padding:2px 8px;font-size:12px;margin-left:8px';action.textContent=String(actionLabel);toast.appendChild(action);
       }
-      toast.innerHTML = html;
 
       if (actionLabel && actionCallback) {
         toast.querySelector("button").onclick = () => {
@@ -151,6 +150,8 @@ function formatCurrency(amount) {
       const SYSTEM_MAINTENANCE_FEE = 21;
       const REVISION_FEE_PER_REVISION = 500;
       let supabaseClient = null;
+      let cloudProjectSyncTimer = null;
+      let cloudHydrating = false;
 
       let state = {
         supabaseUrl: "",
@@ -232,46 +233,20 @@ function formatCurrency(amount) {
       let dragStart = { x: 0, y: 0 };
 
       async function initializeEnvironmentVariables() {
+        // Security boundary: no Supabase or Gemini secret is ever exposed to the browser.
+        // Cloud access is provided by same-origin /api/session + /api/data serverless proxies.
         state.supabaseUrl = "";
         state.supabaseAnonKey = "";
-
         try {
-          const response = await fetch("/api/supabase-config", {
-            method: "GET",
-            cache: "no-store",
-            headers: { "Accept": "application/json" }
-          });
-
-          const contentType = response.headers.get("content-type") || "";
-          const payload = contentType.includes("application/json")
-            ? await response.json()
-            : null;
-
-          if (!response.ok) {
-            throw new Error(payload?.error || `Configuration endpoint returned HTTP ${response.status}`);
-          }
-
-          state.supabaseUrl = String(payload?.SUPABASE_URL || "").trim().replace(/\/$/, "");
-          state.supabaseAnonKey = String(payload?.SUPABASE_ANON_KEY || "").trim();
-
-          if (!state.supabaseUrl || !state.supabaseAnonKey) {
-            throw new Error("Supabase configuration endpoint returned empty credentials.");
-          }
-
-          return true;
+          const response = await fetch("/api/session", {method:"GET",cache:"no-store",credentials:"same-origin",headers:{Accept:"application/json"}});
+          const payload = await response.json().catch(()=>({}));
+          state.csrfToken = String(payload.csrfToken||"");
+          state.cloudAuthenticated = !!payload.authenticated;
+          return state.cloudAuthenticated;
         } catch (error) {
-          console.error("Supabase configuration error:", error);
-
-          // Local fallback is retained for development only. Production should
-          // use the Vercel /api/supabase-config endpoint above.
-          state.supabaseUrl = (localStorage.getItem("SUPABASE_URL") || "").trim().replace(/\/$/, "");
-          state.supabaseAnonKey = (localStorage.getItem("SUPABASE_ANON_KEY") || "").trim();
-
-          if (!state.supabaseUrl || !state.supabaseAnonKey) {
-            state.isConnected = false;
-            return false;
-          }
-          return true;
+          console.warn("Secure cloud session unavailable; continuing offline.", error);
+          state.cloudAuthenticated = false;
+          return false;
         }
       }
 
@@ -351,7 +326,7 @@ function formatCurrency(amount) {
         // One continuous Project ID sequence, starting at JP-001 with no exceptions.
         renumberProjectSequence();
         // Normalize the system-defined maintenance rule for restored/older projects too.
-        state.projects.forEach(p=>{p.system_maintenance_charge=projectHasPackage(p)?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0;if(!Number.isFinite(Number(p.revision_count)))p.revision_count=0;if(!Number.isFinite(Number(p.revision_fee_per_revision)))p.revision_fee_per_revision=getFeeAmount('REVISION',REVISION_FEE_PER_REVISION);});ensureContinuousClientIds();persistClientsState();
+        state.projects.forEach(p=>{p.system_maintenance_charge=projectHasPackage(p)?SYSTEM_MAINTENANCE_FEE:0;if(!Number.isFinite(Number(p.revision_count)))p.revision_count=0;if(!Number.isFinite(Number(p.revision_fee_per_revision)))p.revision_fee_per_revision=getFeeAmount('REVISION',REVISION_FEE_PER_REVISION);});ensureContinuousClientIds();persistClientsState();
         persistProjectsState();
         state.isConnected = false;
         updateConnectionStatus("connected", "OFFLINE · LOCAL");
@@ -389,7 +364,7 @@ function formatCurrency(amount) {
           payment_date: `${year}-01-${String(Math.min(28, (index % 28) + 1)).padStart(2,"0")}`,
           notes: ""
         }] : [];
-        return {
+      return {
           id: projectId,
           project_number: sheetProjectNumber,
           legacy_reference: rec.ref || "",
@@ -640,6 +615,7 @@ function formatCurrency(amount) {
 
       function persistProjectsState() {
         localStorage.setItem("JUAN_PROJECTS_LOCAL", JSON.stringify(state.projects));
+        scheduleActiveProjectCloudSync();
       }
 
       function persistCartState() {
@@ -901,76 +877,88 @@ ${description}`))actionCallback();return;}
         setTimeout(()=>window.location.reload(),750);
       }
 
+      const CLOUD_QUEUE_KEY='JUAN_CLOUD_MUTATION_QUEUE_V1';
+      function readCloudQueue(){try{return JSON.parse(localStorage.getItem(CLOUD_QUEUE_KEY)||'[]')}catch{return []}}
+      function writeCloudQueue(rows){localStorage.setItem(CLOUD_QUEUE_KEY,JSON.stringify(rows.slice(-300)))}
+      function enqueueCloudMutation(payload){const q=readCloudQueue();q.push({id:`q_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,createdAt:new Date().toISOString(),payload});writeCloudQueue(q);window.dispatchEvent(new CustomEvent('juan:sync-queued',{detail:{count:q.length}}));}
+      async function secureProxyRequest(payload,{allowQueue=true}={}){
+        const mutation=!['select'].includes(payload.operation);
+        try{const response=await fetch('/api/data',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','Accept':'application/json',...(state.csrfToken?{'X-CSRF-Token':state.csrfToken}:{})},body:JSON.stringify(payload)});const body=await response.json().catch(()=>({error:`HTTP ${response.status}`}));if(response.status===401){state.cloudAuthenticated=false;state.isConnected=false}if(!response.ok){if(mutation&&allowQueue&&(response.status>=500||response.status===0)){enqueueCloudMutation(payload);return {data:null,error:null,queued:true}}return {data:null,error:new Error(body.error||`HTTP ${response.status}`)}}return {data:body.data??null,error:null}}catch(error){if(mutation&&allowQueue){enqueueCloudMutation(payload);return {data:null,error:null,queued:true}}return {data:null,error}}
+      }
+      async function flushCloudQueue(){if(!navigator.onLine||!state.cloudAuthenticated)return;const q=readCloudQueue();if(!q.length)return;const pending=[];for(const item of q){const r=await secureProxyRequest(item.payload,{allowQueue:false});if(r.error)pending.push(item)}writeCloudQueue(pending);if(!pending.length)showToast('Cloud sync is up to date.');}
+
+      function createSecureDataClient(){
+        const request=async(table,operation,payload={})=>secureProxyRequest({table,operation,...payload});
+        const from=table=>({
+          select(columns='*'){const q={table,operation:'select',columns,filters:[],orderBy:null};const chain={eq(k,v){q.filters.push([k,v]);return chain},order(k,o={}){q.orderBy={column:k,ascending:o.ascending!==false};return request(table,'select',q)},then(resolve,reject){return request(table,'select',q).then(resolve,reject)}};return chain},
+          insert(rows){return request(table,'insert',{rows})},
+          upsert(rows){return request(table,'upsert',{rows})},
+          update(values){const filters=[];return {eq(k,v){filters.push([k,v]);return request(table,'update',{values,filters})}}},
+          delete(){const filters=[];return {eq(k,v){filters.push([k,v]);return request(table,'delete',{filters})}}}
+        });
+        return {from,auth:{getSession:async()=>({data:{session:state.cloudAuthenticated?{}:null},error:state.cloudAuthenticated?null:new Error('Cloud session not authenticated')})}};
+      }
+
+      function cloudProjectRow(project){
+        return {
+          id:project.id,project_number:Number(project.project_number||projectNumber(project)||0)||null,
+          client_id:project.client_id||null,client_name:project.client_name||'',client_email:project.client_email||'',client_phone:project.client_phone||'',client_address:project.client_address||'',
+          title:project.title||'',status:project.status||'In Progress',delivery_status:project.delivery_status||'Pending',start_date:project.start_date||null,deadline_date:project.deadline_date||null,payment_due_date:project.payment_due_date||null,
+          total_amount:Number(project.total_amount||0),subtotal_amount:Number(project.subtotal_amount||0),discount_amount:Number(project.discount_amount||0),rush_fee:Number(project.rush_fee||0),workload_rush_rate:Number(project.workload_rush_rate||0),workload_rush_fee:Number(project.workload_rush_fee||0),workload_at_booking:Number(project.workload_at_booking||0),rush_days_early:Number(project.rush_days_early||0),rush_base_fee:Number(project.rush_base_fee||0),rush_load_factor:Number(project.rush_load_factor||0),rush_project_workload:Number(project.rush_project_workload||0),system_maintenance_charge:Number(project.system_maintenance_charge||0),
+          project_type:project.project_type||'',priority:!!project.priority,notes:project.notes||'',deliverables:Array.isArray(project.deliverables)?project.deliverables:[],deadline_auto:project.deadline_auto!==false,
+          invoice_number:project.invoice_number||null,invoice_issue_date:project.invoice_issue_date||null,invoice_due_date:project.invoice_due_date||null,deleted:!!project.deleted,archived_at:project.archived_at||null,
+          created_at:project.created_at||new Date().toISOString(),updated_at:project.updated_at||project.created_at||new Date().toISOString()
+        };
+      }
+      function cloudProjectItemRows(project){return (project.project_items||[]).map((item,index)=>({id:item.id||`item_${project.id}_${index}`,project_id:project.id,name:item.name||'',qty:Math.max(1,Number(item.qty||1)),price:Number(item.price||0),type:item.type||'SOLO',addon_type:item.addon_type||null,product_code:item.product_code||null,source_product_code:item.source_product_code||null,source_item_name:item.source_item_name||null,category:item.category||'',item_discount:Number(item.item_discount||0),sort_order:index,created_at:item.created_at||project.created_at||new Date().toISOString(),updated_at:item.updated_at||project.updated_at||new Date().toISOString()}));}
+      function cloudDeliverableRows(project){return (project.deliverables||[]).map((d,index)=>({id:d.id||`del_${project.id}_${index}`,project_id:project.id,name:d.name||d.item_name||'',item_name:d.item_name||d.name||'',status:d.status||(d.completed?'Completed':'Pending'),completed:!!d.completed,progress:Number(d.progress||(d.completed?100:0)),parent_id:d.parent_id||null,is_group:!!d.is_group,source_type:d.source_type||null,order_item_id:d.order_item_id||null,order_item_occurrence:Number(d.order_item_occurrence||0)||null,package_name:d.package_name||null,completed_at:d.completed_at||null,sort_order:index,created_at:d.created_at||project.created_at||new Date().toISOString(),updated_at:d.updated_at||project.updated_at||new Date().toISOString()}));}
+      function cloudPaymentRows(project){return (project.payments||[]).map((pay,index)=>({id:pay.id||`pay_${project.id}_${index}`,project_id:project.id,amount_paid:Number(pay.amount_paid||pay.amount||0),payment_date:pay.payment_date||null,payment_method:pay.payment_method||pay.method||'',reference_no:pay.reference_no||pay.reference_number||'',notes:pay.notes||'',created_at:pay.created_at||new Date().toISOString(),updated_at:pay.updated_at||pay.created_at||new Date().toISOString()}));}
+      async function syncProjectBundleToDatabase(project){
+        if(!supabaseClient||!state.isConnected||!state.cloudAuthenticated||!project)return;
+        if(project.deleted){await supabaseClient.from('projects').delete().eq('id',project.id);return;}
+        const parent=await supabaseClient.from('projects').upsert([cloudProjectRow(project)]);if(parent?.error)throw parent.error;
+        for(const [table,rows] of [['project_items',cloudProjectItemRows(project)],['deliverables',cloudDeliverableRows(project)],['payments',cloudPaymentRows(project)]]){
+          const removed=await supabaseClient.from(table).delete().eq('project_id',project.id);if(removed?.error)throw removed.error;
+          if(rows.length){const added=await supabaseClient.from(table).insert(rows);if(added?.error)throw added.error;}
+        }
+      }
+      function scheduleActiveProjectCloudSync(){
+        if(cloudHydrating||!state.isConnected||!state.cloudAuthenticated||!supabaseClient||!state.activeProjectId)return;
+        clearTimeout(cloudProjectSyncTimer);cloudProjectSyncTimer=setTimeout(async()=>{const project=state.projects.find(p=>String(p.id)===String(state.activeProjectId));if(!project)return;try{await syncProjectBundleToDatabase(project)}catch(e){console.warn('Project cloud synchronization deferred:',e?.message||e)}},650);
+      }
+      async function bootstrapCloudFromLocal(){
+        if(!supabaseClient||!state.isConnected||!state.cloudAuthenticated)return;
+        const clients=(state.clients||[]).filter(c=>c?.id).map(c=>({id:c.id,name:c.name||'',email:c.email||'',phone:c.phone||'',address:c.address||'',notes:c.notes||'',client_number:Number(c.client_number||0)||null,created_at:c.created_at||new Date().toISOString(),updated_at:c.updated_at||c.created_at||new Date().toISOString()}));
+        const projects=(state.projects||[]).filter(p=>!p.deleted&&p?.id);
+        if(clients.length){const r=await supabaseClient.from('clients').upsert(clients);if(r?.error)throw r.error;}
+        if(projects.length){const r=await supabaseClient.from('projects').upsert(projects.map(cloudProjectRow));if(r?.error)throw r.error;}
+        const items=projects.flatMap(cloudProjectItemRows),deliverables=projects.flatMap(cloudDeliverableRows),payments=projects.flatMap(cloudPaymentRows);
+        if(items.length){const r=await supabaseClient.from('project_items').upsert(items);if(r?.error)throw r.error;}
+        if(deliverables.length){const r=await supabaseClient.from('deliverables').upsert(deliverables);if(r?.error)throw r.error;}
+        if(payments.length){const r=await supabaseClient.from('payments').upsert(payments);if(r?.error)throw r.error;}
+      }
+
       async function initSupabase() {
         updateConnectionStatus("connecting", "CONNECTING...");
-
         try {
-          if (!window.supabase || typeof window.supabase.createClient !== "function") {
-            throw new Error("Supabase client library did not load.");
-          }
-          if (!state.supabaseUrl || !state.supabaseAnonKey) {
-            throw new Error("Supabase configuration is missing.");
-          }
-          if (!/^https:\/\/[^\s]+\.supabase\.co(?:\/.*)?$/i.test(state.supabaseUrl)) {
-            throw new Error("SUPABASE_URL is invalid.");
-          }
-
-          supabaseClient = window.supabase.createClient(
-            state.supabaseUrl,
-            state.supabaseAnonKey,
-            {
-              auth: {
-                persistSession: true,
-                autoRefreshToken: true,
-                detectSessionInUrl: false
-              }
-            }
-          );
-
-          // Verify the Supabase client itself. This does not require a logged-in user.
-          const { error: sessionError } = await supabaseClient.auth.getSession();
-          if (sessionError) throw new Error(`Supabase authentication check failed: ${sessionError.message}`);
-
-          state.isConnected = true;
+          const ok=await initializeEnvironmentVariables();
+          if(!ok) throw new Error('Cloud session is locked. Local mode remains available.');
+          supabaseClient=createSecureDataClient();
+          state.isConnected=true;
           updateConnectionStatus("connected", "● CONNECTED");
-
-          // Table/RLS errors are handled separately. They must not turn a valid
-          // Supabase connection into NOT CONNECTED.
           await loadDatabaseData();
+          await flushCloudQueue();
+          window.dispatchEvent(new CustomEvent('juan:cloud-connected'));
           return true;
         } catch (err) {
-          console.error("Supabase connection error:", err);
-          state.isConnected = false;
-          supabaseClient = null;
-          updateConnectionStatus("error", "○ NOT CONNECTED");
-          const detail = err?.message ? ` ${err.message}` : "";
-          showToast(`Supabase connection failed.${detail} Local data is still available.`, "Retry", () => initSupabase());
-
-          const localProjs = localStorage.getItem("JUAN_PROJECTS_LOCAL");
-          if (localProjs) {
-            try { state.projects = JSON.parse(localProjs); }
-            catch (e) { console.error("Invalid local projects data:", e); }
-          }
-          const localClients = localStorage.getItem("JUAN_CLIENTS_LOCAL");
-          if (localClients) {
-            try { state.clients = JSON.parse(localClients); }
-            catch (e) { console.error("Invalid local clients data:", e); }
-          }
-          renderCurrentView();
+          state.isConnected=false;supabaseClient=null;updateConnectionStatus("offline", "OFFLINE · LOCAL");
+          console.warn('Cloud sync unavailable:',err?.message||err);
           return false;
         }
       }
 
-      function updateConnectionStatus(type, text) {
-        const el = document.getElementById("connectionStatusIndicator");
-        const txt = document.getElementById("statusText");
-        if (el && txt) {
-          el.className = `connection-status status-${type}`;
-          txt.innerText = text;
-        }
-      }
-
       async function loadDatabaseData() {
+        cloudHydrating=true;
         try {
           const [clientsRes, projectsRes] = await Promise.all([
             supabaseClient ? supabaseClient.from('clients').select('*').order('name') : { data: [] },
@@ -993,15 +981,18 @@ ${description}`))actionCallback();return;}
             } catch(e){}
           }
 
+          const remoteWasEmpty = !(projectsRes.data||[]).length;
+          const uploadAfterLoad=[];
           let fetchedProjects = projectsRes.data || [];
           const localProjs = localStorage.getItem("JUAN_PROJECTS_LOCAL");
           if (localProjs) {
             try {
               const parsedLocal = JSON.parse(localProjs);
               parsedLocal.forEach(lp => {
-                if (!fetchedProjects.some(fp => fp.id === lp.id)) {
-                  fetchedProjects.push(lp);
-                }
+                const idx=fetchedProjects.findIndex(fp=>String(fp.id)===String(lp.id));
+                if(idx<0){fetchedProjects.push(lp);uploadAfterLoad.push(lp);return;}
+                const localStamp=Date.parse(lp.updated_at||lp.created_at||0)||0,remoteStamp=Date.parse(fetchedProjects[idx].updated_at||fetchedProjects[idx].created_at||0)||0;
+                if(localStamp>remoteStamp){fetchedProjects[idx]=lp;uploadAfterLoad.push(lp);}
               });
             } catch(e){}
           }
@@ -1009,7 +1000,11 @@ ${description}`))actionCallback();return;}
           loadTasksState();
 
           renderCurrentView();
+          cloudHydrating=false;
+          if(remoteWasEmpty&&(state.projects.length||state.clients.length)){try{await bootstrapCloudFromLocal();showToast('New Supabase database initialized from this workspace.');}catch(e){console.warn('Initial cloud bootstrap failed:',e?.message||e);}}
+          else if(uploadAfterLoad.length){for(const project of uploadAfterLoad){try{await syncProjectBundleToDatabase(project)}catch(e){console.warn('Offline project reconciliation deferred:',project.id,e?.message||e);}}}
         } catch (err) {
+          cloudHydrating=false;
           console.error("Database error:", err);
           showToast("Warning: Could not load all data from the database. Local data remains available.", "Retry", () => loadDatabaseData());
           const localProjs = localStorage.getItem("JUAN_PROJECTS_LOCAL");
@@ -1061,14 +1056,10 @@ ${description}`))actionCallback();return;}
       }
 function getProjectMaintenanceFee(proj) {
   const fee=getFeeConfig('SYSTEM_MAINTENANCE');
-  return projectHasPackage(proj)&&fee.active!==false?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0;
+  return projectHasPackage(proj)&&fee.active!==false?SYSTEM_MAINTENANCE_FEE:0;
 }
-function getProjectRevisionFee(proj){
-  const count=Math.max(0,Math.floor(Number(proj?.revision_count||0)));
-  const configured=getFeeConfig('REVISION');
-  const rate=Number.isFinite(Number(proj?.revision_fee_per_revision))?Number(proj.revision_fee_per_revision):getFeeAmount('REVISION',REVISION_FEE_PER_REVISION);
-  return configured.active===false?0:count*Math.max(0,rate);
-}
+function getProjectRevisionFee(proj){ return 0; } // Revision requests are explicit PHP 500 ADDON order items.
+
       function getProjectInvoiceTotal(proj){return Math.max(0,Number(proj?.total_amount||0))+getProjectMaintenanceFee(proj)+getProjectRevisionFee(proj);}
 
       function getProjectBalance(proj) {
@@ -1657,7 +1648,7 @@ function calculateRushFromTimeline(startValue,deadlineValue,standardDays=14,deli
         const id=state.activeClientId,c=state.clients.find(x=>x.id===id);if(!c)return;const cid=clientDisplayId(c),projects=state.projects.filter(p=>!p.deleted&&(p.client_id===id||p.client_name===c.name)),paid=projects.reduce((s,p)=>s+getProjectPaid(p),0),total=projects.reduce((s,p)=>s+getProjectInvoiceTotal(p),0);
         document.getElementById('clientProfileName').innerText=c.name||'Client';document.getElementById('clientProfileEmail').innerText=`${cid}${c.email?` · ${c.email}`:''}`;const saveState=document.getElementById('clientProfileSaveState');if(saveState)saveState.textContent='Saved';
         const paymentRows=projects.flatMap(p=>(p.payments||[]).map(pay=>({project:p,payment:pay}))).sort((a,b)=>new Date(b.payment.payment_date||b.payment.created_at||0)-new Date(a.payment.payment_date||a.payment.created_at||0));
-        document.getElementById('clientProfileContent').innerHTML=`<div class="client-profile-layout"><div class="card client-profile-card"><div class="client-profile-identity"><div class="client-profile-avatar">${escapeHtml((c.name||'C').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase())}</div><div><span class="client-id-pill">${escapeHtml(cid)}</span><h2>${escapeHtml(c.name||'Client')}</h2><p>Client details are saved automatically.</p></div></div><div class="client-profile-form"><div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="clientProfileNameInput" placeholder="Full name or business name" value="${escapeHtml(c.name||'')}" onchange="app.autosaveClientProfileField()"></div><div class="form-group"><label class="form-label">Email</label><input class="form-control" id="clientProfileEmailInput" type="email" placeholder="client@example.com" value="${escapeHtml(c.email||'')}" onchange="app.autosaveClientProfileField()"></div><div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="clientProfilePhoneInput" inputmode="tel" placeholder="+63 963 754 4777" value="${escapeHtml(normalizePhilippinePhone(c.phone)||c.phone||'')}" onblur="this.value=app.normalizePhilippinePhone(this.value);app.autosaveClientProfileField()"></div><div class="form-group"><label class="form-label">Address</label><input class="form-control" id="clientProfileAddressInput" placeholder="City, Province" value="${escapeHtml(c.address||'')}" onchange="app.autosaveClientProfileField()"></div></div></div><div class="client-stat-grid client-profile-stats"><div class="mini-stat"><div class="label">Projects</div><div class="value">${projects.length}</div></div><div class="mini-stat"><div class="label">Project Value</div><div class="value">${formatCurrency(total)}</div></div><div class="mini-stat"><div class="label">Paid</div><div class="value">${formatCurrency(paid)}</div></div><div class="mini-stat"><div class="label">Outstanding</div><div class="value">${formatCurrency(Math.max(0,total-paid))}</div></div></div></div><div class="card mt-6"><div class="card-header"><div><div class="section-kicker">HISTORY</div><h2 class="card-title">Projects</h2></div></div><div class="table-responsive"><table class="data-table unified-table"><thead><tr><th>Project ID</th><th>Project</th><th>Value</th><th>Balance</th><th>Status</th></tr></thead><tbody>${projects.sort((a,b)=>projectNumber(a)-projectNumber(b)).map(p=>`<tr onclick="app.openProjectDetails('${p.id}')" style="cursor:pointer"><td><strong>${escapeHtml(formatProjectId(p))}</strong></td><td>${escapeHtml(p.title)}</td><td>${formatCurrency(getProjectInvoiceTotal(p))}</td><td>${formatCurrency(getProjectBalance(p))}</td><td>${escapeHtml(p.status||'')}</td></tr>`).join('')||`<tr><td colspan="5" class="text-muted text-center">No projects.</td></tr>`}</tbody></table></div></div><div class="card mt-6"><div class="card-header"><div><div class="section-kicker">FINANCE</div><h2 class="card-title">Payment History</h2></div></div>${paymentRows.length?`<div class="payment-transaction-list">${paymentRows.map(({project,payment})=>`<div class="payment-transaction-row client-history-payment"><div class="payment-transaction-main"><strong>${escapeHtml(formatProjectId(project))} · ${escapeHtml(project.title||'Project')}</strong><span>${escapeHtml(payment.payment_method||payment.method||'Payment')}${payment.reference_no?` · Ref ${escapeHtml(payment.reference_no)}`:''}</span></div><div class="payment-transaction-value"><strong>+${formatCurrency(payment.amount_paid||payment.amount||0)}</strong><span>${escapeHtml(payment.payment_date||'')}</span></div></div>`).join('')}</div>`:`<div class="payment-history-empty"><strong>No payment history</strong><span>Recorded client payments will appear here.</span></div>`}</div>`;
+        document.getElementById('clientProfileContent').innerHTML=`<div class="client-profile-layout"><div class="card client-profile-card"><div class="client-profile-identity"><div class="client-profile-avatar">${escapeHtml((c.name||'C').split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase())}</div><div><span class="client-id-pill">${escapeHtml(cid)}</span><h2>${escapeHtml(c.name||'Client')}</h2><p>Client details are saved automatically.</p></div></div><div class="client-profile-form"><div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="clientProfileNameInput" placeholder="Full name or business name" value="${escapeHtml(c.name||'')}" onchange="app.autosaveClientProfileField()"></div><div class="form-group"><label class="form-label">Email</label><input class="form-control" id="clientProfileEmailInput" type="email" placeholder="client@example.com" value="${escapeHtml(c.email||'')}" onchange="app.autosaveClientProfileField()"></div><div class="form-group"><label class="form-label">Phone</label><input class="form-control" id="clientProfilePhoneInput" inputmode="tel" placeholder="+63 963 754 4777" value="${escapeHtml(normalizePhilippinePhone(c.phone)||c.phone||'')}" onblur="this.value=app.normalizePhilippinePhone(this.value);app.autosaveClientProfileField()"></div><div class="form-group"><label class="form-label">Address</label><input class="form-control" id="clientProfileAddressInput" placeholder="City, Province" value="${escapeHtml(c.address||'')}" onchange="app.autosaveClientProfileField()"></div></div></div><div class="client-stat-grid client-profile-stats"><div class="mini-stat"><div class="label">Projects</div><div class="value">${projects.length}</div></div><div class="mini-stat"><div class="label">Project Value</div><div class="value">${formatCurrency(total)}</div></div><div class="mini-stat"><div class="label">Paid</div><div class="value">${formatCurrency(paid)}</div></div><div class="mini-stat"><div class="label">Outstanding</div><div class="value">${formatCurrency(Math.max(0,total-paid))}</div></div></div></div><div class="card mt-6"><div class="card-header"><div><div class="section-kicker">HISTORY</div><h2 class="card-title">Projects</h2></div></div><div class="table-responsive"><table class="data-table unified-table"><thead><tr><th>Project ID</th><th>Project</th><th>Value</th><th>Balance</th><th>Status</th></tr></thead><tbody>${projects.sort((a,b)=>projectNumber(a)-projectNumber(b)).map(p=>`<tr onclick="app.openProjectDetails('${p.id}')" style="cursor:pointer"><td><strong>${escapeHtml(formatProjectId(p))}</strong></td><td>${escapeHtml(p.title)}</td><td>${formatCurrency(getProjectInvoiceTotal(p))}</td><td>${formatCurrency(getProjectBalance(p))}</td><td>${escapeHtml(p.status||'')}</td></tr>`).join('')||`<tr><td colspan="5" class="text-muted text-center">No projects.</td></tr>`}</tbody></table></div></div><div class="card mt-6"><div class="card-header"><div><div class="section-kicker">FINANCE</div><h2 class="card-title">Payment History</h2></div></div>${paymentRows.length?`<div class="payment-history-unified">${paymentRows.map(({project,payment})=>`<div class="payment-history-unified-row client-history-payment"><div class="payment-history-unified-main"><strong>${escapeHtml(formatProjectId(project))} · ${escapeHtml(project.title||'Project')}</strong><span>${escapeHtml(payment.payment_method||payment.method||'Payment')}${payment.reference_no?` · Ref ${escapeHtml(payment.reference_no)}`:''}</span></div><div class="payment-history-unified-amount"><strong>+${formatCurrency(payment.amount_paid||payment.amount||0)}</strong><span>${escapeHtml(payment.payment_date||'')}</span></div></div>`).join('')}</div>`:`<div class="payment-history-empty"><strong>No payment history</strong><span>Recorded client payments will appear here.</span></div>`}</div>`;
       }
       function autosaveClientProfileField(){
         const c=state.clients.find(x=>x.id===state.activeClientId);if(!c)return;const name=document.getElementById('clientProfileNameInput')?.value.trim()||'',email=document.getElementById('clientProfileEmailInput')?.value.trim()||'',phone=normalizePhilippinePhone(document.getElementById('clientProfilePhoneInput')?.value||''),address=document.getElementById('clientProfileAddressInput')?.value.trim()||'',status=document.getElementById('clientProfileSaveState');
@@ -2068,7 +2059,7 @@ function calculateRushFromTimeline(startValue,deadlineValue,standardDays=14,deli
 
         const rushFee = Number(state.cart.rushFee || 0);
         const workloadRushFee = Number(state.cart.workloadRushFee || 0);
-        const maintenanceFee=state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0;
+        const maintenanceFee=state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0;
         const total = Math.max(0, subtotal - discountAmount + rushFee + workloadRushFee + maintenanceFee);
 
         document.getElementById("summarySubtotal").innerText = formatCurrency(grossSubtotal); const itemDiscRow=document.getElementById("summaryItemDiscountRow"),itemDiscEl=document.getElementById("summaryItemDiscount");if(itemDiscRow)itemDiscRow.style.display=itemDiscountTotal>0?"flex":"none";if(itemDiscEl)itemDiscEl.innerText=`- ${formatCurrency(itemDiscountTotal)}`;
@@ -2219,15 +2210,15 @@ function updateRushCalculations() {
 
         const body = document.getElementById("orderSummaryModalBody");
         body.innerHTML = `
-          <div class="mb-4"><strong>Project Name:</strong> ${projectName}</div>
-          <div class="mb-4"><strong>Client:</strong> ${clientName}</div>
+          <div class="mb-4"><strong>Project Name:</strong> ${escapeHtml(projectName)}</div>
+          <div class="mb-4"><strong>Client:</strong> ${escapeHtml(clientName)}</div>
           <div class="mb-4"><strong>Start Date:</strong> ${state.cart.startDate}</div>
           <div class="mb-4"><strong>Deadline Date:</strong> ${state.cart.deadlineDate}</div>
           <div class="divider"></div>
           <div class="font-bold mb-2">Order Items:</div>
-          ${state.cart.items.map(i => `<div class="summary-row"><span>${i.name} (x${i.qty})</span><span>${formatCurrency(i.price * i.qty)}</span></div>`).join("")}
+          ${state.cart.items.map(i => `<div class="summary-row"><span>${escapeHtml(i.name)} (x${Math.max(1,Number(i.qty||1))})</span><span>${formatCurrency(i.price * i.qty)}</span></div>`).join("")}
           <div class="divider"></div>
-          ${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0)+ (state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0))>0?`<div class="summary-section-label additional-fees-heading">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))>0?`<div class="summary-row compact-fee-row"><span>Rush Fee</span><span>${formatCurrency(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))}</span></div>`:''}${state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-row compact-fee-row"><span>System Maintenance Fee</span><span>${formatCurrency(getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE))}</span></div>`:''}
+          ${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0)+ (state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0))>0?`<div class="summary-section-label additional-fees-heading">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))>0?`<div class="summary-row compact-fee-row"><span>Rush Fee</span><span>${formatCurrency(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))}</span></div>`:''}${state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-row compact-fee-row"><span>System Maintenance Fee</span><span>${formatCurrency(SYSTEM_MAINTENANCE_FEE)}</span></div>`:''}
           <div class="summary-row summary-total"><span>Total Amount</span><span>${document.getElementById("summaryTotal").innerText}</span></div>
         `;
 
@@ -2236,23 +2227,8 @@ function updateRushCalculations() {
 
       async function syncProjectToDatabase(project) {
         if (!supabaseClient || !state.isConnected || !project) return;
-        try {
-          const { error } = await supabaseClient.from('projects').insert([{
-            id: project.id,
-            client_id: project.client_id,
-            client_name: project.client_name,
-            title: project.title,
-            status: project.status,
-            total_amount: project.total_amount,
-            start_date: project.start_date,
-            deadline_date: project.deadline_date
-          }]);
-          if (error) throw error;
-          showToast("Project synchronized successfully.");
-        } catch (e) {
-          console.error("Project sync retry failed:", e);
-          showToast(`Project sync failed: ${e.message || e}`);
-        }
+        try { await syncProjectBundleToDatabase(project); showToast("Project synchronized successfully."); }
+        catch (e) { console.error("Project sync retry failed:", e); showToast(`Project sync failed: ${e.message || e}`); }
       }
 
       async function syncPaymentToDatabase(project, payment) {
@@ -2295,6 +2271,7 @@ function updateRushCalculations() {
         if (!supabaseClient || !state.isConnected || !client) return;
         try {
           const { error } = await supabaseClient.from('clients').insert([{
+            id: client.id,
             name: client.name,
             email: client.email,
             phone: client.phone,
@@ -2409,7 +2386,7 @@ function updateRushCalculations() {
           rush_base_fee: Number(calculateRushFromTimeline(state.cart.startDate,state.cart.deadlineDate,standardProductionDaysForCart(),projectWorkloadDeliverableCountFromItems(state.cart.items)).baseFee||0),
           rush_load_factor: Number(calculateRushFromTimeline(state.cart.startDate,state.cart.deadlineDate,standardProductionDaysForCart(),projectWorkloadDeliverableCountFromItems(state.cart.items)).loadFactor||1),
           rush_project_workload: Number(projectWorkloadDeliverableCountFromItems(state.cart.items)||0),
-          system_maintenance_charge: state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE') ? getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE) : 0,
+          system_maintenance_charge: state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE') ? SYSTEM_MAINTENANCE_FEE : 0,
           project_type: "",
           priority: (()=>{const start=parseDateSafe(state.cart.startDate),due=parseDateSafe(state.cart.deadlineDate),standard=standardProductionDaysForCart(),days=start&&due?Math.ceil((due-start)/86400000):standard;return rushFee>0||days<standard;})(),
           project_items: state.cart.items.map((i,index) => ({ id:i.id||`oi_new_${Date.now()}_${index}`, name: i.name, price: i.price, qty: i.qty, type: i.type, item_discount:String(i.type||'').toUpperCase()==='PACKAGE'?0:Number(i.item_discount||0), product_code:i.product_code||i.code||null, category:i.category||"" })),
@@ -2431,26 +2408,8 @@ function updateRushCalculations() {
         persistProjectsState();
 
         if (supabaseClient && state.isConnected) {
-          try {
-            await supabaseClient.from('projects').insert([{
-              id: newProject.id,
-              client_id: newProject.client_id,
-              client_name: newProject.client_name,
-              title: newProject.title,
-              status: newProject.status,
-              total_amount: newProject.total_amount,
-              subtotal_amount: newProject.subtotal_amount,
-              discount_amount: newProject.discount_amount,
-              rush_fee: newProject.rush_fee,
-              rush_days_early: newProject.rush_days_early,
-              project_type: newProject.project_type,
-              start_date: newProject.start_date,
-              deadline_date: newProject.deadline_date
-            }]);
-          } catch(e) {
-            console.error("Database operation failed while creating project:", e);
-            showToast("Warning: Project was saved locally, but could not sync to the database.", "Retry", () => syncProjectToDatabase(newProject));
-          }
+          try { await syncProjectBundleToDatabase(newProject); }
+          catch(e) { console.error("Database operation failed while creating project:", e); showToast("Warning: Project was saved locally, but could not sync to the database.", "Retry", () => syncProjectToDatabase(newProject)); }
         }
 
         // A successful order always leaves New Order blank for the next entry.
@@ -2647,7 +2606,7 @@ function recalculateProjectFromOrderItems(proj) {
   const itemDiscountTotal=items.reduce((sum,item)=>{if(['PACKAGE','ADDON'].includes(String(item.type||'').toUpperCase()))return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0);
   const subtotal=Math.max(0,grossSubtotal-itemDiscountTotal);
   proj.subtotal_amount = subtotal;proj.item_discount_amount=itemDiscountTotal;
-  proj.system_maintenance_charge=items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0;
+  proj.system_maintenance_charge=items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0;
   const discount = Math.max(0, Number(proj.discount_amount || 0));
   const stdDays=standardProductionDaysForProject(proj);
   if(proj.start_date&&(!proj.deadline_date||proj.deadline_auto===true)){proj.deadline_date=addDaysToDateString(proj.start_date,stdDays);proj.deadline_auto=true;}
@@ -2688,12 +2647,12 @@ function renderProjectOrderItems(proj) {
   const rows=items.length ? items.map((item,index)=>{
     const type=String(item.type||'').toUpperCase();
     const rawCategory=String(item.category||'').trim();
-    const visibleCategory=type==='PACKAGE'?'Package':type==='ADDON'?'Project File Request':(!rawCategory||['SOLO','SERVICE','ITEM'].includes(rawCategory.toUpperCase())?'Item':rawCategory);
+    const visibleCategory=type==='PACKAGE'?'Package':type==='ADDON'?(String(item.addon_type||'').toUpperCase()==='REVISION'?'Revision Request':String(item.addon_type||'').toUpperCase()==='PROJECT_FILE'?'Project File Request':'Additional Item'):(!rawCategory||['SOLO','SERVICE','ITEM'].includes(rawCategory.toUpperCase())?'Item':rawCategory);
     const line=Number(item.price||0)*Math.max(1,Number(item.qty||1)),lineDisc=['PACKAGE','ADDON'].includes(type)?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-lineDisc,menuId=`orderItemMenu_${index}`;
     return `<div class="order-item-row"><div class="order-item-main"><strong>${escapeHtml(item.name||'Untitled Item')}</strong><span>${escapeHtml(visibleCategory)}${item.source_item_name?` · ${escapeHtml(item.source_item_name)}`:''} · Qty ${Math.max(1,Number(item.qty||1))}${lineDisc?` · Discount ${formatCurrency(lineDisc)}`:''}</span></div><div class="order-item-price"><strong>${formatCurrency(net)}</strong><span>${formatCurrency(Number(item.price||0))} each</span></div><div class="order-item-actions"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Order item options" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openProjectOrderItemModal(${index})">Edit Order Item</button><button class="popover-action text-danger" onclick="app.requestDeleteProjectOrderItem(${index},event)">Remove Order Item</button></div></div></div></div>`;
   }).join('') : `<div class="text-muted py-4">No order items yet.</div>`;
-  const grossSubtotal=items.reduce((s,i)=>s+Number(i.price||0)*Math.max(1,Number(i.qty||1)),0),itemDisc=items.reduce((s,i)=>{const type=String(i.type||'').toUpperCase();if(['PACKAGE','ADDON'].includes(type))return s;const line=Number(i.price||0)*Math.max(1,Number(i.qty||1));return s+Math.min(line,Math.max(0,Number(i.item_discount||0)));},0),subtotal=Math.max(0,grossSubtotal-itemDisc),discount=Math.max(0,Number(proj.discount_amount||0)),baseRush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),combinedRush=baseRush+workloadFee,revisionFee=getProjectRevisionFee(proj),maintenance=getProjectMaintenanceFee(proj),displayTotal=Math.max(0,subtotal-discount+combinedRush+revisionFee+maintenance),revisionCount=Math.max(0,Math.floor(Number(proj.revision_count||0)));
-  box.innerHTML=`<div class="project-order-items-list">${rows}</div>${revisionCount?`<div class="project-request-summary-row"><div><strong>Revision Request${revisionCount===1?'':'s'}</strong><span>${revisionCount} × ${formatCurrency(Number(proj.revision_fee_per_revision||getFeeAmount('REVISION',500)))}</span></div><div class="project-request-summary-actions"><strong>${formatCurrency(revisionFee)}</strong><button class="icon-more-button vertical-more" title="Revision request options" onclick="app.removeProjectRevisionRequest()">⋮</button></div></div>`:''}<div class="project-items-summary"><div class="rush-line"><span>Item Subtotal</span><strong>${formatCurrency(grossSubtotal)}</strong></div>${itemDisc?`<div class="rush-line"><span>Item Discounts</span><strong>− ${formatCurrency(itemDisc)}</strong></div>`:''}${discount?`<div class="rush-line"><span>Project Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:''}${(combinedRush||revisionFee||maintenance)?`<div class="project-items-fee-label">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${combinedRush?`<div class="rush-line compact-fee-row"><span>Rush Fee</span><strong>+ ${formatCurrency(combinedRush)}</strong></div>`:''}${revisionFee?`<div class="rush-line compact-fee-row"><span>Revision Fee</span><strong>+ ${formatCurrency(revisionFee)}</strong></div>`:''}${maintenance?`<div class="rush-line compact-fee-row"><span>System Maintenance Fee</span><strong>+ ${formatCurrency(maintenance)}</strong></div>`:''}<div class="project-items-grand-total"><span>Project Total</span><strong>${formatCurrency(displayTotal)}</strong></div></div>`;
+  const grossSubtotal=items.reduce((s,i)=>s+Number(i.price||0)*Math.max(1,Number(i.qty||1)),0),itemDisc=items.reduce((s,i)=>{const type=String(i.type||'').toUpperCase();if(['PACKAGE','ADDON'].includes(type))return s;const line=Number(i.price||0)*Math.max(1,Number(i.qty||1));return s+Math.min(line,Math.max(0,Number(i.item_discount||0)));},0),subtotal=Math.max(0,grossSubtotal-itemDisc),discount=Math.max(0,Number(proj.discount_amount||0)),baseRush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),combinedRush=baseRush+workloadFee,revisionFee=0,maintenance=getProjectMaintenanceFee(proj),displayTotal=Math.max(0,subtotal-discount+combinedRush+maintenance);
+  box.innerHTML=`<div class="project-order-items-list">${rows}</div><div class="project-items-summary"><div class="rush-line"><span>Item Subtotal</span><strong>${formatCurrency(grossSubtotal)}</strong></div>${itemDisc?`<div class="rush-line"><span>Item Discounts</span><strong>− ${formatCurrency(itemDisc)}</strong></div>`:''}${discount?`<div class="rush-line"><span>Project Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:''}${(combinedRush||revisionFee||maintenance)?`<div class="project-items-fee-label">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${combinedRush?`<div class="rush-line compact-fee-row"><span>Rush Fee</span><strong>+ ${formatCurrency(combinedRush)}</strong></div>`:''}${revisionFee?`<div class="rush-line compact-fee-row"><span>Revision Fee</span><strong>+ ${formatCurrency(revisionFee)}</strong></div>`:''}${maintenance?`<div class="rush-line compact-fee-row"><span>System Maintenance Fee</span><strong>+ ${formatCurrency(maintenance)}</strong></div>`:''}<div class="project-items-grand-total"><span>Project Total</span><strong>${formatCurrency(displayTotal)}</strong></div></div>`;
 }
       function getProjectCatalogChoices(query=''){
         const q=String(query||'').trim().toLowerCase();
@@ -2838,6 +2797,7 @@ function openProjectOrderBatchModal(){
         return new Promise((resolve,reject)=>{
           if(!file){resolve(null);return}
           if(file.size>3*1024*1024){reject(new Error('Receipt must be 3 MB or smaller to keep the workspace fast.'));return}
+          const allowed=['image/jpeg','image/png','image/webp','application/pdf'];if(!allowed.includes(String(file.type||'').toLowerCase())){reject(new Error('Receipt must be JPG, PNG, WEBP, or PDF.'));return}
           const reader=new FileReader();reader.onload=()=>resolve({data:reader.result,name:file.name,type:file.type||'application/octet-stream'});reader.onerror=()=>reject(new Error('Could not read receipt file.'));reader.readAsDataURL(file);
         });
       }
@@ -2872,8 +2832,8 @@ function openProjectOrderBatchModal(){
           if(record){Object.assign(record,{amount_paid:draft.amount,amount:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no,notes:draft.notes,updated_at:new Date().toISOString()});if(draft.receipt_data)Object.assign(record,{receipt_data:draft.receipt_data,receipt_name:draft.receipt_name,receipt_type:draft.receipt_type});}
         }
         if(!record){record={id:'pay_'+Date.now(),project_id:proj.id,amount_paid:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no,notes:draft.notes,receipt_data:draft.receipt_data||'',receipt_name:draft.receipt_name||'',receipt_type:draft.receipt_type||'',created_at:new Date().toISOString()};if(!proj.payments)proj.payments=[];proj.payments.push(record);}
-        proj.pending_amount=Math.max(0,getProjectInvoiceTotal(proj)-getProjectPaid(proj));proj.payment_status=getProjectPaymentStatus(proj);persistProjectsState();
-        if(supabaseClient&&state.isConnected){try{if(draft.editingId)await supabaseClient.from('payments').update({amount_paid:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no}).eq('id',draft.editingId);else await supabaseClient.from('payments').insert([{project_id:proj.id,amount_paid:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no}]);}catch(e){console.warn('Payment sync unavailable:',e.message);}}
+        proj.pending_amount=Math.max(0,getProjectInvoiceTotal(proj)-getProjectPaid(proj));proj.payment_status=getProjectPaymentStatus(proj);proj.updated_at=new Date().toISOString();persistProjectsState();
+        if(supabaseClient&&state.isConnected){try{await syncProjectBundleToDatabase(proj)}catch(e){console.warn('Payment sync unavailable:',e.message);}}
         renderPaymentTracker(proj);renderInvoicePaper(proj);renderPaymentsView();renderOverviewDashboard();showActionStatus('Payment Successful',draft.editingId?'Payment changes were saved.':'Payment was recorded successfully.',true);state.editingPaymentId=null;setTimeout(()=>closeModal('actionStatusModal'),750);
       }
       function viewPaymentReceipt(paymentId){
@@ -3595,7 +3555,7 @@ function openFeeInfo(type='all'){
       function openAdditionalFeeModal(code=''){
         ensureAdditionalFees();const fee=code?getFeeConfig(code):null;document.getElementById('additionalFeeModalTitle').textContent=fee?'Edit Fee':'Add Fee';document.getElementById('additionalFeeCode').value=fee?.code||'';document.getElementById('additionalFeeName').value=fee?.name||'';document.getElementById('additionalFeeAmount').value=fee?.amount??'';document.getElementById('additionalFeeRule').value=fee?.rule||'manual';document.getElementById('additionalFeeDescription').value=fee?.description||'';document.getElementById('additionalFeeActive').checked=fee?.active!==false;document.getElementById('additionalFeeDeleteBtn')?.classList.toggle('hidden',!fee||fee.locked);enforceWordLimit(document.getElementById('additionalFeeDescription'),45,'additionalFeeDescriptionCount');openModal('additionalFeeModal');
       }
-      function saveAdditionalFee(){
+      function saveAdditionalFee(){const lockedCode=String(document.getElementById('additionalFeeCode')?.value||'').toUpperCase();if(lockedCode==='REVISION')document.getElementById('additionalFeeAmount').value=REVISION_FEE_PER_REVISION;if(lockedCode==='SYSTEM_MAINTENANCE')document.getElementById('additionalFeeAmount').value=SYSTEM_MAINTENANCE_FEE;
         ensureAdditionalFees();let code=String(document.getElementById('additionalFeeCode')?.value||'').trim().toUpperCase(),name=document.getElementById('additionalFeeName')?.value.trim()||'',amount=Math.max(0,Number(document.getElementById('additionalFeeAmount')?.value||0)),rule=document.getElementById('additionalFeeRule')?.value||'manual',description=document.getElementById('additionalFeeDescription')?.value.trim()||'',active=!!document.getElementById('additionalFeeActive')?.checked;if(!name){showToast('Fee name is required.');return;}if(!code){code='CUSTOM_'+Date.now();state.additionalFees.push({code,name,amount,rule,description,active,locked:false});}else{const fee=state.additionalFees.find(f=>f.code===code);if(fee)Object.assign(fee,{name,amount,rule,description,active});}
         persistAdditionalFees();state.projects.forEach(p=>{if(projectHasPackage(p))p.system_maintenance_charge=getFeeAmount('SYSTEM_MAINTENANCE',21);});persistProjectsState();closeModal('additionalFeeModal');renderAdditionalFeesManager();updateCartCalculations();const proj=state.projects.find(p=>p.id===state.activeProjectId);if(proj){recalculateProjectFromOrderItems(proj);renderProjectOrderItems(proj);renderInvoicePaper(proj);}showToast('Additional fee updated.');
       }
@@ -3633,12 +3593,21 @@ function openFeeInfo(type='all'){
       }
       function renderProjectFileRequestOptions(proj){const sel=document.getElementById('projectFileRequestItem');if(!sel)return;state.projectFileRequestChoices=getProjectFileRequestChoices(proj);sel.innerHTML=state.projectFileRequestChoices.length?state.projectFileRequestChoices.map((x,i)=>`<option value="${i}">${escapeHtml(x.name)} · ${formatCurrency(x.price)} → request ${formatCurrency(x.price*.5)}</option>`).join(''):'<option value="">No eligible item</option>';}
       function refreshProjectAfterRequest(proj){recalculateProjectFromOrderItems(proj);syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);renderOverviewDashboard();}
-      function addProjectRevisionRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const fee=getFeeAmount('REVISION',500);proj.revision_count=Math.max(0,Math.floor(Number(proj.revision_count||0)))+1;proj.revision_fee_per_revision=fee;proj.updated_at=new Date().toISOString();refreshProjectAfterRequest(proj);showToast(`Revision request added · ${formatCurrency(fee)}.`);}
-      function removeProjectRevisionRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const count=Math.max(0,Math.floor(Number(proj.revision_count||0)));if(!count)return;proj.revision_count=count-1;proj.updated_at=new Date().toISOString();refreshProjectAfterRequest(proj);showToast('One revision request removed.');}
+      function addProjectRevisionRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;if(!Array.isArray(proj.project_items))proj.project_items=[];const fee=REVISION_FEE_PER_REVISION;proj.project_items.push({id:`oi_${proj.id}_revision_${Date.now()}`,name:'Revision Request',qty:1,price:fee,type:'ADDON',addon_type:'REVISION',category:'Requests',item_discount:0});proj.revision_count=0;proj.revision_fee_per_revision=fee;refreshProjectAfterRequest(proj);showToast(`Revision request added · ${formatCurrency(fee)}.`);}
+      function removeProjectRevisionRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj||!Array.isArray(proj.project_items))return;const i=[...proj.project_items].map((x,idx)=>[x,idx]).reverse().find(([x])=>String(x.addon_type||'').toUpperCase()==='REVISION')?.[1];if(i===undefined)return;proj.project_items.splice(i,1);refreshProjectAfterRequest(proj);showToast('Revision request removed.');}
       function addProjectFileRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const idx=Number(document.getElementById('projectFileRequestItem')?.value),choice=(state.projectFileRequestChoices||[])[idx];if(!choice){showToast('Choose the item for the project file request.');return;}if(!Array.isArray(proj.project_items))proj.project_items=[];const price=Math.round(choice.price*.5*100)/100;proj.project_items.push({id:`oi_${proj.id}_file_${Date.now()}`,name:'Project File Request',source_item_name:choice.name,qty:1,price,type:'ADDON',addon_type:'PROJECT_FILE',product_code:null,source_product_code:choice.code||null,category:'Project Files',item_discount:0});refreshProjectAfterRequest(proj);renderProjectFileRequestOptions(proj);showToast(`Project file request added · ${formatCurrency(price)}.`);}
+
+      function openCloudLogin(){const input=document.getElementById('cloudPasswordInput');if(input)input.value='';const err=document.getElementById('cloudLoginError');if(err)err.textContent='';openModal('cloudLoginModal');setTimeout(()=>input?.focus(),40);}
+      async function connectCloud(){const input=document.getElementById('cloudPasswordInput'),err=document.getElementById('cloudLoginError');const password=input?.value||'';if(!password){if(err)err.textContent='Enter the workspace password.';return}try{const response=await fetch('/api/session',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({password})});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||'Cloud sign-in failed');state.csrfToken=body.csrfToken||'';state.cloudAuthenticated=true;closeModal('cloudLoginModal');await initSupabase();showToast('Secure cloud sync connected.')}catch(e){if(err)err.textContent=e.message||'Cloud sign-in failed'}}
+      async function disconnectCloud(){try{await fetch('/api/session',{method:'DELETE',credentials:'same-origin',headers:{'X-CSRF-Token':state.csrfToken||''}})}catch{}state.cloudAuthenticated=false;state.isConnected=false;supabaseClient=null;state.csrfToken='';updateConnectionStatus('offline','OFFLINE · LOCAL');showToast('Cloud sync disconnected.');}
 
       return {
         initWorkspace,
+        initSupabase,
+        flushCloudQueue,
+        openCloudLogin,
+        connectCloud,
+        disconnectCloud,
         openWorkspaceClock,
         saveOrderDraft,
         openOrderDrafts,

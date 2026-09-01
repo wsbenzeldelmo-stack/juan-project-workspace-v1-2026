@@ -2,7 +2,7 @@
  * JUAN PROJECT WORKSPACE — assistant.js
  * ------------------------------------------------------------------
  * PURPOSE: Guided JUAN Assistant workflow: suggested topics, controlled data-entry flow, project lookups, reminders and bubble behavior.
- * LOAD ORDER: 3 of 4 local modules (the OCR library may load between modules).
+ * UNIFIED ENGINE: owns assistant navigation, composer actions, bubble state, reminders and OCR binding.
  *
  * MAINTENANCE TIP:
  * - Search for `function <name>` or `app.<action>` to find a feature.
@@ -79,6 +79,6 @@
     async handle(file){if(!file)return;if(!String(file.type||'').startsWith('image/')){this.status('Reference detection works with image receipts. PDF can still be attached manually.');return}try{this.status('Preparing receipt for local OCR…','is-working');const canvas=await this.prepare(file),worker=await this.getWorker(),res=await worker.recognize(canvas),ref=this.reference(res?.data?.text||'');if(ref){const input=document.getElementById('paymentRefInput');if(input&&!input.value.trim())input.value=ref;this.status(`Reference detected: ${ref}`,'is-success')}else this.status('No reference number detected. You can enter it manually.')}catch(e){console.warn('Local OCR unavailable:',e);this.status('OCR unavailable. You can enter the reference number manually.','is-error')}},
     bind(){const input=document.getElementById('paymentReceiptInput');if(!input||input.dataset.ocrBound)return;input.dataset.ocrBound='1';input.addEventListener('change',()=>this.handle(input.files?.[0]||null))}
   };
-  document.addEventListener('DOMContentLoaded',()=>{juanAI.home(true);juanAI.refreshBubble();localOCR.bind()});
-  setTimeout(()=>{juanAI.refreshBubble();localOCR.bind()},250);
+  let booted=false;function bootAssistant(){if(booted)return;booted=true;juanAI.home(true);juanAI.refreshBubble();localOCR.bind();document.addEventListener('click',e=>{const send=e.target.closest('#assistantSendBtn');if(send){e.preventDefault();juanAI.send?.();}});document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target?.id==='assistantPageInput'){e.preventDefault();juanAI.send?.();}});window.addEventListener('storage',e=>{if(e.key===BUBBLE_KEY||e.key==='JUAN_PROJECTS_LOCAL')juanAI.refreshBubble();});}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootAssistant,{once:true});else bootAssistant();
 })();

@@ -58,3 +58,6 @@ Open **Settings → Data Backup & Restore → Restore JSON Backup**. The restore
 
 A Vercel deployment hosts the application code; it does not turn the JSON file into a shared cloud database. Restored data is saved to the browser's local workspace storage on that device. Use Supabase when you want the same database to sync across devices.
 
+
+## Secure deployment (2026-09-02 refactor)
+Cloud synchronization no longer exposes Supabase credentials in the browser. See `docs/SECURITY_AND_REDEPLOYMENT.md` for the required Vercel environment variables, secure cloud-session flow, Supabase RLS/revoke SQL, local testing, and redeployment checklist.

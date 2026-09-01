@@ -1,17 +1,8 @@
-/**
- * JUAN PROJECT WORKSPACE — pwa.js
- * ------------------------------------------------------------------
- * PURPOSE: Progressive Web App bootstrap. Registers the service worker after the page loads.
- * LOAD ORDER: 4 of 4 local modules (the OCR library may load between modules).
- *
- * MAINTENANCE TIP:
- * - Search for `function <name>` or `app.<action>` to find a feature.
- * - Make one logical change at a time and commit it with Git.
- * - Do not rename stored LocalStorage keys unless you also write a migration.
- */
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(err => console.warn('Service worker registration failed:', err));
-  });
-}
+/** JUAN PROJECT WORKSPACE — PWA/network synchronization coordinator */
+(function(){
+  let syncing=false;
+  async function requestCloudSync(){if(syncing||!navigator.onLine)return;syncing=true;try{await app.initSupabase?.();}catch(e){console.warn('Reconnect sync failed:',e)}finally{syncing=false}}
+  function setNetworkState(){if(navigator.onLine){navigator.serviceWorker?.controller?.postMessage({type:'NETWORK_ONLINE'});requestCloudSync();}else{document.getElementById('statusText')?.replaceChildren(document.createTextNode('OFFLINE · LOCAL'));}}
+  if('serviceWorker'in navigator){window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('./service-worker.js');if(reg.waiting)reg.waiting.postMessage({type:'SKIP_WAITING'});}catch(err){console.warn('Service worker registration failed:',err)}});navigator.serviceWorker.addEventListener('message',e=>{if(e.data?.type==='SYNC_REQUESTED'||e.data?.type==='SW_READY')requestCloudSync();});}
+  window.addEventListener('online',setNetworkState);window.addEventListener('offline',setNetworkState);window.addEventListener('focus',()=>{if(navigator.onLine)requestCloudSync()});
+})();
