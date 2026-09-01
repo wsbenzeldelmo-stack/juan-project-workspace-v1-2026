@@ -108,10 +108,6 @@
 </div>
 <div class="overview-calendar-shell"><div class="overview-calendar" id="overviewMiniCalendar"></div></div>
 <div class="overview-upcoming-events" id="overviewUpcomingEvents"></div>
-<div class="overview-flip-clock" id="overviewFlipClock" role="button" tabindex="0" onclick="app.openWorkspaceClock()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();app.openWorkspaceClock();}" aria-label="Open current time">
-  <div class="flip-clock-copy"><span>CURRENT TIME</span><small id="overviewClockDate">Today</small></div>
-  <div class="flip-clock-digits" aria-live="off"><span id="overviewClockHours">00</span><b>:</b><span id="overviewClockMinutes">00</span><b>:</b><span id="overviewClockSeconds">00</span><em id="overviewClockPeriod">AM</em></div>
-</div>
 </div>
 </div>
 </div>
@@ -181,9 +177,10 @@
 <div class="greeting-subtitle">Workflow</div>
 <h1 class="page-title">New Order Entry</h1>
 </div>
-<div class="action-buttons-group order-draft-actions">
-<button class="btn btn-secondary" onclick="app.openOrderDrafts()">Drafts <span class="draft-count-badge" id="orderDraftCount">0</span></button>
-<button class="btn btn-secondary" onclick="app.saveOrderDraft()">Save Draft</button>
+<div style="display: flex; gap: 12px; align-items: center;">
+<select class="form-control" id="templateSelectDropdown" onchange="app.loadProjectTemplate(this.value)" style="max-width: 220px;">
+<option value="">-- Load Template --</option>
+</select>
 </div>
 </header>
 <div class="order-grid">
@@ -286,7 +283,7 @@
 <span class="rush-duration">Duration: <strong id="orderDurationDays">14 days</strong></span>
 <span class="rush-simple-label" id="rushFeeBadge">STANDARD</span>
 </div>
-<div class="rush-fee-amount"><span>Rush Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('rush')" aria-label="About Rush Fee">i</button></span><strong id="orderRushFeeText">₱0.00</strong></div>
+<div class="rush-fee-amount"><span>Rush Fee <button type="button" class="inline-info-button" onclick="app.openFeeInfo('rush')" aria-label="About Rush Fee">i</button></span><strong id="orderRushFeeText">₱0.00</strong></div><div class="rush-factors-summary rush-factors-hidden" id="rushFactorsSummary" aria-live="polite"></div>
 </div>
 <div class="divider"></div>
 <div class="cart-summary-rows">
@@ -334,7 +331,7 @@
 <header class="page-header"><div><div class="greeting-subtitle">Workspace</div><h1 class="page-title">Projects</h1></div><button class="btn btn-primary" onclick="app.navigateTo('new-order')">+ New Order</button></header>
 <div class="view-toolbar unified-toolbar projects-toolbar">
 <input class="form-control" id="projectsSearch" oninput="app.queueViewRender('projects')" placeholder="Search Project ID, project name, client, or category..."/>
-<div class="toolbar-actions"><div class="filter-pills" id="projectFilters"></div><label class="sort-capsule"><span>Sort</span><select id="projectsSort" onchange="app.setListSort('projects',this.value)"><option value="default">Default</option><option value="id">By ID</option><option value="priority">By Priority</option></select></label></div>
+<div class="toolbar-actions"><select class="compact-sort" id="projectsSort" onchange="app.setListSort('projects',this.value)"><option value="default">Default</option><option value="id">By ID</option><option value="priority">By Priority</option></select><div class="filter-pills" id="projectFilters"></div></div>
 </div>
 <div class="card table-card">
 <div class="table-responsive">
@@ -366,7 +363,6 @@
 </section>
 <!-- VIEW 3: PROJECT DETAILS -->
 <section class="view" id="view-project-details">
-<div class="project-detail-sticky-shell">
 <header class="page-header">
 <div>
 <button class="btn-text mb-2" onclick="app.navigateTo('projects')">
@@ -408,16 +404,15 @@
 <button class="tab-btn" data-project-tab="invoice" onclick="app.switchProjectTab('invoice', event)">Invoice</button>
 <button class="tab-btn" data-project-tab="notes" onclick="app.switchProjectTab('notes', event)">Notes</button>
 </div>
-</div>
 <div class="tab-content" id="projTab-project-data">
 <div class="project-data-grid">
 <div class="card project-data-card project-client-display-card" onclick="app.openProjectDataClientProfile()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();app.openProjectDataClientProfile();}">
 <div class="card-header"><div><div class="section-kicker">CLIENT</div><h3 class="card-title">Client Information</h3><div class="text-sm text-muted mt-1">View client profile to edit contact details.</div></div><span class="client-card-arrow">›</span></div>
 <div class="project-data-form-grid project-client-readonly-grid">
-<div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="projectDataClientName" placeholder="Full name or business name" readonly tabindex="-1"/></div>
-<div class="form-group"><label class="form-label">Email Address</label><input class="form-control" id="projectDataClientEmail" placeholder="client@example.com" readonly tabindex="-1" type="email"/></div>
-<div class="form-group"><label class="form-label">Phone Number</label><input class="form-control" id="projectDataClientPhone" placeholder="+63 963 754 4777" readonly tabindex="-1"/></div>
-<div class="form-group"><label class="form-label">Address</label><input class="form-control" id="projectDataClientAddress" placeholder="City, Province" readonly tabindex="-1"/></div>
+<div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="projectDataClientName" readonly tabindex="-1"/></div>
+<div class="form-group"><label class="form-label">Email Address</label><input class="form-control" id="projectDataClientEmail" readonly tabindex="-1" type="email"/></div>
+<div class="form-group"><label class="form-label">Phone Number</label><input class="form-control" id="projectDataClientPhone" readonly tabindex="-1"/></div>
+<div class="form-group"><label class="form-label">Address</label><input class="form-control" id="projectDataClientAddress" readonly tabindex="-1"/></div>
 </div>
 </div>
 <div class="card project-data-card project-data-project-card">
@@ -427,6 +422,7 @@
 <div class="form-group"><label class="form-label">Project Name</label><input class="form-control" id="projectDataProjectName" oninput="app.scheduleProjectDataAutosave()"/></div>
 <div class="form-group"><label class="form-label">Project Start Date</label><input class="form-control" id="projectDataStartDate" onchange="app.handleProjectDataStartDateChange();app.scheduleProjectDataAutosave()" type="date"/></div>
 <div class="form-group"><label class="form-label">Project Deadline</label><input class="form-control" id="projectDataDeadline" onchange="app.handleProjectDataDeadlineChange();app.scheduleProjectDataAutosave()" type="date"/><div class="project-data-rush-live" id="projectDataRushLive"></div></div>
+<div class="form-group"><label class="form-label">Revisions</label><input class="form-control" id="projectDataRevisionCount" min="0" step="1" type="number" value="0" oninput="app.scheduleProjectDataAutosave()"/><div class="text-sm text-muted mt-1">₱500 per revision</div></div>
 </div>
 <div class="project-priority-toggle-row">
 <div><strong>Priority</strong></div>
@@ -543,10 +539,6 @@
 <div class="catalog-manager-main">
 <div class="card table-card" id="catalogServicesCard"><div class="catalog-panel-heading catalog-table-heading"><div><div class="section-kicker" id="catalogItemsKicker">ITEMS</div><h2 class="card-title" id="catalogSelectedCategoryTitle">All Shop Items</h2></div><div class="catalog-heading-actions"><button class="btn btn-primary btn-sm" id="catalogAddItemBtn" onclick="app.openCatalogServiceModal()">+ Add Item</button><button aria-label="Maximize items" class="icon-action-button" onclick="app.openCatalogSectionFullView('items')" title="Maximize items"><svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="15 3 21 3 21 9"></polyline><line x1="14" x2="21" y1="10" y2="3"></line><polyline points="9 21 3 21 3 15"></polyline><line x1="10" x2="3" y1="14" y2="21"></line></svg></button></div></div><div class="table-responsive"><table class="data-table unified-table catalog-services-table"><thead id="catalogServicesHead"><tr><th>Item / Service</th><th>Description</th><th>Price</th><th class="actions-col"></th></tr></thead><tbody id="catalogServicesBody"></tbody></table></div></div>
 <div class="card table-card" id="catalogPackagesCard"><div class="catalog-panel-heading catalog-table-heading"><div><div class="section-kicker">PACKAGES</div><h2 class="card-title">Packages</h2></div><div class="catalog-heading-actions"><button class="btn btn-secondary btn-sm" onclick="app.openCatalogPackageModal()">Create Package</button><button aria-label="Maximize packages" class="icon-action-button" onclick="app.openCatalogSectionFullView('packages')" title="Maximize packages"><svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="15 3 21 3 21 9"></polyline><line x1="14" x2="21" y1="10" y2="3"></line><polyline points="9 21 3 21 3 15"></polyline><line x1="10" x2="3" y1="14" y2="21"></line></svg></button></div></div><div class="table-responsive"><table class="data-table unified-table catalog-packages-table"><thead><tr><th>Package</th><th>Inclusions</th><th>Original Price</th><th>Offer Price</th><th class="actions-col"></th></tr></thead><tbody id="catalogPackagesBody"></tbody></table></div></div>
-<div class="card table-card shop-fees-card" id="catalogAdditionalFeesCard">
-  <div class="catalog-panel-heading catalog-table-heading"><div><div class="section-kicker">ADDITIONAL FEES</div><h2 class="card-title">Fees</h2><div class="text-sm text-muted mt-1">Predefined charges and the short explanation shown by the info button.</div></div><div class="catalog-heading-actions"><button class="btn btn-secondary btn-sm" onclick="app.openAdditionalFeeModal()">+ Add Fee</button></div></div>
-  <div class="table-responsive"><table class="data-table unified-table shop-fees-table"><thead><tr><th>Fee</th><th>Charge</th><th>Rule</th><th>Info Preview</th><th class="actions-col"></th></tr></thead><tbody id="catalogAdditionalFeesBody"></tbody></table></div>
-</div>
 </div>
 </div>
 </section>
@@ -865,13 +857,6 @@
 <div class="modal-body">
 <div class="project-batch-toolbar"><div class="form-group project-batch-search"><label class="form-label">Find Items or Packages</label><input autocomplete="off" class="form-control" id="projectOrderBatchSearch" oninput="app.renderProjectOrderBatchChoices(this.value)" placeholder="Search Shop items or packages..."/></div><div class="project-batch-service-filters" id="projectOrderBatchServiceFilters" aria-label="Filter Shop by Service"></div></div>
 <div class="project-batch-picker" id="projectOrderBatchChoices"></div>
-<div class="project-request-panel">
-  <div class="project-request-head"><div><strong>Project Requests</strong><span>Add chargeable requests without creating production deliverables.</span></div></div>
-  <div class="project-request-actions">
-    <button class="project-request-action" type="button" onclick="app.addProjectRevisionRequest()"><span><strong>Revision Request</strong><small id="projectRevisionRequestPrice">₱500 per request</small></span><b>+</b></button>
-    <div class="project-file-request-action"><div><strong>Project File Request</strong><small>50% of the selected item's current Shop price.</small></div><div class="project-file-request-controls"><select class="form-control" id="projectFileRequestItem"></select><button class="btn btn-secondary btn-sm" type="button" onclick="app.addProjectFileRequest()">Add Request</button></div></div>
-  </div>
-</div>
 <div class="project-batch-custom">
 <div class="project-batch-custom-head"><strong>Custom item</strong><span>Use only when it is not in the Shop.</span></div>
 <div class="project-batch-custom-grid"><input class="form-control" id="projectBatchCustomName" placeholder="Item name"/><input aria-label="Quantity" class="form-control" id="projectBatchCustomQty" min="1" type="number" value="1"/><input class="form-control" id="projectBatchCustomPrice" min="0" placeholder="Price" step="0.01" type="number"/><button class="btn btn-secondary" onclick="app.addCustomProjectBatchItem()" type="button">Add</button></div>
@@ -955,12 +940,6 @@
 <div class="modal-backdrop" id="catalogCategoryModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">SHOP SERVICE</div><h3 class="modal-title" id="catalogCategoryModalTitle">Add Service</h3></div><button class="modal-close" onclick="app.closeModal('catalogCategoryModal')">×</button></div><div class="modal-body"><input id="catalogCategoryOldName" type="hidden"/><div class="form-group"><label class="form-label">Service Name</label><input class="form-control" id="catalogCategoryName" placeholder="Service name, e.g. TV Broadcast Graphics"/></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogCategoryDeleteBtn" onclick="app.deleteCatalogCategory()">Delete Service</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogCategoryModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogCategory()">Save Service</button></div></div></div>
 <div class="modal-backdrop" id="catalogServiceModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">SHOP ITEM</div><h3 class="modal-title" id="catalogServiceModalTitle">Add Item</h3></div><button class="modal-close" onclick="app.closeModal('catalogServiceModal')">×</button></div><div class="modal-body"><input id="catalogServiceCode" type="hidden"/><div class="form-group"><label class="form-label">Item Name</label><input class="form-control" id="catalogServiceName" placeholder="Item name"/></div><div class="form-group"><label class="form-label">Service</label><select class="form-control" id="catalogServiceCategory"></select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control fixed-notes-field" id="catalogServiceDescription" placeholder="Briefly describe this item" rows="3" oninput="app.enforceWordLimit(this,60,'catalogServiceDescriptionCount')"></textarea><div class="notes-word-count" id="catalogServiceDescriptionCount">0 / 60 words</div></div><div class="form-group"><label class="form-label">Price (₱)</label><input class="form-control" id="catalogServicePrice" min="0" step="0.01" type="number"/></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogServiceDeleteBtn" onclick="app.deleteCatalogService()">Delete Item</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogServiceModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogService()">Save Item</button></div></div></div>
 <div class="modal-backdrop" id="catalogPackageModal"><div class="modal-card modal-wide"><div class="modal-header"><div><div class="section-kicker">PACKAGE BUILDER</div><h3 class="modal-title" id="catalogPackageModalTitle">Create Package</h3></div><button class="modal-close" onclick="app.closeModal('catalogPackageModal')">×</button></div><div class="modal-body"><input id="catalogPackageCode" type="hidden"/><div class="form-grid"><div class="form-group"><label class="form-label">Package Name</label><input class="form-control" id="catalogPackageName" placeholder="Package name"/></div><div class="form-group"><label class="form-label">Service</label><select class="form-control" id="catalogPackageCategory" onchange="app.renderPackageServiceChoices(document.getElementById('catalogPackageServiceSearch').value)"></select></div></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-control fixed-notes-field" id="catalogPackageDescription" rows="3" placeholder="Briefly describe the package" oninput="app.enforceWordLimit(this,80,'catalogPackageDescriptionCount')"></textarea><div class="notes-word-count" id="catalogPackageDescriptionCount">0 / 80 words</div></div><div class="form-group"><label class="form-label">Inclusions</label><div class="text-sm text-muted mb-2">Select existing Items from this Service. Inclusions stay linked to the Shop items.</div><label class="form-label">Find Items</label><input class="form-control" id="catalogPackageServiceSearch" oninput="app.renderPackageServiceChoices(this.value)" placeholder="Type to search available items..."/><div class="package-service-picker" id="catalogPackageServiceChoices"></div></div><div class="package-builder-summary"><div><span>Original item total</span><strong id="catalogPackageOriginalTotal">₱0.00</strong></div><div class="form-group" style="margin:0"><label class="form-label">Offer / Discounted Price (₱)</label><input class="form-control" id="catalogPackageSellingPrice" min="0" step="0.01" type="number"/></div></div></div><div class="modal-footer catalog-modal-footer"><button class="btn btn-text text-danger hidden" id="catalogPackageDeleteBtn" onclick="app.deleteCatalogPackage()">Delete Package</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('catalogPackageModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveCatalogPackage()">Save Package</button></div></div></div>
-<!-- MODAL: WORKSPACE CLOCK -->
-<div class="modal-backdrop" id="workspaceClockModal"><div class="modal-card workspace-clock-modal-card"><div class="modal-header"><div><div class="section-kicker">CURRENT TIME</div><h3 class="modal-title" id="workspaceClockModalDate">Today</h3></div><button class="modal-close" onclick="app.closeModal('workspaceClockModal')">×</button></div><div class="modal-body"><div class="workspace-clock-large"><span id="workspaceClockHours">00</span><b>:</b><span id="workspaceClockMinutes">00</span><b>:</b><span id="workspaceClockSeconds">00</span><em id="workspaceClockPeriod">AM</em></div></div></div></div>
-<!-- MODAL: ORDER DRAFTS -->
-<div class="modal-backdrop" id="orderDraftsModal"><div class="modal-card modal-wide"><div class="modal-header"><div><div class="section-kicker">NEW ORDER</div><h3 class="modal-title">Draft Orders</h3></div><button class="modal-close" onclick="app.closeModal('orderDraftsModal')">×</button></div><div class="modal-body"><div class="draft-order-list" id="orderDraftsList"></div></div></div></div>
-<!-- MODAL: ADDITIONAL FEE EDITOR -->
-<div class="modal-backdrop" id="additionalFeeModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">SHOP FEE</div><h3 class="modal-title" id="additionalFeeModalTitle">Add Fee</h3></div><button class="modal-close" onclick="app.closeModal('additionalFeeModal')">×</button></div><div class="modal-body"><input type="hidden" id="additionalFeeCode"><div class="form-group"><label class="form-label">Fee Name</label><input class="form-control" id="additionalFeeName" placeholder="Fee name"></div><div class="form-grid"><div class="form-group"><label class="form-label">Amount (₱)</label><input class="form-control" id="additionalFeeAmount" min="0" step="0.01" type="number"></div><div class="form-group"><label class="form-label">Rule</label><select class="form-control" id="additionalFeeRule"><option value="per_4_days_early">Every 4 days earlier</option><option value="per_revision">Per revision</option><option value="package_once">Once with package</option><option value="manual">Manual</option></select></div></div><div class="form-group"><label class="form-label">Info Button Preview</label><textarea class="form-control fixed-notes-field" id="additionalFeeDescription" rows="3" placeholder="Short, easy-to-understand explanation" oninput="app.enforceWordLimit(this,45,'additionalFeeDescriptionCount')"></textarea><div class="notes-word-count" id="additionalFeeDescriptionCount">0 / 45 words</div></div><label class="fee-active-row"><span><strong>Active</strong><small>Show and use this fee where its rule applies.</small></span><label class="toggle-switch"><input id="additionalFeeActive" type="checkbox" checked><span class="toggle-slider"></span></label></label></div><div class="modal-footer"><button class="btn btn-text text-danger hidden" id="additionalFeeDeleteBtn" onclick="app.deleteAdditionalFee()">Delete Fee</button><span class="modal-footer-spacer"></span><button class="btn btn-secondary" onclick="app.closeModal('additionalFeeModal')">Cancel</button><button class="btn btn-primary" onclick="app.saveAdditionalFee()">Save Fee</button></div></div></div>
 <!-- MODAL: FEE INFORMATION -->
 <div class="modal-backdrop" id="feeInfoModal"><div class="modal-card fee-info-modal-card"><div class="modal-header"><div><div class="section-kicker">ADDITIONAL FEE</div><h3 class="modal-title" id="feeInfoTitle">Fee Information</h3></div><button class="modal-close" onclick="app.closeModal('feeInfoModal')">×</button></div><div class="modal-body" id="feeInfoBody"></div><div class="modal-footer"><span class="modal-footer-spacer"></span><button class="btn btn-primary" onclick="app.closeModal('feeInfoModal')">Got it</button></div></div></div>
 <!-- MODAL: CALENDAR EVENT / MEETING -->

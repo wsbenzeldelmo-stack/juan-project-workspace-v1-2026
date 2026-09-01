@@ -148,7 +148,7 @@ function formatCurrency(amount) {
     const SAMPLE_DATA_VERSION = "PAYMENT_TRACKER_2025_001_054_CONTINUOUS_V2";
     const LEGACY_SHEET_RECORDS = [{"ref":"2025-001-001","client":"imahemultimediaproductions@gmail.com","project":"FUN AND LAUGH WITH RON","project_type":"Social Media Managing","amount_due":13000.0,"amount_received":13000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-002","client":"yvonnemaedelgado@gmail.com","project":"iREPORT","project_type":"TV Broadcast Package","amount_due":10000.0,"amount_received":10000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-003","client":"trishakayemesana@gmail.com","project":"SIMULCAST","project_type":"TV Broadcast Package","amount_due":10000.0,"amount_received":10000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-004","client":"dkian032@gmail.com","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":3000.0,"amount_received":3000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-005","client":"dalumpinesmargaret@gmail.com","project":"THE PULSE NEWS","project_type":"Logo Animation","amount_due":800.0,"amount_received":800.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-006","client":"ramosdenmar03@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":11500.0,"amount_received":11500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-007","client":"ardienjamesgais@gmail.com","project":"DEPED X","project_type":"TV Broadcast Package","amount_due":4300.0,"amount_received":4300.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-008","client":"kztksem88@gmail.com","project":"HORIZON NEWS CENTRAL","project_type":"Blender Workshop","amount_due":1500.0,"amount_received":1500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-009","client":"oliver.villaruel@deped.gov.ph","project":"TUTOK PILIPINAS","project_type":"TV Broadcast Package","amount_due":8300.0,"amount_received":8300.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-010","client":"dimaanolorraine37@gmail.com","project":"BANTAY PILIPINAS","project_type":"TV Broadcast Package","amount_due":7500.0,"amount_received":7500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-011","client":"janellerinn@gmail.com","project":"MASID","project_type":"TV Broadcast Package","amount_due":7500.0,"amount_received":7500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-012","client":"ramosdenmar03@gmail.com","project":"KAMPUS KONEK 2","project_type":"TV Broadcast Package","amount_due":13000.0,"amount_received":13000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-013","client":"nikkazara29@gmail.com","project":"TOP NEWS","project_type":"TV Broadcast Package","amount_due":5000.0,"amount_received":5000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-014","client":"mamadoaalexanderissaiah@gmail.com","project":"ALISTO PUNTO","project_type":"TV Broadcast Package","amount_due":11000.0,"amount_received":11000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-015","client":"earljohnmapa12@gmail.com","project":"CAMPUS PATROL","project_type":"Logo Animation","amount_due":6000.0,"amount_received":6000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-016","client":"annefelicityrufo1@gmail.com","project":"CAMPUS PATROL","project_type":"OBB and CBB","amount_due":1700.0,"amount_received":1700.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-017","client":"sosadanica07@gmail.com","project":"DSPC TV","project_type":"OBB and CBB","amount_due":1700.0,"amount_received":1700.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-018","client":"ashleymaeramos001@gmail.com","project":"RONDA PILIPINAS","project_type":"OBB and CBB","amount_due":1700.0,"amount_received":1700.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-019","client":"leisoriano25@gmail.com","project":"RONDA PILIPINAS","project_type":"Blender Workshop","amount_due":2000.0,"amount_received":2000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-020","client":"bacalaaj@gmail.com","project":"SUBIC","project_type":"Logo Animation","amount_due":2720.0,"amount_received":2720.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-021","client":"oliver.villaruel@deped.gov.ph","project":"KAMPUS KONEK RSPC","project_type":"TV Broadcast Package","amount_due":10000.0,"amount_received":10000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-022","client":"calmorinjareen@gmail.com","project":"STRONGER CHAMPS PATROL","project_type":"TV Broadcast Package","amount_due":12100.0,"amount_received":12100.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-023","client":"danrowey2009@gmail.com","project":"BROADKAST PILIPINAS","project_type":"TV Broadcast Package","amount_due":7950.0,"amount_received":7950.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-024","client":"rapaconnicolo7@gmail.com","project":"CAMPUS PATROL RSPC","project_type":"TV Broadcast Package","amount_due":16450.0,"amount_received":16450.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-025","client":"mamadoaalexanderissaiah@gmail.com","project":"ALISTO PUNTO RSPC","project_type":"TV Broadcast Package","amount_due":10000.0,"amount_received":10000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-026","client":"apriljoy.tabingo@deped.gov.ph","project":"KAMPUS BALITAAN RSPC","project_type":"TV Broadcast Package","amount_due":8550.0,"amount_received":8550.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-027","client":"NATHANIEL VILLEGAS","project":"WATCH","project_type":"Interactive 3D Model","amount_due":6000.0,"amount_received":6000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-028","client":"michaelquinto33@gmail.com","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":12200.0,"amount_received":12200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-029","client":"acunamika67@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":13200.0,"amount_received":13200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-030","client":"caliaoalthea6@gmail.com","project":"CAMPUS ON SCREEN","project_type":"TV Broadcast Package","amount_due":5075.0,"amount_received":5075.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-031","client":"macarimbangesmail18@gmail.com","project":"THE NEWS AUTHORITY","project_type":"Headline Rundown","amount_due":2000.0,"amount_received":2000.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-032","client":"santos.amielelijah@gmail.com","project":"SINAG BALITA","project_type":"TV Broadcast Package","amount_due":7500.0,"amount_received":7500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-033","client":"annefelicityrufo1@gmail.com","project":"KAMPUS KONEK","project_type":"OBB","amount_due":1200.0,"amount_received":1200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-034","client":"Name","project":"MEMORIES","project_type":"TV Broadcast Package","amount_due":1200.0,"amount_received":1200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-035","client":"oliver.villaruel@deped.gov.ph","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":6600.0,"amount_received":1200.0,"payment_status":"Downpayment","pending":5400.0},{"ref":"2025-001-036","client":"kyledylan1921@gmail.com","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":8300.0,"amount_received":8300.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-037","client":"iannebaristol2005@gmail.com","project":"PICE-MUSC","project_type":"Logo Animation","amount_due":1500.0,"amount_received":1500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-038","client":"jetcastre5@gmail.com","project":"NEWSKO KONEK","project_type":"Logo Animation","amount_due":1200.0,"amount_received":1200.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-039","client":"oliver.villaruel@deped.gov.ph","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":2000.0,"amount_received":0.0,"payment_status":"Pending","pending":2000.0},{"ref":"2025-001-040","client":"sittieazhimagyusoph@gmail.com","project":"NOVARE","project_type":"Logo Animation","amount_due":5150.0,"amount_received":5150.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-041","client":"tjmercado1515@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":13300.0,"amount_received":4800.0,"payment_status":"Downpayment","pending":8500.0},{"ref":"2025-001-042","client":"allieyahbautista@gmail.com","project":"CAMPUS PATROL","project_type":"TV Broadcast Package","amount_due":11500.0,"amount_received":3284.0,"payment_status":"Pending","pending":8216.0},{"ref":"2025-001-043","client":"scharlesleendon@gmail.com","project":"RAMONIAN PULSE","project_type":"TV Broadcast Package","amount_due":7900.0,"amount_received":7900.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-044","client":"tagapulot.brianaziv@gmail.com","project":"ALUBIJID NCHS","project_type":"Logo Animation","amount_due":2500.0,"amount_received":2500.0,"payment_status":"Pending","pending":0.0},{"ref":"2025-001-045","client":"ardienjamesgais@gmail.com","project":"AKSYON PILIPINAS","project_type":"TV Broadcast Package","amount_due":4300.0,"amount_received":4300.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-046","client":"mtyap.pas@gmail.com","project":"ABS MANDIRIGMA","project_type":"TV Broadcast Package","amount_due":7500.0,"amount_received":0.0,"payment_status":"Pending","pending":7500.0},{"ref":"2025-001-047","client":"scharlesleendon@gmail.com","project":"RAMONIAN PULSE","project_type":"Video Editing","amount_due":6500.0,"amount_received":6500.0,"payment_status":"Completed","pending":0.0},{"ref":"2025-001-048","client":"babonmichaelneil@gmail.com","project":"TINIG BAYBAYIN","project_type":"TV Broadcast Package","amount_due":11800.0,"amount_received":10700.0,"payment_status":"Downpayment","pending":1100.0},{"ref":"2025-001-049","client":"caliguirankathleengrace@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":10800.0,"amount_received":5400.0,"payment_status":"Downpayment","pending":5400.0},{"ref":"2025-001-050","client":"brylevicmudo@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":7900.0,"amount_received":4000.0,"payment_status":"Downpayment","pending":3900.0},{"ref":"2025-001-051","client":"sharanfaten9@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":9500.0,"amount_received":4500.0,"payment_status":"Downpayment","pending":5000.0},{"ref":"2025-001-052","client":"mykellpatigayon949@gmail.com","project":"USAPANG NATIONALIAN","project_type":"Logo Animation","amount_due":1500.0,"amount_received":1500.0,"payment_status":"Downpayment","pending":0.0},{"ref":"2025-001-053","client":"ramosdenmar03@gmail.com","project":"KAMPUS KONEK","project_type":"TV Broadcast Package","amount_due":15000.0,"amount_received":0.0,"payment_status":"Downpayment","pending":15000.0},{"ref":"2025-001-054","client":"barejechad05@gmail.com","project":"CAMPUS NEWS","project_type":"TV Broadcast Package","amount_due":8500.0,"amount_received":4100.0,"payment_status":"Downpayment","pending":4400.0}];
     const app = (function() {
-      const SYSTEM_MAINTENANCE_FEE = 21;
+      const SYSTEM_MAINTENANCE_FEE = 19;
       const REVISION_FEE_PER_REVISION = 500;
       let supabaseClient = null;
 
@@ -326,9 +326,6 @@ function formatCurrency(amount) {
           if (!Array.isArray(state.manualEvents)) state.manualEvents = [];
         } catch(e) { state.manualEvents = []; }
 
-        ensureAdditionalFees();
-        loadOrderDraftsState();
-
         const addrInput = document.getElementById("ownerAddressInput");
         const phoneInput = document.getElementById("ownerPhoneInput");
         const emailInput = document.getElementById("ownerEmailInput");
@@ -351,14 +348,12 @@ function formatCurrency(amount) {
         // One continuous Project ID sequence, starting at JP-001 with no exceptions.
         renumberProjectSequence();
         // Normalize the system-defined maintenance rule for restored/older projects too.
-        state.projects.forEach(p=>{p.system_maintenance_charge=projectHasPackage(p)?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0;if(!Number.isFinite(Number(p.revision_count)))p.revision_count=0;if(!Number.isFinite(Number(p.revision_fee_per_revision)))p.revision_fee_per_revision=getFeeAmount('REVISION',REVISION_FEE_PER_REVISION);});ensureContinuousClientIds();persistClientsState();
+        state.projects.forEach(p=>{p.system_maintenance_charge=projectHasPackage(p)?SYSTEM_MAINTENANCE_FEE:0;if(!Number.isFinite(Number(p.revision_count)))p.revision_count=0;p.revision_fee_per_revision=REVISION_FEE_PER_REVISION;});ensureContinuousClientIds();persistClientsState();
         persistProjectsState();
         state.isConnected = false;
         updateConnectionStatus("connected", "OFFLINE · LOCAL");
         renderCurrentView();
         renderTemplatesDropdown();
-        updateDraftCountBadge();
-        startWorkspaceClock();
       }
 
 
@@ -1059,16 +1054,12 @@ ${description}`))actionCallback();return;}
         const items=proj?.project_items||proj?.items||[];
         return Array.isArray(items)&&items.some(i=>String(i?.type||'').toUpperCase()==='PACKAGE');
       }
-function getProjectMaintenanceFee(proj) {
-  const fee=getFeeConfig('SYSTEM_MAINTENANCE');
-  return projectHasPackage(proj)&&fee.active!==false?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0;
-}
-function getProjectRevisionFee(proj){
-  const count=Math.max(0,Math.floor(Number(proj?.revision_count||0)));
-  const configured=getFeeConfig('REVISION');
-  const rate=Number.isFinite(Number(proj?.revision_fee_per_revision))?Number(proj.revision_fee_per_revision):getFeeAmount('REVISION',REVISION_FEE_PER_REVISION);
-  return configured.active===false?0:count*Math.max(0,rate);
-}
+      function getProjectMaintenanceFee(proj) {
+        return projectHasPackage(proj)?SYSTEM_MAINTENANCE_FEE:0;
+      }
+      function getProjectRevisionFee(proj){
+        const count=Math.max(0,Math.floor(Number(proj?.revision_count||0)));return count*REVISION_FEE_PER_REVISION;
+      }
       function getProjectInvoiceTotal(proj){return Math.max(0,Number(proj?.total_amount||0))+getProjectMaintenanceFee(proj)+getProjectRevisionFee(proj);}
 
       function getProjectBalance(proj) {
@@ -1397,26 +1388,26 @@ function getProjectRevisionFee(proj){
         const fee=Math.round((base*rate/100)*100)/100;
         return {rate,fee,active};
       }
-function standardProductionDaysForItems(items=[]){
-  const list=(Array.isArray(items)?items:[]).filter(i=>!['ADDON','REQUEST'].includes(String(i?.type||'').toUpperCase()));
-  const hasPackage=list.some(i=>String(i?.type||'').toUpperCase()==='PACKAGE');
-  if(hasPackage)return 14;
-  const itemCount=list.reduce((sum,i)=>sum+Math.max(1,Math.round(Number(i?.qty||1))),0);
-  return itemCount>=2?14:7;
-}
+      function standardProductionDaysForItems(items=[]){
+        const list=Array.isArray(items)?items:[];
+        const hasPackage=list.some(i=>String(i?.type||'').toUpperCase()==='PACKAGE');
+        if(hasPackage)return 14;
+        const singleCount=list.reduce((sum,i)=>sum+Math.max(1,Math.round(Number(i?.qty||1))),0);
+        return singleCount>=2?14:7;
+      }
       function standardProductionDaysForProject(proj){return standardProductionDaysForItems(proj?.project_items||proj?.items||[]);}
       function standardProductionDaysForCart(){return standardProductionDaysForItems(state.cart?.items||[]);}
-function projectWorkloadDeliverableCountFromItems(items=[]){
-  const list=(Array.isArray(items)?items:[]).filter(i=>!['ADDON','REQUEST'].includes(String(i?.type||'').toUpperCase()));
-  return list.reduce((sum,item)=>{
-    const qty=Math.max(1,Math.round(Number(item?.qty||1))),type=String(item?.type||'').toUpperCase();
-    if(type!=='PACKAGE')return sum+qty;
-    const norm=v=>String(v||'').trim().toLowerCase();
-    const pkg=(state.packagesList||[]).find(p=>String(p.product_code||'')===String(item.product_code||item.code||'')||norm(p.name)===norm(item.name));
-    const inclusions=Array.isArray(pkg?.includedServiceNames)?pkg.includedServiceNames.filter(Boolean).length:0;
-    return sum+Math.max(1,inclusions)*qty;
-  },0);
-}
+      function projectWorkloadDeliverableCountFromItems(items=[]){
+        const list=Array.isArray(items)?items:[];
+        return list.reduce((sum,item)=>{
+          const qty=Math.max(1,Math.round(Number(item?.qty||1))),type=String(item?.type||'').toUpperCase();
+          if(type!=='PACKAGE')return sum+qty;
+          const norm=v=>String(v||'').trim().toLowerCase();
+          const pkg=(state.packagesList||[]).find(p=>String(p.product_code||'')===String(item.product_code||item.code||'')||norm(p.name)===norm(item.name));
+          const inclusions=Array.isArray(pkg?.includedServiceNames)?pkg.includedServiceNames.filter(Boolean).length:0;
+          return sum+Math.max(1,inclusions)*qty;
+        },0);
+      }
       function projectWorkloadDeliverableCount(proj){
         const ds=(proj?.deliverables||[]).filter(d=>!d.is_group);
         return ds.length||projectWorkloadDeliverableCountFromItems(proj?.project_items||proj?.items||[]);
@@ -1428,14 +1419,15 @@ function projectWorkloadDeliverableCountFromItems(items=[]){
         if(n>=4)return {factor:1.25,label:'Moderate'};
         return {factor:1.00,label:'Standard'};
       }
-function calculateRushFromTimeline(startValue,deadlineValue,standardDays=14,deliverableCount=1){
-  const start=parseDateSafe(startValue),due=parseDateSafe(deadlineValue),standard=Math.max(1,Number(standardDays||14));
-  const load=projectWorkloadFactor(deliverableCount),unit=getFeeAmount('RUSH',500);
-  if(!start||!due)return {duration:null,daysEarly:0,baseFee:0,fee:0,standardDays:standard,deliverableCount:Math.max(0,Number(deliverableCount||0)),loadFactor:load.factor,loadLabel:load.label};
-  const duration=Math.max(0,Math.round((due-start)/86400000)),daysEarly=Math.max(0,standard-duration);
-  const baseFee=daysEarly>0?Math.ceil(daysEarly/4)*unit:0;
-  return {duration,daysEarly,baseFee,fee:baseFee,standardDays:standard,deliverableCount:Math.max(0,Number(deliverableCount||0)),loadFactor:load.factor,loadLabel:load.label};
-}
+      function calculateRushFromTimeline(startValue,deadlineValue,standardDays=14,deliverableCount=1){
+        const start=parseDateSafe(startValue),due=parseDateSafe(deadlineValue),standard=Math.max(1,Number(standardDays||14));
+        const load=projectWorkloadFactor(deliverableCount);
+        if(!start||!due)return {duration:null,daysEarly:0,baseFee:0,fee:0,standardDays:standard,deliverableCount:Math.max(0,Number(deliverableCount||0)),loadFactor:load.factor,loadLabel:load.label};
+        const duration=Math.max(0,Math.round((due-start)/86400000)),daysEarly=Math.max(0,standard-duration);
+        const baseFee=daysEarly>0?Math.ceil(daysEarly/4)*500:0;
+        const fee=baseFee;
+        return {duration,daysEarly,baseFee,fee,standardDays:standard,deliverableCount:Math.max(0,Number(deliverableCount||0)),loadFactor:load.factor,loadLabel:load.label};
+      }
       function setListSort(scope,value){
         if(!state.listSorts)state.listSorts={};state.listSorts[scope]=value;
         if(scope==='projects')renderProjects(); else if(scope==='payments')renderPaymentsView(); else if(scope==='clients')renderClients(); else if(scope==='catalog')renderPricelist(); else if(scope==='overviewProjects')renderOverviewCurrentProjects(); else if(scope==='overviewDeadlines')renderOverviewUpcomingDeadlines();
@@ -2068,7 +2060,7 @@ function calculateRushFromTimeline(startValue,deadlineValue,standardDays=14,deli
 
         const rushFee = Number(state.cart.rushFee || 0);
         const workloadRushFee = Number(state.cart.workloadRushFee || 0);
-        const maintenanceFee=state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0;
+        const maintenanceFee=state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0;
         const total = Math.max(0, subtotal - discountAmount + rushFee + workloadRushFee + maintenanceFee);
 
         document.getElementById("summarySubtotal").innerText = formatCurrency(grossSubtotal); const itemDiscRow=document.getElementById("summaryItemDiscountRow"),itemDiscEl=document.getElementById("summaryItemDiscount");if(itemDiscRow)itemDiscRow.style.display=itemDiscountTotal>0?"flex":"none";if(itemDiscEl)itemDiscEl.innerText=`- ${formatCurrency(itemDiscountTotal)}`;
@@ -2150,13 +2142,84 @@ function calculateRushFromTimeline(startValue,deadlineValue,standardDays=14,deli
         updateRushCalculations();
       }
 
-function updateRushCalculations() {
-  const startVal=document.getElementById('orderStartDate')?.value,deadVal=document.getElementById('orderDeadlineDate')?.value,rushDisplay=document.getElementById('rushFeeDisplayBox'),durationEl=document.getElementById('orderDurationDays'),badgeEl=document.getElementById('rushFeeBadge'),rushTextEl=document.getElementById('orderRushFeeText');
-  if(!startVal||!deadVal){state.cart.rushDaysEarly=0;state.cart.rushFee=0;state.cart.workloadRushRate=0;state.cart.workloadRushFee=0;if(rushDisplay)rushDisplay.style.display='none';updateCartCalculations();return;}
-  state.cart.startDate=startVal;state.cart.deadlineDate=deadVal;const start=new Date(`${startVal}T00:00:00`),dead=new Date(`${deadVal}T00:00:00`),durationDays=Math.max(0,Math.round((dead-start)/86400000)),standard=standardProductionDaysForCart(),workloadCount=projectWorkloadDeliverableCountFromItems(state.cart.items),rushCalc=calculateRushFromTimeline(startVal,deadVal,standard,workloadCount),rushFee=rushCalc.fee,workloadRush=calculateWorkloadRushSurcharge(nextProjectNumber(),rushFee);
-  state.cart.rushDaysEarly=rushCalc.daysEarly;state.cart.rushFee=rushFee;state.cart.workloadRushRate=workloadRush.rate;state.cart.workloadRushFee=workloadRush.fee;
-  if(durationEl)durationEl.textContent=`${durationDays} day${durationDays===1?'':'s'}`;if(badgeEl)badgeEl.textContent=(rushFee+workloadRush.fee)>0?'RUSH':'STANDARD';if(rushTextEl)rushTextEl.textContent=formatCurrency(rushFee+workloadRush.fee);if(rushDisplay)rushDisplay.style.display='block';updateCartCalculations();
-}
+      function updateRushCalculations() {
+        const startVal = document.getElementById("orderStartDate")?.value;
+        const deadVal = document.getElementById("orderDeadlineDate")?.value;
+        const rushDisplay = document.getElementById("rushFeeDisplayBox");
+        const durationEl = document.getElementById("orderDurationDays");
+        const badgeEl = document.getElementById("rushFeeBadge");
+        const rushTextEl = document.getElementById("orderRushFeeText");
+
+        // Do not show rush information until both dates exist.
+        if (!startVal || !deadVal) {
+          state.cart.rushDaysEarly = 0;
+          state.cart.rushFee = 0;
+          state.cart.workloadRushRate = 0;
+          state.cart.workloadRushFee = 0;
+          if (rushDisplay) rushDisplay.style.display = "none";
+          const rushRow = document.getElementById("summaryRushRow");
+          if (rushRow) rushRow.style.display = "none";
+          updateCartCalculations();
+          return;
+        }
+
+        state.cart.startDate = startVal;
+        state.cart.deadlineDate = deadVal;
+
+        const start = new Date(`${startVal}T00:00:00`);
+        const dead = new Date(`${deadVal}T00:00:00`);
+        const diffDays = Math.round((dead - start) / (1000 * 60 * 60 * 24));
+        const durationDays = Math.max(0, diffDays);
+
+        // Standard duration is item-aware: one standalone service = 7 days;
+        // two or more standalone services, or any package/bundle = 14 days.
+        const STANDARD_DAYS = standardProductionDaysForCart();
+        const workloadCount=projectWorkloadDeliverableCountFromItems(state.cart.items);
+        const rushCalc = calculateRushFromTimeline(startVal,deadVal,STANDARD_DAYS,workloadCount);
+        const daysEarly = rushCalc.daysEarly;
+        const rushFee = rushCalc.fee;
+
+        state.cart.rushDaysEarly = daysEarly;
+        state.cart.rushFee = rushFee;
+        const workloadRush=calculateWorkloadRushSurcharge(nextProjectNumber(),rushFee);
+        state.cart.workloadRushRate=workloadRush.rate;
+        state.cart.workloadRushFee=workloadRush.fee;
+
+        if (durationEl) {
+          durationEl.innerText = `${durationDays} day${durationDays === 1 ? '' : 's'}`;
+        }
+
+        const rushLevel = daysEarly<=0 ? 0 : daysEarly<=4 ? 1 : daysEarly<=8 ? 2 : daysEarly<=12 ? 3 : 4;
+        const levelNames = ["STANDARD", "SLIGHT RUSH", "RUSH", "EXPRESS RUSH", "CUSTOM RUSH"];
+
+        if (badgeEl) {
+          badgeEl.className = rushLevel === 0 ? "rush-simple-label" : "rush-simple-label rush";
+          badgeEl.innerText = rushLevel===0 ? `STANDARD · ${STANDARD_DAYS}D` : levelNames[rushLevel];
+        }
+        if (rushTextEl) rushTextEl.innerText = formatCurrency(rushFee + Number(workloadRush.fee||0));
+        const factorsEl=document.getElementById('rushFactorsSummary');
+        if(factorsEl){
+          const currentLoad=Number(workloadRush.active||0);
+          factorsEl.innerHTML=`<span>${daysEarly>0?`${daysEarly} day${daysEarly===1?'':'s'} earlier · `:''}${workloadRush.rate?`Current workload +${workloadRush.rate}%`:'Standard workload'}</span>`;
+        }
+
+        // A valid deadline is required before showing the card.
+        if (rushDisplay) rushDisplay.style.display = diffDays >= 0 ? "block" : "none";
+
+        const rushSummary = document.getElementById("summaryRushFee");
+        const rushRow = document.getElementById("summaryRushRow");
+        const combinedRush=rushFee+Number(workloadRush.fee||0);
+        if (rushSummary) rushSummary.innerText = `+ ${formatCurrency(combinedRush)}`;
+        if (rushRow) rushRow.style.display = combinedRush > 0 ? "flex" : "none";
+
+        const deadlineErr = document.getElementById("orderDeadlineError");
+        if (deadlineErr) {
+          deadlineErr.innerText = diffDays < 0 ? "Deadline date cannot be earlier than start date." : "";
+        }
+
+        updateCartCalculations();
+      }
+
       /* VALIDATION FOR NEW ORDER */
       function showOrderConfirmation() {
         updateRushCalculations();
@@ -2227,7 +2290,7 @@ function updateRushCalculations() {
           <div class="font-bold mb-2">Order Items:</div>
           ${state.cart.items.map(i => `<div class="summary-row"><span>${i.name} (x${i.qty})</span><span>${formatCurrency(i.price * i.qty)}</span></div>`).join("")}
           <div class="divider"></div>
-          ${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0)+ (state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0))>0?`<div class="summary-section-label additional-fees-heading">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))>0?`<div class="summary-row compact-fee-row"><span>Rush Fee</span><span>${formatCurrency(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))}</span></div>`:''}${state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-row compact-fee-row"><span>System Maintenance Fee</span><span>${formatCurrency(getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE))}</span></div>`:''}
+          ${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0)+ (state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0))>0?`<div class="summary-section-label additional-fees-heading">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))>0?`<div class="summary-row compact-fee-row"><span>Rush Fee</span><span>${formatCurrency(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))}</span></div>`:''}${state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-row compact-fee-row"><span>System Maintenance Fee</span><span>${formatCurrency(SYSTEM_MAINTENANCE_FEE)}</span></div>`:''}
           <div class="summary-row summary-total"><span>Total Amount</span><span>${document.getElementById("summaryTotal").innerText}</span></div>
         `;
 
@@ -2409,14 +2472,14 @@ function updateRushCalculations() {
           rush_base_fee: Number(calculateRushFromTimeline(state.cart.startDate,state.cart.deadlineDate,standardProductionDaysForCart(),projectWorkloadDeliverableCountFromItems(state.cart.items)).baseFee||0),
           rush_load_factor: Number(calculateRushFromTimeline(state.cart.startDate,state.cart.deadlineDate,standardProductionDaysForCart(),projectWorkloadDeliverableCountFromItems(state.cart.items)).loadFactor||1),
           rush_project_workload: Number(projectWorkloadDeliverableCountFromItems(state.cart.items)||0),
-          system_maintenance_charge: state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE') ? getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE) : 0,
+          system_maintenance_charge: state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE') ? SYSTEM_MAINTENANCE_FEE : 0,
           project_type: "",
           priority: (()=>{const start=parseDateSafe(state.cart.startDate),due=parseDateSafe(state.cart.deadlineDate),standard=standardProductionDaysForCart(),days=start&&due?Math.ceil((due-start)/86400000):standard;return rushFee>0||days<standard;})(),
           project_items: state.cart.items.map((i,index) => ({ id:i.id||`oi_new_${Date.now()}_${index}`, name: i.name, price: i.price, qty: i.qty, type: i.type, item_discount:String(i.type||'').toUpperCase()==='PACKAGE'?0:Number(i.item_discount||0), product_code:i.product_code||i.code||null, category:i.category||"" })),
           included_revisions: 0,
           revision_count: 0,
-          revision_fee_per_revision: getFeeAmount('REVISION',REVISION_FEE_PER_REVISION),
-          additional_revision_fee: getFeeAmount('REVISION',REVISION_FEE_PER_REVISION),
+          revision_fee_per_revision: REVISION_FEE_PER_REVISION,
+          additional_revision_fee: REVISION_FEE_PER_REVISION,
           notes: "",
           created_at: new Date().toISOString(),
           invoice_number: null,
@@ -2453,9 +2516,17 @@ function updateRushCalculations() {
           }
         }
 
-        // A successful order always leaves New Order blank for the next entry.
-        if(state.editingDraftId){deleteOrderDraft(state.editingDraftId,true);state.editingDraftId=null;}
-        resetNewOrderForm(true);
+        // Reset cart state for a fresh order. Dates are re-created from the actual current date on next open.
+        state.cart.items = [];
+        state.cart.discountVal = 0;
+        state.cart.startDate = "";
+        state.cart.deadlineDate = "";
+        state.cart.deadlineManuallySet = false;
+        state.cart.rushFee = 0;
+        state.cart.workloadRushRate = 0;
+        state.cart.workloadRushFee = 0;
+        state.cart.rushDaysEarly = 0;
+        persistCartState();
 
         closeModal("orderSummaryModal");
         showToast("Order created successfully!");
@@ -2572,7 +2643,7 @@ function updateRushCalculations() {
         if(!proj)return;const client=getProjectClientRecord(proj)||{};
         const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v??''};
         set('projectDataClientName',proj.client_name||client.name||'');set('projectDataClientEmail',proj.client_email||client.email||'');set('projectDataClientPhone',proj.client_phone||client.phone||'');set('projectDataClientAddress',proj.client_address||client.address||'');
-        set('projectDataProjectId',formatProjectId(proj));set('projectDataProjectName',proj.title||'');set('projectDataStartDate',proj.start_date||'');set('projectDataDeadline',proj.deadline_date||'');setTimeout(()=>refreshProjectDataRushPreview(false),0);
+        set('projectDataProjectId',formatProjectId(proj));set('projectDataProjectName',proj.title||'');set('projectDataStartDate',proj.start_date||'');set('projectDataDeadline',proj.deadline_date||'');set('projectDataRevisionCount',Math.max(0,Number(proj.revision_count||0)));setTimeout(()=>refreshProjectDataRushPreview(false),0);
         const priorityEl=document.getElementById('projectDataPriority');if(priorityEl)priorityEl.checked=projectIsPriority(proj);
       }
       function openProjectData(projId){
@@ -2606,7 +2677,7 @@ function updateRushCalculations() {
         proj.title=document.getElementById('projectDataProjectName')?.value??proj.title??'';
         proj.start_date=document.getElementById('projectDataStartDate')?.value||'';
         proj.deadline_date=document.getElementById('projectDataDeadline')?.value||'';
-        
+        proj.revision_count=Math.max(0,Math.floor(Number(document.getElementById('projectDataRevisionCount')?.value||0)));proj.revision_fee_per_revision=REVISION_FEE_PER_REVISION;
         if(proj.delivery_status!=='Delivered'){proj.payment_due_date='';proj.invoice_due_date='';}
         const start=parseDateSafe(proj.start_date),due=parseDateSafe(proj.deadline_date),rushCalc=calculateRushFromTimeline(proj.start_date,proj.deadline_date,standardProductionDaysForProject(proj),projectWorkloadDeliverableCount(proj));
         if(start&&due){
@@ -2641,25 +2712,31 @@ function updateRushCalculations() {
         const roots=ds.filter(d=>!d.parent_id);const row=(d,child=false)=>{const menuId=`deliverableMenu_${String(d.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,progress=d.is_group?Number(d.progress||0):(d.completed?100:Number(d.progress||0));return `<div class="deliverable-checklist-row ${child?'deliverable-child-row':''} ${d.completed?'is-complete':''}"><button type="button" class="deliverable-check ${d.completed?'checked':''}" aria-pressed="${d.completed?'true':'false'}" onclick="app.toggleDeliverable('${proj.id}','${String(d.id).replace(/'/g,"\'")}')"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></button><div class="deliverable-checklist-copy"><strong>${escapeHtml(d.item_name)}</strong>${d.is_group?`<span>${ds.filter(c=>String(c.parent_id||'')===String(d.id)).filter(c=>c.completed).length}/${ds.filter(c=>String(c.parent_id||'')===String(d.id)).length} included items</span>`:''}</div><div class="deliverable-item-progress"><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${progress}%"></div></div><span>${Math.round(progress)}%</span></div><div class="popover-wrap" id="${menuId}"><button class="icon-more-button" onclick="event.stopPropagation();app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action text-danger" onclick="event.stopPropagation();app.deleteProjectDeliverable('${String(d.id).replace(/'/g,"\'")}')">Remove Deliverable</button></div></div></div>`};
         container.innerHTML=`<div class="deliverable-checklist">${roots.map(root=>`<div class="deliverable-group-block">${row(root,false)}${ds.filter(c=>String(c.parent_id||'')===String(root.id)).map(c=>row(c,true)).join('')}</div>`).join('')}</div>`;
       }
-function recalculateProjectFromOrderItems(proj) {
-  const items = Array.isArray(proj.project_items) ? proj.project_items : [];
-  const grossSubtotal = items.reduce((sum,item) => sum + Math.max(0,Number(item.price||0)) * Math.max(1,Number(item.qty||1)), 0);
-  const itemDiscountTotal=items.reduce((sum,item)=>{if(['PACKAGE','ADDON'].includes(String(item.type||'').toUpperCase()))return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0);
-  const subtotal=Math.max(0,grossSubtotal-itemDiscountTotal);
-  proj.subtotal_amount = subtotal;proj.item_discount_amount=itemDiscountTotal;
-  proj.system_maintenance_charge=items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0;
-  const discount = Math.max(0, Number(proj.discount_amount || 0));
-  const stdDays=standardProductionDaysForProject(proj);
-  if(proj.start_date&&(!proj.deadline_date||proj.deadline_auto===true)){proj.deadline_date=addDaysToDateString(proj.start_date,stdDays);proj.deadline_auto=true;}
-  proj.standard_production_days=stdDays;
-  if(proj.start_date&&proj.deadline_date){const rushCalc=calculateRushFromTimeline(proj.start_date,proj.deadline_date,stdDays,projectWorkloadDeliverableCountFromItems(items));proj.rush_days_early=rushCalc.daysEarly;proj.rush_fee=rushCalc.fee;proj.rush_base_fee=rushCalc.baseFee;proj.rush_load_factor=rushCalc.loadFactor;proj.rush_project_workload=rushCalc.deliverableCount;}
-  const rush = Math.max(0, Number(proj.rush_fee || 0));
-  const workload=calculateWorkloadRushSurcharge(projectNumber(proj),rush,proj.id,proj.workload_at_booking);
-  proj.workload_rush_rate=workload.rate;proj.workload_rush_fee=workload.fee;if(!Number.isFinite(Number(proj.workload_at_booking)))proj.workload_at_booking=workload.active;
-  proj.total_amount = Math.max(0, subtotal - discount + rush + Number(workload.fee||0));proj.pending_amount = Math.max(0, getProjectInvoiceTotal(proj) - getProjectPaid(proj));
-  if(!proj.project_type){const cats=[...new Set(items.filter(i=>!['ADDON','REQUEST'].includes(String(i.type||'').toUpperCase())).map(i=>String(i.category||'').trim()).filter(Boolean))];proj.project_type=cats.length===1?cats[0]:(cats.length>1?'Mixed Services':'');}
-  proj.updated_at = new Date().toISOString();
-}
+      function recalculateProjectFromOrderItems(proj) {
+        const items = Array.isArray(proj.project_items) ? proj.project_items : [];
+        const grossSubtotal = items.reduce((sum,item) => sum + Math.max(0,Number(item.price||0)) * Math.max(1,Number(item.qty||1)), 0);
+        const itemDiscountTotal=items.reduce((sum,item)=>{if(String(item.type||'').toUpperCase()==='PACKAGE')return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0);
+        const subtotal=Math.max(0,grossSubtotal-itemDiscountTotal);
+        proj.subtotal_amount = subtotal;proj.item_discount_amount=itemDiscountTotal;
+        proj.system_maintenance_charge=items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0;
+        const discount = Math.max(0, Number(proj.discount_amount || 0));
+        const stdDays=standardProductionDaysForProject(proj);
+        if(proj.start_date&&(!proj.deadline_date||proj.deadline_auto===true)){proj.deadline_date=addDaysToDateString(proj.start_date,stdDays);proj.deadline_auto=true;}
+        proj.standard_production_days=stdDays;
+        if(proj.start_date&&proj.deadline_date){
+          const rushCalc=calculateRushFromTimeline(proj.start_date,proj.deadline_date,stdDays,projectWorkloadDeliverableCountFromItems(items));
+          proj.rush_days_early=rushCalc.daysEarly;proj.rush_fee=rushCalc.fee;proj.rush_base_fee=rushCalc.baseFee;proj.rush_load_factor=rushCalc.loadFactor;proj.rush_project_workload=rushCalc.deliverableCount;
+        }
+        const rush = Math.max(0, Number(proj.rush_fee || 0));
+        const workload=calculateWorkloadRushSurcharge(projectNumber(proj),rush,proj.id,proj.workload_at_booking);
+        proj.workload_rush_rate=workload.rate;proj.workload_rush_fee=workload.fee;
+        if(!Number.isFinite(Number(proj.workload_at_booking)))proj.workload_at_booking=workload.active;
+        proj.total_amount = Math.max(0, subtotal - discount + rush + Number(workload.fee||0));
+        proj.pending_amount = Math.max(0, getProjectInvoiceTotal(proj) - getProjectPaid(proj));
+        if(!proj.project_type){const cats=[...new Set(items.map(i=>String(i.category||'').trim()).filter(Boolean))];proj.project_type=cats.length===1?cats[0]:(cats.length>1?'Mixed Services':'');}
+        proj.updated_at = new Date().toISOString();
+      }
+
       function syncProjectDeliverablesFromOrderItems(proj){
         if(!proj)return false;
         const items=Array.isArray(proj.project_items)?proj.project_items:[],old=Array.isArray(proj.deliverables)?proj.deliverables:[];
@@ -2668,7 +2745,7 @@ function recalculateProjectFromOrderItems(proj) {
         const oldByKey=new Map();old.forEach(d=>{const key=[d.order_item_id||'',d.order_item_occurrence||1,d.parent_key||'',norm(d.item_name||d.name)].join('|');if(!oldByKey.has(key))oldByKey.set(key,d)});
         const fresh=[];
         const make=(item,occ,name,extra={})=>{const key=[item.id,occ,extra.parent_key||'',norm(name)].join('|'),prev=oldByKey.get(key);return {...(prev||{}),id:prev?.id||`del_${proj.id}_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,item_name:name,name,source_type:'ORDER_ITEM',order_item_id:item.id,order_item_occurrence:occ,completed:!!prev?.completed,progress:prev?.completed?100:Number(prev?.progress||0),status:prev?.completed?'Completed':'Pending',completed_at:prev?.completed_at||null,...extra};};
-        items.filter(item=>!['ADDON','REQUEST'].includes(String(item.type||'').toUpperCase())).forEach((item,itemIndex)=>{
+        items.forEach((item,itemIndex)=>{
           if(!item.id)item.id=`oi_${proj.id}_${Date.now()}_${itemIndex}_${Math.random().toString(36).slice(2,6)}`;
           const qty=Math.max(1,Math.round(Number(item.qty||1))),isPackage=String(item.type||'').toUpperCase()==='PACKAGE';
           const pkg=(state.packagesList||[]).find(p=>String(p.product_code||'')===String(item.product_code||'')||norm(p.name)===norm(item.name));const inclusions=isPackage?[...(pkg?.includedServiceNames||[])]:[];
@@ -2681,20 +2758,17 @@ function recalculateProjectFromOrderItems(proj) {
         });
         proj.deliverables=[...fresh,...manual];proj.updated_at=new Date().toISOString();return true;
       }
-function renderProjectOrderItems(proj) {
-  const box=document.getElementById('projectOrderItemsList'); if(!box||!proj)return;
-  if(!Array.isArray(proj.project_items)) proj.project_items = Array.isArray(proj.items) ? proj.items : [];
-  const items=proj.project_items;
-  const rows=items.length ? items.map((item,index)=>{
-    const type=String(item.type||'').toUpperCase();
-    const rawCategory=String(item.category||'').trim();
-    const visibleCategory=type==='PACKAGE'?'Package':type==='ADDON'?'Project File Request':(!rawCategory||['SOLO','SERVICE','ITEM'].includes(rawCategory.toUpperCase())?'Item':rawCategory);
-    const line=Number(item.price||0)*Math.max(1,Number(item.qty||1)),lineDisc=['PACKAGE','ADDON'].includes(type)?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-lineDisc,menuId=`orderItemMenu_${index}`;
-    return `<div class="order-item-row"><div class="order-item-main"><strong>${escapeHtml(item.name||'Untitled Item')}</strong><span>${escapeHtml(visibleCategory)}${item.source_item_name?` · ${escapeHtml(item.source_item_name)}`:''} · Qty ${Math.max(1,Number(item.qty||1))}${lineDisc?` · Discount ${formatCurrency(lineDisc)}`:''}</span></div><div class="order-item-price"><strong>${formatCurrency(net)}</strong><span>${formatCurrency(Number(item.price||0))} each</span></div><div class="order-item-actions"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Order item options" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openProjectOrderItemModal(${index})">Edit Order Item</button><button class="popover-action text-danger" onclick="app.requestDeleteProjectOrderItem(${index},event)">Remove Order Item</button></div></div></div></div>`;
-  }).join('') : `<div class="text-muted py-4">No order items yet.</div>`;
-  const grossSubtotal=items.reduce((s,i)=>s+Number(i.price||0)*Math.max(1,Number(i.qty||1)),0),itemDisc=items.reduce((s,i)=>{const type=String(i.type||'').toUpperCase();if(['PACKAGE','ADDON'].includes(type))return s;const line=Number(i.price||0)*Math.max(1,Number(i.qty||1));return s+Math.min(line,Math.max(0,Number(i.item_discount||0)));},0),subtotal=Math.max(0,grossSubtotal-itemDisc),discount=Math.max(0,Number(proj.discount_amount||0)),baseRush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),combinedRush=baseRush+workloadFee,revisionFee=getProjectRevisionFee(proj),maintenance=getProjectMaintenanceFee(proj),displayTotal=Math.max(0,subtotal-discount+combinedRush+revisionFee+maintenance),revisionCount=Math.max(0,Math.floor(Number(proj.revision_count||0)));
-  box.innerHTML=`<div class="project-order-items-list">${rows}</div>${revisionCount?`<div class="project-request-summary-row"><div><strong>Revision Request${revisionCount===1?'':'s'}</strong><span>${revisionCount} × ${formatCurrency(Number(proj.revision_fee_per_revision||getFeeAmount('REVISION',500)))}</span></div><div class="project-request-summary-actions"><strong>${formatCurrency(revisionFee)}</strong><button class="icon-more-button vertical-more" title="Revision request options" onclick="app.removeProjectRevisionRequest()">⋮</button></div></div>`:''}<div class="project-items-summary"><div class="rush-line"><span>Item Subtotal</span><strong>${formatCurrency(grossSubtotal)}</strong></div>${itemDisc?`<div class="rush-line"><span>Item Discounts</span><strong>− ${formatCurrency(itemDisc)}</strong></div>`:''}${discount?`<div class="rush-line"><span>Project Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:''}${(combinedRush||revisionFee||maintenance)?`<div class="project-items-fee-label">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${combinedRush?`<div class="rush-line compact-fee-row"><span>Rush Fee</span><strong>+ ${formatCurrency(combinedRush)}</strong></div>`:''}${revisionFee?`<div class="rush-line compact-fee-row"><span>Revision Fee</span><strong>+ ${formatCurrency(revisionFee)}</strong></div>`:''}${maintenance?`<div class="rush-line compact-fee-row"><span>System Maintenance Fee</span><strong>+ ${formatCurrency(maintenance)}</strong></div>`:''}<div class="project-items-grand-total"><span>Project Total</span><strong>${formatCurrency(displayTotal)}</strong></div></div>`;
-}
+      function renderProjectOrderItems(proj) {
+        const box=document.getElementById('projectOrderItemsList'); if(!box||!proj)return;
+        if(!Array.isArray(proj.project_items)) proj.project_items = Array.isArray(proj.items) ? proj.items : [];
+        const items=proj.project_items;
+        const rows=items.length ? items.map((item,index)=>{
+          const visibleCategory=String(item.category||'').trim() || (String(item.type||'').toUpperCase()==='PACKAGE'?'Package':'Service');
+          const line=Number(item.price||0)*Math.max(1,Number(item.qty||1)),lineDisc=String(item.type||'').toUpperCase()==='PACKAGE'?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-lineDisc,menuId=`orderItemMenu_${index}`;return `<div class="order-item-row"><div class="order-item-main"><strong>${escapeHtml(item.name||'Untitled Item')}</strong><span>${escapeHtml(visibleCategory)} · Qty ${Math.max(1,Number(item.qty||1))}${lineDisc?` · Discount ${formatCurrency(lineDisc)}`:''}</span></div><div class="order-item-price"><strong>${formatCurrency(net)}</strong><span>${formatCurrency(Number(item.price||0))} each</span></div><div class="order-item-actions"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Order item options" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openProjectOrderItemModal(${index})">Edit Order Item</button><button class="popover-action text-danger" onclick="app.requestDeleteProjectOrderItem(${index},event)">Remove Order Item</button></div></div></div></div>`;
+        }).join('') : `<div class="text-muted py-4">No order items recorded. Add items when you are ready.</div>`;
+        const grossSubtotal=items.reduce((sum,item)=>sum+Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1)),0),itemDiscountTotal=items.reduce((sum,item)=>{if(String(item.type||'').toUpperCase()==='PACKAGE')return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0),subtotal=Math.max(0,grossSubtotal-itemDiscountTotal),discount=Math.max(0,Number(proj.discount_amount||0)),rush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),workloadRate=Math.max(0,Number(proj.workload_rush_rate||0)),total=Number(proj.total_amount||Math.max(0,subtotal-discount+rush+workloadFee));
+        const combinedRush=rush+workloadFee,maintenance=Math.max(0,getProjectMaintenanceFee(proj)),revisionFee=getProjectRevisionFee(proj),displayTotal=total+maintenance+revisionFee;box.innerHTML=`${rows}<div class="project-items-total"><div><span>Items subtotal</span><strong>${formatCurrency(grossSubtotal)}</strong></div>${itemDiscountTotal?`<div><span>Item discounts</span><strong>− ${formatCurrency(itemDiscountTotal)}</strong></div>`:''}${discount?`<div><span>Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:''}${(combinedRush||revisionFee||maintenance)?`<div class="project-fee-heading"><span>Additional Fees</span><button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${combinedRush?`<div class="rush-line compact-fee-row"><span>Rush Fee</span><strong>+ ${formatCurrency(combinedRush)}</strong></div>`:''}${revisionFee?`<div class="rush-line compact-fee-row"><span>Revision Fee</span><strong>+ ${formatCurrency(revisionFee)}</strong></div>`:''}${maintenance?`<div class="rush-line compact-fee-row"><span>System Maintenance Fee</span><strong>+ ${formatCurrency(maintenance)}</strong></div>`:''}<div class="project-items-grand-total"><span>Project Total</span><strong>${formatCurrency(displayTotal)}</strong></div></div>`;
+      }
       function getProjectCatalogChoices(query=''){
         const q=String(query||'').trim().toLowerCase();
         const services=(state.soloServices||[]).map(x=>({kind:'SERVICE',code:x.product_code,name:x.name,price:Number(x.price||0),category:x.category||'',type:'SOLO'}));
@@ -2704,14 +2778,13 @@ function renderProjectOrderItems(proj) {
       function renderProjectOrderItemSuggestions(query=''){
         const box=document.getElementById('projectOrderItemSuggestions');if(!box)return;const items=getProjectCatalogChoices(query);box.classList.add('open');box.innerHTML=items.map((x,i)=>`<button type="button" class="typeahead-option" onmousedown="event.preventDefault();app.selectProjectOrderItemSuggestion(${i})"><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(displayCategory(x.category||x.kind))} · ${formatCurrency(x.price)}</span></button>`).join('')||`<div class="typeahead-empty">No match — keep typing to use a custom item.</div>`;state.projectOrderItemSuggestionCache=items;
       }
-function openProjectOrderBatchModal(){
-  const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
-  state.projectOrderBatchSelection={};state.projectOrderBatchChoiceCache=[];state.projectOrderBatchCategory='ALL';
-  const search=document.getElementById('projectOrderBatchSearch'),name=document.getElementById('projectBatchCustomName'),qty=document.getElementById('projectBatchCustomQty'),price=document.getElementById('projectBatchCustomPrice');
-  if(search)search.value='';if(name)name.value='';if(qty)qty.value='1';if(price)price.value='';
-  const rev=document.getElementById('projectRevisionRequestPrice');if(rev)rev.textContent=`${formatCurrency(getFeeAmount('REVISION',500))} per request`;
-  renderProjectFileRequestOptions(proj);renderProjectOrderBatchChoices('');renderProjectOrderBatchSelected();openModal('projectOrderBatchModal');setTimeout(()=>search?.focus(),70);
-}
+      function openProjectOrderBatchModal(){
+        const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
+        state.projectOrderBatchSelection={};state.projectOrderBatchChoiceCache=[];state.projectOrderBatchCategory='ALL';
+        const search=document.getElementById('projectOrderBatchSearch'),name=document.getElementById('projectBatchCustomName'),qty=document.getElementById('projectBatchCustomQty'),price=document.getElementById('projectBatchCustomPrice');
+        if(search)search.value='';if(name)name.value='';if(qty)qty.value='1';if(price)price.value='';
+        renderProjectOrderBatchChoices('');renderProjectOrderBatchSelected();openModal('projectOrderBatchModal');setTimeout(()=>search?.focus(),70);
+      }
       function projectBatchKey(item){return String(item.code||item.product_code||item.name||'').toLowerCase()+'|'+String(item.type||'SOLO').toUpperCase();}
       function renderProjectOrderBatchChoices(query=''){
         const box=document.getElementById('projectOrderBatchChoices');if(!box)return;ensureCatalogCategories();const category=state.projectOrderBatchCategory||'ALL',filters=document.getElementById('projectOrderBatchServiceFilters');if(filters){filters.innerHTML=['ALL',...state.catalogCategories].map(c=>{const label=c==='ALL'?'All':displayCategory(c),enc=encodeURIComponent(c);return `<button type="button" class="filter-pill ${category===c?'active':''}" onclick="app.setProjectOrderBatchCategory(decodeURIComponent('${enc}'))">${escapeHtml(label)}</button>`}).join('');}
@@ -2888,27 +2961,31 @@ function openProjectOrderBatchModal(){
         const input=document.createElement('input');input.type='file';input.accept='image/*,application/pdf';input.onchange=async()=>{const file=input.files?.[0];if(!file)return;try{const receipt=await readReceiptFile(file);Object.assign(payment,{receipt_data:receipt.data,receipt_name:receipt.name,receipt_type:receipt.type,updated_at:new Date().toISOString()});persistProjectsState();renderPaymentTracker(proj);showToast('Receipt attached.')}catch(e){showToast(e.message)}};input.click();
       }
 
-function renderPaymentTracker(proj) {
-  const overviewEl=document.getElementById('paymentOverview'),listEl=document.getElementById('paymentTransactions');if(!overviewEl||!proj)return;
-  const total=getProjectInvoiceTotal(proj),payments=[...(proj.payments||[])],totalPaid=payments.reduce((s,p)=>s+Number(p.amount_paid||p.amount||0),0),remaining=Math.max(0,total-totalPaid),status=getProjectPaymentStatus(proj);
-  overviewEl.innerHTML=`<div class="payment-metrics-grid"><div class="payment-metric-card"><div><span>Payment Status</span><strong>${escapeHtml(status)}</strong></div></div><div class="payment-metric-card"><div><span>Invoice Total</span><strong class="number-animate">${formatCurrency(total)}</strong></div></div><div class="payment-metric-card paid"><div><span>Total Paid</span><strong class="number-animate">${formatCurrency(totalPaid)}</strong></div></div><div class="payment-metric-card ${remaining>0?'due':'paid'}"><div><span>Balance Due</span><strong class="number-animate">${formatCurrency(remaining)}</strong></div></div></div>`;
-  if(listEl){
-    if(!payments.length){listEl.innerHTML='<div class="payment-history-empty"><strong>No payments recorded</strong><span>Recorded payments will appear here as transactions.</span></div>';animateNumbersIn(overviewEl);return;}
-    payments.sort((a,b)=>new Date(b.payment_date||b.created_at||0)-new Date(a.payment_date||a.created_at||0));
-    listEl.innerHTML=`<div class="payment-history-unified">${payments.map(p=>{const amount=Number(p.amount_paid||p.amount||0),date=parseDateSafe(p.payment_date||p.created_at),method=p.payment_method||p.method||'Payment',ref=p.reference_no||p.reference_number||'',notes=p.notes||'',menuId=`paymentMenu_${String(p.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,hasReceipt=!!p.receipt_data;return `<div class="payment-history-unified-row"><div class="payment-history-unified-main"><strong>${escapeHtml(method)}</strong><span>${ref?`Ref ${escapeHtml(ref)} · `:''}${date?date.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'No date'}${hasReceipt?' · Receipt attached':''}</span>${notes?`<small>${escapeHtml(notes)}</small>`:''}</div><div class="payment-history-unified-amount"><strong>${formatCurrency(amount)}</strong></div><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openRecordPaymentModal('${p.id}')">Edit Payment</button><button class="popover-action" onclick="app.attachReceiptToPayment('${p.id}')">${hasReceipt?'Replace':'Attach'} Receipt</button>${hasReceipt?`<button class="popover-action" onclick="app.viewPaymentReceipt('${p.id}')">View Receipt</button>`:''}</div></div></div>`}).join('')}</div>`;
-  }
-  animateNumbersIn(overviewEl);
-}
+      function renderPaymentTracker(proj) {
+        const overviewEl=document.getElementById('paymentCalculationsOverview'),listEl=document.getElementById('paymentHistoryList'),maintenance=Math.max(0,getProjectMaintenanceFee(proj)),revisionFee=getProjectRevisionFee(proj),total=getProjectInvoiceTotal(proj),payments=(proj.payments||[]).slice(),totalPaid=payments.reduce((sum,p)=>sum+Number(p.amount_paid||p.amount||0),0),remaining=Math.max(0,total-totalPaid),status=getInvoiceStatus({...proj,total_amount:total},remaining),statusClass=status==='PAID'?'paid':status==='DOWNPAYMENT'?'partial':'unpaid';
+        const metricIcon=(type)=>({status:'<path d="M5 12l4 4L19 6"/>',total:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10M7 13h6"/>',paid:'<path d="M12 3v18M7 8l5-5 5 5"/>',balance:'<circle cx="12" cy="12" r="9"/><path d="M8 12h8"/>'}[type]);
+        if(overviewEl)overviewEl.innerHTML=`<div class="payment-overview-grid payment-overview-balanced"><div class="payment-metric-card payment-status-card ${statusClass}"><span class="payment-metric-icon"><svg class="icon-svg" viewBox="0 0 24 24">${metricIcon('status')}</svg></span><div><span>Payment Status</span><strong>${escapeHtml(status)}</strong></div></div><div class="payment-metric-card"><span class="payment-metric-icon"><svg class="icon-svg" viewBox="0 0 24 24">${metricIcon('total')}</svg></span><div><span>Invoice Total</span><strong class="number-animate">${formatCurrency(total)}</strong></div></div><div class="payment-metric-card paid"><span class="payment-metric-icon"><svg class="icon-svg" viewBox="0 0 24 24">${metricIcon('paid')}</svg></span><div><span>Total Paid</span><strong class="number-animate">${formatCurrency(totalPaid)}</strong></div></div><div class="payment-metric-card ${remaining>0?'due':'paid'}"><span class="payment-metric-icon"><svg class="icon-svg" viewBox="0 0 24 24">${metricIcon('balance')}</svg></span><div><span>Balance Due</span><strong class="number-animate">${formatCurrency(remaining)}</strong></div></div></div>`;
+        if(listEl){
+          if(!payments.length){listEl.innerHTML='<div class="payment-history-empty"><strong>No payments recorded</strong><span>Recorded payments will appear here as transactions.</span></div>';animateNumbersIn(overviewEl);return}
+          payments.sort((a,b)=>new Date(b.payment_date||b.created_at||0)-new Date(a.payment_date||a.created_at||0));
+          listEl.innerHTML=`<div class="payment-transaction-list">${payments.map(p=>{const amount=Number(p.amount_paid||p.amount||0),date=parseDateSafe(p.payment_date||p.created_at),method=p.payment_method||p.method||'Payment',ref=p.reference_no||p.reference_number||'',notes=p.notes||'',menuId=`paymentMenu_${String(p.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,isGcash=/gcash/i.test(method),isBank=/bank/i.test(method),hasReceipt=!!p.receipt_data;const icon=isGcash?`<img src="https://cdn.brandfetch.io/idU5cKFAqi/theme/dark/logo.svg?c=1dxbfHSJFAPEGdCLU4o5B" alt="GCash" onerror="this.style.display='none';this.parentElement.classList.add('gcash-fallback')">`:isBank?`<svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M3 10h18M5 10v8M9 10v8M15 10v8M19 10v8M3 18h18M12 3l9 5H3l9-5Z"/></svg>`:`<svg class="icon-svg sm" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M7 12h10"/></svg>`;return `<div class="payment-transaction-row"><div class="payment-transaction-icon ${isGcash?'gcash-logo-icon':isBank?'bank-icon':''}">${icon}</div><div class="payment-transaction-main"><strong>Payment received</strong><span>${escapeHtml(method)}${ref?` · Ref ${escapeHtml(ref)}`:''}${hasReceipt?' · Receipt attached':''}</span>${notes?`<small>${escapeHtml(notes)}</small>`:''}</div><div class="payment-transaction-value"><strong>+${formatCurrency(amount)}</strong><span>${date?date.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'—'}</span></div><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openRecordPaymentModal('${p.id}')">Edit Payment</button><button class="popover-action" onclick="app.attachReceiptToPayment('${p.id}')">${hasReceipt?'Replace':'Attach'} Receipt</button>${hasReceipt?`<button class="popover-action" onclick="app.viewPaymentReceipt('${p.id}')">View Receipt</button>`:''}</div></div></div>`}).join('')}</div>`;
+        }
+        animateNumbersIn(overviewEl);
+      }
+
       /* ==========================================================================
          INVOICE GENERATOR & EMAIL REMINDERS
          ========================================================================== */
-function openFeeInfo(type='all'){
-  ensureAdditionalFees();const title=document.getElementById('feeInfoTitle'),body=document.getElementById('feeInfoBody');if(!title||!body)return;
-  const map={rush:'RUSH',revision:'REVISION',maintenance:'SYSTEM_MAINTENANCE'},core=['RUSH','REVISION','SYSTEM_MAINTENANCE'];
-  if(type!=='all'&&map[type]){const fee=getFeeConfig(map[type]);title.textContent=fee.name;body.innerHTML=`<div class="fee-info-copy compact-fee-info"><p>${escapeHtml(fee.description||'Additional project charge.')}</p></div>`;}
-  else{title.textContent='Additional Fees';body.innerHTML=`<div class="fee-info-list">${core.map(code=>getFeeConfig(code)).filter(f=>f.active!==false).map(f=>`<div><strong>${escapeHtml(f.name)}</strong><span>${escapeHtml(f.description||'Additional project charge.')}</span></div>`).join('')}</div>`;}
-  openModal('feeInfoModal');
-}
+      function openFeeInfo(type='all'){
+        const title=document.getElementById('feeInfoTitle'),body=document.getElementById('feeInfoBody');if(!title||!body)return;
+        const content={
+          rush:{name:'Rush Fee',copy:'For an earlier project turnaround. ₱500 is added for every 4 days earlier than the standard timeline, plus the applicable current-workload surcharge from JP-052 onward.'},
+          revision:{name:'Revision Fee',copy:'₱500 for every recorded revision.'},
+          maintenance:{name:'System Maintenance Fee',copy:'₱19 once for projects that contain a Package. It supports the JUAN Project management system and service operations.'}
+        };
+        if(type!=='all'&&content[type]){title.textContent=content[type].name;body.innerHTML=`<div class="fee-info-copy compact-fee-info"><p>${escapeHtml(content[type].copy)}</p></div>`;}else{title.textContent='Additional Fees';body.innerHTML=`<div class="fee-info-list">${Object.values(content).map(x=>`<div><strong>${escapeHtml(x.name)}</strong><span>${escapeHtml(x.copy)}</span></div>`).join('')}</div>`;}
+        openModal('feeInfoModal');
+      }
       function renderInvoicePaper(proj) {
         const paper=document.getElementById('invoicePaperPrintable');if(!paper||!proj)return;
         const invoiceNo=ensureInvoiceNumber(proj),storedSubtotal=Math.max(0,Number(proj.subtotal_amount||0)),discount=Math.max(0,Number(proj.discount_amount||0));
@@ -3371,7 +3448,7 @@ function openFeeInfo(type='all'){
         const previous=state.catalogManagerFilter;state.catalogManagerFilter=kind==='packages'?'Packages':kind==='items'?'Items':'All Items';openCatalogFullView();state.catalogManagerFilter=previous;renderPricelist();
       }
       function renderPricelist(){
-        ensureCatalogCategories();ensureAdditionalFees();renderAdditionalFeesManager();const serviceList=document.getElementById('catalogCategoryList'),itemsBody=document.getElementById('catalogServicesBody'),packagesBody=document.getElementById('catalogPackagesBody'),filters=document.getElementById('catalogManagerFilters');if(!serviceList||!itemsBody||!packagesBody||!filters)return;
+        ensureCatalogCategories();const serviceList=document.getElementById('catalogCategoryList'),itemsBody=document.getElementById('catalogServicesBody'),packagesBody=document.getElementById('catalogPackagesBody'),filters=document.getElementById('catalogManagerFilters');if(!serviceList||!itemsBody||!packagesBody||!filters)return;
         const q=(document.getElementById('catalogManagerSearch')?.value||'').trim().toLowerCase(),pref=state.listSorts?.catalog||'default',selected=state.catalogManagerCategory||'ALL';if(selected==='ALL')state.catalogManagerFilter='All Items';else if(!['Items','Packages'].includes(state.catalogManagerFilter))state.catalogManagerFilter='Items';const filter=state.catalogManagerFilter;filters.innerHTML=selected==='ALL'?'':['Items','Packages'].map(n=>`<button class="filter-pill ${filter===n?'active':''}" onclick="app.setCatalogManagerFilter('${n}')">${n}</button>`).join('');filters.style.display=selected==='ALL'?'none':'flex';const sortEl=document.getElementById('catalogSort');if(sortEl)sortEl.value=pref;
         const categories=['ALL',...state.catalogCategories];if(pref==='az')categories.splice(1,categories.length-1,...categories.slice(1).sort((a,b)=>String(a).localeCompare(String(b))));if(pref==='za')categories.splice(1,categories.length-1,...categories.slice(1).sort((a,b)=>String(b).localeCompare(String(a))));
         serviceList.innerHTML=categories.map((service,index)=>{const label=service==='ALL'?'All':displayCategory(service),itemCount=service==='ALL'?state.soloServices.length:state.soloServices.filter(s=>String(s.category||'')===service).length,packageCount=service==='ALL'?state.packagesList.length:state.packagesList.filter(p=>String(p.category||'')===service).length,enc=encodeURIComponent(service),draggable=service!=='ALL'&&pref==='default';return `<button class="catalog-category-item ${selected===service?'active':''}" ${draggable?'draggable="true"':''} data-service-index="${index-1}" ondragstart="app.startCatalogServiceDrag(event,${index-1})" ondragover="app.allowCatalogServiceDrop(event)" ondrop="app.dropCatalogService(event,${index-1})" onclick="app.selectCatalogCategory(decodeURIComponent('${enc}'))"><span class="service-drag-handle" aria-hidden="true">${service==='ALL'?'':'⋮⋮'}</span><span class="service-nav-copy"><strong>${escapeHtml(label)}</strong><small>${itemCount} item${itemCount===1?'':'s'}${packageCount?` · ${packageCount} package${packageCount===1?'':'s'}`:''}</small></span>${service!=='ALL'?`<span class="catalog-category-more vertical-more" onclick="event.stopPropagation();app.openCatalogCategoryMenu(decodeURIComponent('${enc}'),this,event)">⋮</span>`:''}</button>`}).join('');
@@ -3569,89 +3646,8 @@ function openFeeInfo(type='all'){
         openEditProjectModal(projId);
       }
 
-
-      function defaultAdditionalFees(){
-        return [
-          {code:'RUSH',name:'Rush Fee',amount:500,rule:'per_4_days_early',description:'Applied when the requested deadline is earlier than the standard timeline. Current workload may adjust the final rush charge from JP-052 onward.',active:true,locked:true},
-          {code:'REVISION',name:'Revision Fee',amount:500,rule:'per_revision',description:'Applied for each chargeable revision request added to the project.',active:true,locked:true},
-          {code:'SYSTEM_MAINTENANCE',name:'System Maintenance Fee',amount:21,rule:'package_once',description:'Applied once to orders containing a Package to support the JUAN Project system and service operations.',active:true,locked:true}
-        ];
-      }
-      function ensureAdditionalFees(){
-        if(Array.isArray(state.additionalFees)&&state.additionalFees.length)return state.additionalFees;
-        let saved=[];try{saved=JSON.parse(localStorage.getItem('JUAN_ADDITIONAL_FEES')||'[]');if(!Array.isArray(saved))saved=[];}catch(_){saved=[];}
-        const defaults=defaultAdditionalFees();const byCode=new Map(saved.map(f=>[String(f.code||'').toUpperCase(),f]));
-        state.additionalFees=defaults.map(d=>({...d,...(byCode.get(d.code)||{}),code:d.code,locked:true}));
-        saved.filter(f=>!defaults.some(d=>d.code===String(f.code||'').toUpperCase())).forEach(f=>state.additionalFees.push({...f,code:String(f.code||`CUSTOM_${Date.now()}`).toUpperCase(),locked:false}));
-        persistAdditionalFees();return state.additionalFees;
-      }
-      function persistAdditionalFees(){localStorage.setItem('JUAN_ADDITIONAL_FEES',JSON.stringify(state.additionalFees||[]));}
-      function getFeeConfig(code){ensureAdditionalFees();const key=String(code||'').toUpperCase();return state.additionalFees.find(f=>String(f.code||'').toUpperCase()===key)||{code:key,name:key,amount:0,rule:'manual',description:'',active:false};}
-      function getFeeAmount(code,fallback=0){const fee=getFeeConfig(code);return fee.active===false?0:Math.max(0,Number.isFinite(Number(fee.amount))?Number(fee.amount):Number(fallback||0));}
-      function renderAdditionalFeesManager(){
-        const body=document.getElementById('catalogAdditionalFeesBody');if(!body)return;ensureAdditionalFees();const ruleLabel={per_4_days_early:'Every 4 days earlier',per_revision:'Per revision',package_once:'Once with package',manual:'Manual'};
-        body.innerHTML=(state.additionalFees||[]).map((fee,i)=>{const menu=`shopFee_${i}`;return `<tr><td><strong>${escapeHtml(fee.name||'Fee')}</strong>${fee.active===false?'<small class="row-subtype">Inactive</small>':''}</td><td><strong>${formatCurrency(fee.amount||0)}</strong></td><td>${escapeHtml(ruleLabel[fee.rule]||'Manual')}</td><td class="catalog-desc-cell">${escapeHtml(fee.description||'—')}</td><td class="actions-cell"><div class="popover-wrap" id="${menu}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menu}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openAdditionalFeeModal('${escapeHtml(fee.code)}')">Edit Fee</button>${fee.locked?'':`<button class="popover-action text-danger" onclick="app.deleteAdditionalFee('${escapeHtml(fee.code)}')">Delete Fee</button>`}</div></div></td></tr>`}).join('')||'<tr><td colspan="5" class="text-center text-muted py-4">No fees configured.</td></tr>';
-      }
-      function openAdditionalFeeModal(code=''){
-        ensureAdditionalFees();const fee=code?getFeeConfig(code):null;document.getElementById('additionalFeeModalTitle').textContent=fee?'Edit Fee':'Add Fee';document.getElementById('additionalFeeCode').value=fee?.code||'';document.getElementById('additionalFeeName').value=fee?.name||'';document.getElementById('additionalFeeAmount').value=fee?.amount??'';document.getElementById('additionalFeeRule').value=fee?.rule||'manual';document.getElementById('additionalFeeDescription').value=fee?.description||'';document.getElementById('additionalFeeActive').checked=fee?.active!==false;document.getElementById('additionalFeeDeleteBtn')?.classList.toggle('hidden',!fee||fee.locked);enforceWordLimit(document.getElementById('additionalFeeDescription'),45,'additionalFeeDescriptionCount');openModal('additionalFeeModal');
-      }
-      function saveAdditionalFee(){
-        ensureAdditionalFees();let code=String(document.getElementById('additionalFeeCode')?.value||'').trim().toUpperCase(),name=document.getElementById('additionalFeeName')?.value.trim()||'',amount=Math.max(0,Number(document.getElementById('additionalFeeAmount')?.value||0)),rule=document.getElementById('additionalFeeRule')?.value||'manual',description=document.getElementById('additionalFeeDescription')?.value.trim()||'',active=!!document.getElementById('additionalFeeActive')?.checked;if(!name){showToast('Fee name is required.');return;}if(!code){code='CUSTOM_'+Date.now();state.additionalFees.push({code,name,amount,rule,description,active,locked:false});}else{const fee=state.additionalFees.find(f=>f.code===code);if(fee)Object.assign(fee,{name,amount,rule,description,active});}
-        persistAdditionalFees();state.projects.forEach(p=>{if(projectHasPackage(p))p.system_maintenance_charge=getFeeAmount('SYSTEM_MAINTENANCE',21);});persistProjectsState();closeModal('additionalFeeModal');renderAdditionalFeesManager();updateCartCalculations();const proj=state.projects.find(p=>p.id===state.activeProjectId);if(proj){recalculateProjectFromOrderItems(proj);renderProjectOrderItems(proj);renderInvoicePaper(proj);}showToast('Additional fee updated.');
-      }
-      function deleteAdditionalFee(code=''){
-        code=String(code||document.getElementById('additionalFeeCode')?.value||'').toUpperCase();const fee=(state.additionalFees||[]).find(f=>f.code===code);if(!fee||fee.locked){showToast('Core fees can be edited but not deleted.');return;}requestDestructivePin('Delete Fee',`Delete "${fee.name}"?`,()=>{state.additionalFees=state.additionalFees.filter(f=>f.code!==code);persistAdditionalFees();closeModal('additionalFeeModal');renderAdditionalFeesManager();showToast('Fee deleted.');});
-      }
-
-      function loadOrderDraftsState(){try{state.orderDrafts=JSON.parse(localStorage.getItem('JUAN_ORDER_DRAFTS')||'[]');if(!Array.isArray(state.orderDrafts))state.orderDrafts=[];}catch(_){state.orderDrafts=[];}state.editingDraftId=null;}
-      function persistOrderDrafts(){localStorage.setItem('JUAN_ORDER_DRAFTS',JSON.stringify(state.orderDrafts||[]));updateDraftCountBadge();}
-      function updateDraftCountBadge(){const el=document.getElementById('orderDraftCount');if(el)el.textContent=String((state.orderDrafts||[]).length);}
-      function collectOrderDraft(){
-        state.cart.projectName=document.getElementById('orderProjectName')?.value.trim()||state.cart.projectName||'';state.cart.startDate=document.getElementById('orderStartDate')?.value||state.cart.startDate;state.cart.deadlineDate=document.getElementById('orderDeadlineDate')?.value||state.cart.deadlineDate;
-        return {id:state.editingDraftId||`draft_${Date.now()}`,saved_at:new Date().toISOString(),cart:JSON.parse(JSON.stringify(state.cart)),newClient:{name:document.getElementById('newClientName')?.value||'',email:document.getElementById('newClientEmail')?.value||'',phone:document.getElementById('newClientPhone')?.value||'',address:document.getElementById('newClientAddress')?.value||''}};
-      }
-      function saveOrderDraft(){
-        if(!Array.isArray(state.orderDrafts))loadOrderDraftsState();const draft=collectOrderDraft(),idx=state.orderDrafts.findIndex(d=>d.id===draft.id);if(idx>=0)state.orderDrafts[idx]=draft;else state.orderDrafts.unshift(draft);state.editingDraftId=draft.id;persistOrderDrafts();showToast('Order draft saved.');
-      }
-      function openOrderDrafts(){renderOrderDrafts();openModal('orderDraftsModal');}
-      function renderOrderDrafts(){const box=document.getElementById('orderDraftsList');if(!box)return;const drafts=[...(state.orderDrafts||[])].sort((a,b)=>new Date(b.saved_at||0)-new Date(a.saved_at||0));box.innerHTML=drafts.length?drafts.map(d=>{const project=d.cart?.projectName||'Untitled order',count=(d.cart?.items||[]).reduce((s,i)=>s+Number(i.qty||1),0),when=d.saved_at?new Date(d.saved_at).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}):'';return `<div class="draft-order-row"><div><strong>${escapeHtml(project)}</strong><span>${count} item${count===1?'':'s'} · Saved ${escapeHtml(when)}</span></div><div class="draft-order-actions"><button class="btn btn-secondary btn-sm" onclick="app.loadOrderDraft('${d.id}')">Edit Draft</button><button class="icon-more-button vertical-more" onclick="app.deleteOrderDraft('${d.id}')" aria-label="Delete draft">⋮</button></div></div>`}).join(''):'<div class="empty-compact-state"><strong>No drafts</strong><span>Save an unfinished New Order and continue it later.</span></div>';}
-      function loadOrderDraft(id){const d=(state.orderDrafts||[]).find(x=>x.id===id);if(!d)return;state.cart={...state.cart,...JSON.parse(JSON.stringify(d.cart||{}))};state.editingDraftId=id;persistCartState();closeModal('orderDraftsModal');navigateTo('new-order');setTimeout(()=>{const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||''};set('orderProjectName',state.cart.projectName);set('orderStartDate',state.cart.startDate);set('orderDeadlineDate',state.cart.deadlineDate);set('cartDiscountVal',state.cart.discountVal||0);set('cartDiscountType',state.cart.discountType||'fixed');set('newClientName',d.newClient?.name);set('newClientEmail',d.newClient?.email);set('newClientPhone',d.newClient?.phone);set('newClientAddress',d.newClient?.address);setClientMode(state.cart.clientMode||'existing');if(state.cart.selectedClientId)selectExistingClient(state.cart.selectedClientId);renderCartUI();renderServiceCatalog();updateRushCalculations();},60);}
-      function deleteOrderDraft(id,silent=false){if(!Array.isArray(state.orderDrafts))loadOrderDraftsState();state.orderDrafts=state.orderDrafts.filter(d=>d.id!==id);if(state.editingDraftId===id)state.editingDraftId=null;persistOrderDrafts();renderOrderDrafts();if(!silent)showToast('Draft deleted.');}
-      function resetNewOrderForm(silent=false){
-        const today=getLocalDateString(new Date());state.cart={clientMode:'existing',selectedClientId:'',projectName:'',items:[],discountVal:0,discountType:'fixed',startDate:today,deadlineDate:addDaysToDateString(today,7),deadlineManuallySet:false,rushFee:0,workloadRushRate:0,workloadRushFee:0,rushDaysEarly:0};state.editingDraftId=null;persistCartState();
-        const ids=['orderProjectName','orderClientSearch','orderClientSelect','newClientName','newClientEmail','newClientPhone','newClientAddress'];ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});const dv=document.getElementById('cartDiscountVal'),dt=document.getElementById('cartDiscountType');if(dv)dv.value='0';if(dt)dt.value='fixed';setClientMode('existing');renderCartUI();setDefaultOrderDates(true);if(!silent)showToast('New Order form cleared.');
-      }
-
-      let workspaceClockTimer=null;
-      function updateWorkspaceClock(){const now=new Date(),parts=new Intl.DateTimeFormat('en-PH',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}).formatToParts(now),get=t=>parts.find(p=>p.type===t)?.value||'',date=now.toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'});[['overviewClockHours',get('hour')],['overviewClockMinutes',get('minute')],['overviewClockSeconds',get('second')],['overviewClockPeriod',get('dayPeriod')],['workspaceClockHours',get('hour')],['workspaceClockMinutes',get('minute')],['workspaceClockSeconds',get('second')],['workspaceClockPeriod',get('dayPeriod')],['overviewClockDate',date],['workspaceClockModalDate',date]].forEach(([id,v])=>{const el=document.getElementById(id);if(el)el.textContent=v;});}
-      function startWorkspaceClock(){if(workspaceClockTimer)clearInterval(workspaceClockTimer);updateWorkspaceClock();workspaceClockTimer=setInterval(updateWorkspaceClock,1000);}
-      function openWorkspaceClock(){updateWorkspaceClock();openModal('workspaceClockModal');}
-
-      function getProjectFileRequestChoices(proj){
-        const out=[],seen=new Set(),norm=v=>String(v||'').trim().toLowerCase();const push=(name,price,code='')=>{const key=norm(name);if(!name||seen.has(key))return;seen.add(key);out.push({name,price:Math.max(0,Number(price||0)),code});};
-        (proj?.project_items||[]).forEach(item=>{const type=String(item.type||'').toUpperCase();if(['ADDON','REQUEST'].includes(type))return;if(type==='PACKAGE'){const pkg=(state.packagesList||[]).find(p=>String(p.product_code||'')===String(item.product_code||'')||norm(p.name)===norm(item.name));(pkg?.includedServiceNames||[]).forEach(name=>{const svc=(state.soloServices||[]).find(s=>norm(s.name)===norm(name));push(name,svc?.price||0,svc?.product_code||'');});}else{const svc=(state.soloServices||[]).find(s=>String(s.product_code||'')===String(item.product_code||'')||norm(s.name)===norm(item.name));push(item.name,svc?.price??item.price,svc?.product_code||item.product_code||'');}});return out;
-      }
-      function renderProjectFileRequestOptions(proj){const sel=document.getElementById('projectFileRequestItem');if(!sel)return;state.projectFileRequestChoices=getProjectFileRequestChoices(proj);sel.innerHTML=state.projectFileRequestChoices.length?state.projectFileRequestChoices.map((x,i)=>`<option value="${i}">${escapeHtml(x.name)} · ${formatCurrency(x.price)} → request ${formatCurrency(x.price*.5)}</option>`).join(''):'<option value="">No eligible item</option>';}
-      function refreshProjectAfterRequest(proj){recalculateProjectFromOrderItems(proj);syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);renderOverviewDashboard();}
-      function addProjectRevisionRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const fee=getFeeAmount('REVISION',500);proj.revision_count=Math.max(0,Math.floor(Number(proj.revision_count||0)))+1;proj.revision_fee_per_revision=fee;proj.updated_at=new Date().toISOString();refreshProjectAfterRequest(proj);showToast(`Revision request added · ${formatCurrency(fee)}.`);}
-      function removeProjectRevisionRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const count=Math.max(0,Math.floor(Number(proj.revision_count||0)));if(!count)return;proj.revision_count=count-1;proj.updated_at=new Date().toISOString();refreshProjectAfterRequest(proj);showToast('One revision request removed.');}
-      function addProjectFileRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const idx=Number(document.getElementById('projectFileRequestItem')?.value),choice=(state.projectFileRequestChoices||[])[idx];if(!choice){showToast('Choose the item for the project file request.');return;}if(!Array.isArray(proj.project_items))proj.project_items=[];const price=Math.round(choice.price*.5*100)/100;proj.project_items.push({id:`oi_${proj.id}_file_${Date.now()}`,name:'Project File Request',source_item_name:choice.name,qty:1,price,type:'ADDON',addon_type:'PROJECT_FILE',product_code:null,source_product_code:choice.code||null,category:'Project Files',item_discount:0});refreshProjectAfterRequest(proj);renderProjectFileRequestOptions(proj);showToast(`Project file request added · ${formatCurrency(price)}.`);}
-
       return {
         initWorkspace,
-        openWorkspaceClock,
-        saveOrderDraft,
-        openOrderDrafts,
-        loadOrderDraft,
-        deleteOrderDraft,
-        resetNewOrderForm,
-        openAdditionalFeeModal,
-        saveAdditionalFee,
-        deleteAdditionalFee,
-        renderAdditionalFeesManager,
-        addProjectRevisionRequest,
-        removeProjectRevisionRequest,
-        addProjectFileRequest,
         navigateTo,
         setThemeMode,
         setDashboardTheme,
