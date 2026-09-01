@@ -250,6 +250,32 @@ function formatCurrency(amount) {
         }
       }
 
+      function updateConnectionStatus(status="offline", label="OFFLINE · LOCAL", detail=""){
+        const indicator=document.getElementById("connectionStatusIndicator");
+        const textEl=document.getElementById("statusText");
+        const settingsState=document.getElementById("cloudConnectionState");
+        const settingsDetail=document.getElementById("cloudConnectionDetail");
+        const normalized=["connected","connecting","error","offline"].includes(status)?status:"offline";
+        if(indicator){
+          indicator.classList.remove("status-connected","status-connecting","status-error","status-offline");
+          indicator.classList.add(`status-${normalized}`);
+        }
+        if(textEl)textEl.textContent=label;
+        if(settingsState){
+          settingsState.textContent=label;
+          settingsState.dataset.status=normalized;
+        }
+        if(settingsDetail){
+          settingsDetail.textContent=detail || (
+            normalized==="connected" ? "Secure Supabase synchronization is active." :
+            normalized==="connecting" ? "Authenticating and checking the database…" :
+            normalized==="error" ? "Cloud connection needs attention." :
+            "Local data remains available. Connect Cloud to enable Supabase and Gemini."
+          );
+        }
+        window.dispatchEvent(new CustomEvent("juan:cloud-status",{detail:{status:normalized,label,detail}}));
+      }
+
       async function initWorkspace() {
         applyTheme(state.themeMode);
         updateProfileDisplay();
@@ -329,11 +355,19 @@ function formatCurrency(amount) {
         state.projects.forEach(p=>{p.system_maintenance_charge=projectHasPackage(p)?SYSTEM_MAINTENANCE_FEE:0;if(!Number.isFinite(Number(p.revision_count)))p.revision_count=0;if(!Number.isFinite(Number(p.revision_fee_per_revision)))p.revision_fee_per_revision=getFeeAmount('REVISION',REVISION_FEE_PER_REVISION);});ensureContinuousClientIds();persistClientsState();
         persistProjectsState();
         state.isConnected = false;
-        updateConnectionStatus("connected", "OFFLINE · LOCAL");
+        updateConnectionStatus("offline", "OFFLINE · LOCAL");
         renderCurrentView();
         renderTemplatesDropdown();
         updateDraftCountBadge();
         startWorkspaceClock();
+        // Restore an existing secure HttpOnly session automatically without interrupting offline-first startup.
+        setTimeout(async()=>{
+          if(!navigator.onLine)return;
+          try{
+            const authenticated=await initializeEnvironmentVariables();
+            if(authenticated)await initSupabase({silent:false});
+          }catch(error){console.warn('Automatic cloud restore skipped:',error);}
+        },180);
       }
 
 
@@ -938,21 +972,30 @@ ${description}`))actionCallback();return;}
         if(payments.length){const r=await supabaseClient.from('payments').upsert(payments);if(r?.error)throw r.error;}
       }
 
-      async function initSupabase() {
-        updateConnectionStatus("connecting", "CONNECTING...");
+      async function initSupabase({silent=false}={}) {
+        if(!navigator.onLine){
+          state.isConnected=false;
+          updateConnectionStatus("offline", "OFFLINE · LOCAL", "No internet connection. Local workspace data remains available.");
+          return false;
+        }
+        if(!silent)updateConnectionStatus("connecting", "CONNECTING…", "Checking secure session and Supabase database access…");
         try {
           const ok=await initializeEnvironmentVariables();
-          if(!ok) throw new Error('Cloud session is locked. Local mode remains available.');
+          if(!ok) throw new Error('Secure cloud session is not authenticated.');
           supabaseClient=createSecureDataClient();
           state.isConnected=true;
-          updateConnectionStatus("connected", "● CONNECTED");
           await loadDatabaseData();
           await flushCloudQueue();
+          updateConnectionStatus("connected", "CLOUD · SYNCED", "Secure Supabase synchronization is active.");
           window.dispatchEvent(new CustomEvent('juan:cloud-connected'));
           return true;
         } catch (err) {
-          state.isConnected=false;supabaseClient=null;updateConnectionStatus("offline", "OFFLINE · LOCAL");
-          console.warn('Cloud sync unavailable:',err?.message||err);
+          const message=String(err?.message||err||'Cloud connection failed.');
+          state.isConnected=false;
+          supabaseClient=null;
+          const locked=/not authenticated|authentication required|session/i.test(message);
+          updateConnectionStatus(locked?"offline":"error", locked?"OFFLINE · LOCAL":"CLOUD · ERROR", message);
+          console.warn('Cloud sync unavailable:',message);
           return false;
         }
       }
@@ -965,8 +1008,8 @@ ${description}`))actionCallback();return;}
             supabaseClient ? supabaseClient.from('projects').select('*, deliverables(*), payments(*), project_items(*)').order('created_at', { ascending: false }) : { data: [] }
           ]);
 
-          if (clientsRes.error) console.error("Clients table load failed:", clientsRes.error);
-          if (projectsRes.error) console.error("Projects table load failed:", projectsRes.error);
+          if (clientsRes.error) throw new Error(`Clients table: ${clientsRes.error.message||clientsRes.error}`);
+          if (projectsRes.error) throw new Error(`Projects table: ${projectsRes.error.message||projectsRes.error}`);
 
           if (clientsRes.data && clientsRes.data.length > 0) {
             state.clients = clientsRes.data;
@@ -3597,13 +3640,77 @@ function openFeeInfo(type='all'){
       function removeProjectRevisionRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj||!Array.isArray(proj.project_items))return;const i=[...proj.project_items].map((x,idx)=>[x,idx]).reverse().find(([x])=>String(x.addon_type||'').toUpperCase()==='REVISION')?.[1];if(i===undefined)return;proj.project_items.splice(i,1);refreshProjectAfterRequest(proj);showToast('Revision request removed.');}
       function addProjectFileRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const idx=Number(document.getElementById('projectFileRequestItem')?.value),choice=(state.projectFileRequestChoices||[])[idx];if(!choice){showToast('Choose the item for the project file request.');return;}if(!Array.isArray(proj.project_items))proj.project_items=[];const price=Math.round(choice.price*.5*100)/100;proj.project_items.push({id:`oi_${proj.id}_file_${Date.now()}`,name:'Project File Request',source_item_name:choice.name,qty:1,price,type:'ADDON',addon_type:'PROJECT_FILE',product_code:null,source_product_code:choice.code||null,category:'Project Files',item_discount:0});refreshProjectAfterRequest(proj);renderProjectFileRequestOptions(proj);showToast(`Project file request added · ${formatCurrency(price)}.`);}
 
-      function openCloudLogin(){const input=document.getElementById('cloudPasswordInput');if(input)input.value='';const err=document.getElementById('cloudLoginError');if(err)err.textContent='';openModal('cloudLoginModal');setTimeout(()=>input?.focus(),40);}
-      async function connectCloud(){const input=document.getElementById('cloudPasswordInput'),err=document.getElementById('cloudLoginError');const password=input?.value||'';if(!password){if(err)err.textContent='Enter the workspace password.';return}try{const response=await fetch('/api/session',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({password})});const body=await response.json().catch(()=>({}));if(!response.ok)throw new Error(body.error||'Cloud sign-in failed');state.csrfToken=body.csrfToken||'';state.cloudAuthenticated=true;closeModal('cloudLoginModal');await initSupabase();showToast('Secure cloud sync connected.')}catch(e){if(err)err.textContent=e.message||'Cloud sign-in failed'}}
-      async function disconnectCloud(){try{await fetch('/api/session',{method:'DELETE',credentials:'same-origin',headers:{'X-CSRF-Token':state.csrfToken||''}})}catch{}state.cloudAuthenticated=false;state.isConnected=false;supabaseClient=null;state.csrfToken='';updateConnectionStatus('offline','OFFLINE · LOCAL');showToast('Cloud sync disconnected.');}
+      function setCloudLoginFeedback(message="",kind=""){
+        const feedback=document.getElementById('cloudLoginFeedback');
+        const err=document.getElementById('cloudLoginError');
+        if(feedback){feedback.textContent=message;feedback.className=`cloud-login-feedback${kind?` is-${kind}`:''}`;}
+        if(err)err.textContent=kind==='error'?message:'';
+      }
+      function setCloudConnectBusy(busy,label="Connect"){
+        const btn=document.getElementById('cloudLoginConnectBtn');
+        const input=document.getElementById('cloudPasswordInput');
+        if(btn){btn.disabled=!!busy;btn.textContent=busy?label:"Connect";}
+        if(input)input.disabled=!!busy;
+      }
+      function openCloudLogin(){
+        const input=document.getElementById('cloudPasswordInput');
+        if(input){input.value='';input.disabled=false;}
+        setCloudLoginFeedback("Enter your workspace password to start a secure session.","info");
+        setCloudConnectBusy(false);
+        openModal('cloudLoginModal');
+        setTimeout(()=>input?.focus(),40);
+      }
+      async function connectCloud(){
+        const input=document.getElementById('cloudPasswordInput');
+        const password=String(input?.value||'');
+        if(!password){setCloudLoginFeedback('Enter the workspace password.','error');input?.focus();return false;}
+        setCloudConnectBusy(true,"Authenticating…");
+        setCloudLoginFeedback("Authenticating workspace password…","working");
+        updateConnectionStatus("connecting","AUTHENTICATING…","Validating the secure workspace session.");
+        try{
+          const response=await fetch('/api/session',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({password})});
+          const body=await response.json().catch(()=>({}));
+          if(!response.ok){
+            const message=response.status===401?'Wrong workspace password.':(body.error||`Authentication failed (HTTP ${response.status}).`);
+            throw new Error(message);
+          }
+          state.csrfToken=String(body.csrfToken||'');
+          state.cloudAuthenticated=true;
+          setCloudLoginFeedback("Password accepted. Connecting to Supabase…","working");
+          setCloudConnectBusy(true,"Connecting…");
+          const connected=await initSupabase();
+          if(!connected){
+            const detail=document.getElementById('cloudConnectionDetail')?.textContent||'Supabase connection failed. Check Vercel environment variables and database installation.';
+            throw new Error(detail);
+          }
+          setCloudLoginFeedback("Connected. Supabase sync and Gemini are ready.","success");
+          setCloudConnectBusy(true,"Connected");
+          showToast('Secure cloud sync connected.');
+          setTimeout(()=>{closeModal('cloudLoginModal');setCloudConnectBusy(false);},500);
+          return true;
+        }catch(e){
+          const message=String(e?.message||'Cloud sign-in failed');
+          state.isConnected=false;
+          if(/wrong workspace password/i.test(message))state.cloudAuthenticated=false;
+          updateConnectionStatus("error","CLOUD · ERROR",message);
+          setCloudLoginFeedback(message,"error");
+          setCloudConnectBusy(false);
+          input?.focus();
+          return false;
+        }
+      }
+      async function disconnectCloud(){
+        try{await fetch('/api/session',{method:'DELETE',credentials:'same-origin',headers:{'X-CSRF-Token':state.csrfToken||''}})}catch{}
+        state.cloudAuthenticated=false;state.isConnected=false;supabaseClient=null;state.csrfToken='';
+        updateConnectionStatus('offline','OFFLINE · LOCAL','Secure cloud session disconnected. Local workspace data remains available.');
+        window.dispatchEvent(new CustomEvent('juan:cloud-disconnected'));
+        showToast('Cloud sync disconnected.');
+      }
 
       return {
         initWorkspace,
         initSupabase,
+        updateConnectionStatus,
         flushCloudQueue,
         openCloudLogin,
         connectCloud,

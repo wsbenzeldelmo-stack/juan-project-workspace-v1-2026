@@ -6,7 +6,7 @@ The mobile experience is intentionally **not** a full admin replacement. It is d
 ## Main phone navigation
 1. **Home** — KPIs, active projects, deadlines, calendar summary.
 2. **Projects** — search and inspect project details, deliverables/progress, payment status, notes.
-3. **AI** — primary mobile action surface for guided questions and workspace lookups.
+3. **AI** — free-form Gemini chat with secure workspace context when connected.
 4. **Finance** — read invoices, balances, payment status and reports.
 5. **More** — Settings plus secondary read-only views such as Clients and Calendar.
 

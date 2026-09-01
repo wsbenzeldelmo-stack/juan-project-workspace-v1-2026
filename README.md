@@ -1,3 +1,8 @@
+
+## v8.1 cloud + AI hotfix
+
+This build fixes the cloud-status runtime bug in v8.0 and replaces the old guided assistant with free-form JUAN AI powered by Gemini. Cloud connection now shows explicit authentication, database connection, success, wrong-password, and configuration-error states.
+
 ## Mobile Viewer Edition
 
 v1.1.0 adds a read-first mobile interface. See `docs/MOBILE_GUIDE.md`.

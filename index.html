@@ -16,7 +16,7 @@
 <link href="./manifest.webmanifest" rel="manifest"/>
 <link href="./assets/apple-touch-icon.png" rel="apple-touch-icon"/>
 <link href="./assets/favicon-64.png" rel="icon" sizes="64x64" type="image/png"/>
-<link href="./css/core.css" rel="stylesheet"/><link href="./css/visual-language.css" rel="stylesheet"/><link href="./css/responsive.css" rel="stylesheet"/><link href="./css/overview-assistant.css" rel="stylesheet"/><link href="./css/management-layout.css" rel="stylesheet"/><link href="./css/interactions-scroll.css" rel="stylesheet"/><link href="./css/project-catalog.css" rel="stylesheet"/><link href="./css/items-security-performance.css" rel="stylesheet"/><link href="./css/payments-invoice-urgency.css" rel="stylesheet"/><link href="./css/catalog-calendar-receipts.css" rel="stylesheet"/><link href="./css/typography-guided-assistant.css" rel="stylesheet"/><link href="./css/mobile-viewer.css" rel="stylesheet"/><link href="./css/shop-refinement.css" rel="stylesheet"/></head>
+<link href="./css/core.css?v=8.1.0" rel="stylesheet"/><link href="./css/visual-language.css" rel="stylesheet"/><link href="./css/responsive.css" rel="stylesheet"/><link href="./css/overview-assistant.css" rel="stylesheet"/><link href="./css/management-layout.css" rel="stylesheet"/><link href="./css/interactions-scroll.css" rel="stylesheet"/><link href="./css/project-catalog.css" rel="stylesheet"/><link href="./css/items-security-performance.css" rel="stylesheet"/><link href="./css/payments-invoice-urgency.css" rel="stylesheet"/><link href="./css/catalog-calendar-receipts.css" rel="stylesheet"/><link href="./css/typography-guided-assistant.css?v=8.1.0" rel="stylesheet"/><link href="./css/mobile-viewer.css" rel="stylesheet"/><link href="./css/shop-refinement.css" rel="stylesheet"/></head>
 <body>
 <!--
   JUAN PROJECT WORKSPACE — MODULAR BUILD
@@ -34,7 +34,7 @@
 <div class="brand">
 <div class="brand-title">JUAN PROJECT</div>
 <div class="brand-subtitle-large">WORKSPACE</div>
-<div class="connection-status status-connected" id="connectionStatusIndicator">
+<div class="connection-status status-offline" id="connectionStatusIndicator">
 <span class="status-dot"></span> <span id="statusText">OFFLINE · LOCAL</span>
 </div>
 </div>
@@ -305,26 +305,40 @@
 </div></section>
 <!-- VIEW: AI ASSISTANT -->
 <section class="view" id="view-assistant">
-<div class="assistant-page-shell">
+<div class="assistant-page-shell assistant-gemini-shell">
 <aside class="assistant-page-sidebar">
-<div class="assistant-page-brand"><span class="assistant-page-brand-icon"><svg class="icon-svg" viewbox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4A7 7 0 0 1 3 13V9a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg></span><div><strong>JUAN AI</strong><span>Workspace guide</span></div></div>
-<button class="assistant-side-action" onclick="juanAI.newChat()"><svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>New conversation</button>
-<div class="assistant-side-section">SHORTCUTS</div>
-<button class="assistant-history-item" onclick="juanAI.topicProjects()">Projects</button>
-<button class="assistant-history-item" onclick="juanAI.topicDeadlines()">Deadlines &amp; Today</button>
-<button class="assistant-history-item" onclick="juanAI.topicFinance()">Finance</button>
+<div class="assistant-page-brand">
+  <span class="assistant-page-brand-icon"><svg class="icon-svg" viewbox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3 1.5-4A7 7 0 0 1 3 13V9a6 6 0 0 1 6-6h6a6 6 0 0 1 6 6z"></path><path d="M8 10h.01M12 10h.01M16 10h.01"></path></svg></span>
+  <div><strong>JUAN AI</strong><span>Powered by Gemini</span></div>
+</div>
+<button class="assistant-side-action" type="button" data-ai-action="new-chat">
+  <svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+  New conversation
+</button>
+<div class="assistant-side-section">CONNECTION</div>
+<button class="assistant-ai-connection-card" type="button" data-ai-action="connect">
+  <span class="assistant-ai-connection-dot"></span>
+  <span><strong id="assistantConnectionTitle">Checking Gemini…</strong><small id="assistantConnectionText">Checking secure session</small></span>
+</button>
 <div class="assistant-side-spacer"></div>
-<div class="assistant-side-foot">Local workspace assistant<br/>Guided actions only</div>
+<div class="assistant-side-foot">Free-form Gemini chat<br/>Workspace-aware when connected</div>
 </aside>
 <div class="assistant-page-main">
-<header class="assistant-page-header"><div><div class="greeting-subtitle">Workspace Assistant</div><h1 class="page-title">JUAN AI Assistant</h1></div><span class="assistant-local-pill">LOCAL · GUIDED</span></header>
-<div class="assistant-chat-stage">
-<div class="assistant-page-messages" id="assistantPageMessages"></div>
-<div class="assistant-suggestion-row" id="assistantSuggestions"></div>
-<div class="assistant-composer is-locked" id="assistantComposer">
-<textarea id="assistantPageInput" onkeydown="if(event.key==='Enter'&amp;&amp;!event.shiftKey){event.preventDefault();juanAI.send();}" placeholder="Choose an option above to continue." readonly="" rows="6"></textarea>
-<div class="assistant-composer-meta"><span id="assistantComposerHint"><svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M12 3v18M3 12h18"></path></svg> Guided assistant</span><button aria-label="Send" class="assistant-send-btn" disabled="" id="assistantSendBtn" onclick="juanAI.send()"><svg class="icon-svg" viewbox="0 0 24 24"><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg></button></div>
-</div>
+<header class="assistant-page-header">
+  <div><div class="greeting-subtitle">Gemini Workspace Assistant</div><h1 class="page-title">JUAN AI</h1></div>
+  <button class="assistant-local-pill assistant-gemini-pill" id="assistantModePill" type="button" data-ai-action="connect">CHECKING…</button>
+</header>
+<div class="assistant-chat-stage assistant-gemini-stage">
+  <div class="assistant-page-messages" id="assistantPageMessages" aria-live="polite"></div>
+  <div class="assistant-composer" id="assistantComposer">
+    <textarea id="assistantPageInput" placeholder="Message JUAN AI…" rows="2" maxlength="4000"></textarea>
+    <div class="assistant-composer-meta">
+      <span id="assistantComposerHint">Gemini can use your workspace context when securely connected.</span>
+      <button aria-label="Send message" class="assistant-send-btn" id="assistantSendBtn" type="button" data-ai-action="send">
+        <svg class="icon-svg" viewbox="0 0 24 24"><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="13 6 19 12 13 18"></polyline></svg>
+      </button>
+    </div>
+  </div>
 </div>
 </div>
 </div>
@@ -596,7 +610,18 @@
 <input class="form-control" disabled="" style="background:var(--bg-subtle);" type="text" value="Workspace Owner"/>
 </div>
 </div>
-<div class="card"><h2 class="card-title mb-4">Secure Cloud Sync</h2><p class="text-sm text-muted mb-4">Cloud credentials stay on the server. This browser receives only a signed HttpOnly session and CSRF token.</p><div class="action-buttons-group"><button class="btn btn-primary" type="button" onclick="app.openCloudLogin()">Connect Cloud</button><button class="btn btn-secondary" type="button" onclick="app.disconnectCloud()">Disconnect</button></div></div>
+<div class="card cloud-sync-card">
+<h2 class="card-title mb-2">Secure Cloud Sync</h2>
+<p class="text-sm text-muted mb-3">Cloud credentials stay on the server. This browser receives only a signed HttpOnly session and CSRF token.</p>
+<div class="cloud-sync-state-row">
+  <span class="cloud-sync-state-badge" id="cloudConnectionState" data-status="offline">OFFLINE · LOCAL</span>
+  <span class="cloud-sync-state-detail" id="cloudConnectionDetail">Local data remains available. Connect Cloud to enable Supabase and Gemini.</span>
+</div>
+<div class="action-buttons-group mt-4">
+  <button class="btn btn-primary" id="cloudConnectButton" type="button" onclick="app.openCloudLogin()">Connect Cloud</button>
+  <button class="btn btn-secondary" type="button" onclick="app.disconnectCloud()">Disconnect</button>
+</div>
+</div>
 <!-- Appearance & Dark Mode Toggle Section -->
 <div class="card">
 <h2 class="card-title mb-4">Appearance &amp; Theme</h2>
@@ -973,7 +998,19 @@
 </button>
 </div>
 
-<div class="modal-backdrop" id="cloudLoginModal"><div class="modal-card"><div class="modal-header"><div><div class="section-kicker">SECURE SYNC</div><h3 class="modal-title">Connect Cloud</h3></div><button class="modal-close" onclick="app.closeModal('cloudLoginModal')">×</button></div><div class="modal-body"><div class="form-group"><label class="form-label">Workspace Password</label><input class="form-control" id="cloudPasswordInput" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')app.connectCloud()"/><span class="inline-error" id="cloudLoginError"></span></div><div class="text-sm text-muted">The password is sent only to the same-origin session endpoint and is never stored in localStorage.</div></div><div class="modal-footer"><button class="btn btn-secondary" onclick="app.closeModal('cloudLoginModal')">Cancel</button><button class="btn btn-primary" onclick="app.connectCloud()">Connect</button></div></div></div>
+<div class="modal-backdrop" id="cloudLoginModal"><div class="modal-card">
+<div class="modal-header"><div><div class="section-kicker">SECURE SYNC</div><h3 class="modal-title">Connect Cloud</h3></div><button class="modal-close" onclick="app.closeModal('cloudLoginModal')">×</button></div>
+<div class="modal-body">
+  <div class="form-group">
+    <label class="form-label">Workspace Password</label>
+    <input class="form-control" id="cloudPasswordInput" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')app.connectCloud()"/>
+    <span class="inline-error" id="cloudLoginError"></span>
+  </div>
+  <div class="cloud-login-feedback is-info" id="cloudLoginFeedback">Enter your workspace password to start a secure session.</div>
+  <div class="text-sm text-muted mt-3">You will see explicit authentication and database connection status here. The password is never stored in localStorage.</div>
+</div>
+<div class="modal-footer"><button class="btn btn-secondary" onclick="app.closeModal('cloudLoginModal')">Cancel</button><button class="btn btn-primary" id="cloudLoginConnectBtn" onclick="app.connectCloud()">Connect</button></div>
+</div></div>
 <div class="toast-container" id="toastContainer"></div>
 <!-- SINGLE APPLICATION ENGINE + UNIFIED ASSISTANT ENGINE -->
 <!-- MODAL: FULL PRICELIST -->
@@ -1026,7 +1063,7 @@
     </div>
   </div>
 </div>
-<script src="./js/app.js"></script>
+<script src="./js/app.js?v=8.1.0"></script>
 <div class="modal-backdrop" id="overviewListModal">
 <div class="modal-card modal-wide overview-list-modal-card">
 <div class="modal-header"><div><div class="section-kicker">OVERVIEW</div><h3 class="modal-title" id="overviewListModalTitle">Projects</h3></div><button class="modal-close" onclick="app.closeModal('overviewListModal')">×</button></div>
@@ -1034,8 +1071,8 @@
 </div>
 </div>
 <script defer="" src="./ocr/tesseract.min.js"></script>
-<script src="./js/assistant.js"></script>
-<script src="./js/pwa.js"></script>
+<script src="./js/assistant.js?v=8.1.0"></script>
+<script src="./js/pwa.js?v=8.1.0"></script>
 <script src="./js/mobile-viewer.js"></script>
 </body>
 </html>

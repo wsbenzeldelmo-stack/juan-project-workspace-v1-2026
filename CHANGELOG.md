@@ -1,3 +1,14 @@
+# v8.1.0 — Cloud authentication feedback + Gemini-first assistant
+- Fixed missing `updateConnectionStatus()` runtime bug that prevented visible cloud-state transitions.
+- Added explicit Authenticating, Connecting, Connected, Wrong Password, and Cloud Error feedback.
+- Cloud modal remains open when authentication/database setup fails so the error is visible.
+- Added automatic restore of an existing secure cloud session.
+- Replaced the guided assistant workflow with free-form Gemini chat.
+- Removed assistant preset shortcut cards and locked composer behavior.
+- Added Gemini server status detection and secure CSRF-aware chat requests.
+- Added workspace-aware Gemini context and local session chat history.
+- Bumped the service-worker cache to force the corrected client bundle to load.
+
 # v8.0.0 — Fresh Supabase + Gemini deployment
 - Added full `sql/install.sql` for brand-new Supabase projects.
 - Added current `sb_secret_...` server-key support via `SUPABASE_SECRET_KEY`.

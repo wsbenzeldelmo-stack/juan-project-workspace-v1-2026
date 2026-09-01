@@ -939,3 +939,16 @@
       #invoicePaperPrintable, #invoicePaperPrintable * { visibility: visible; }
       #invoicePaperPrintable { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; border: none; }
     }
+
+/* v8.1 — explicit cloud connection states */
+.status-offline{background:var(--bg-subtle);color:var(--text-secondary)}
+.cloud-sync-state-row{display:flex;flex-direction:column;gap:5px;padding:12px 13px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-subtle)}
+.cloud-sync-state-badge{font-size:11px;font-weight:750;letter-spacing:.02em;color:var(--text-secondary)}
+.cloud-sync-state-badge[data-status="connected"]{color:var(--primary-mint-dark)}
+.cloud-sync-state-badge[data-status="connecting"]{color:#d97706}
+.cloud-sync-state-badge[data-status="error"]{color:var(--status-red)}
+.cloud-sync-state-detail{font-size:11px;line-height:1.45;color:var(--text-tertiary)}
+.cloud-login-feedback{margin-top:10px;padding:10px 12px;border-radius:11px;border:1px solid var(--border-subtle);background:var(--bg-subtle);font-size:12px;line-height:1.45;color:var(--text-secondary)}
+.cloud-login-feedback.is-working{border-color:rgba(217,119,6,.25);background:rgba(255,149,0,.08);color:#b66805}
+.cloud-login-feedback.is-success{border-color:var(--mint-subtle-border);background:var(--mint-light-bg);color:var(--primary-mint-dark)}
+.cloud-login-feedback.is-error{border-color:rgba(255,59,48,.22);background:rgba(255,59,48,.07);color:var(--status-red)}

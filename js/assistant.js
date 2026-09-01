@@ -1,84 +1,234 @@
 /**
  * JUAN PROJECT WORKSPACE — assistant.js
- * ------------------------------------------------------------------
- * PURPOSE: Guided JUAN Assistant workflow: suggested topics, controlled data-entry flow, project lookups, reminders and bubble behavior.
- * UNIFIED ENGINE: owns assistant navigation, composer actions, bubble state, reminders and OCR binding.
- *
- * MAINTENANCE TIP:
- * - Search for `function <name>` or `app.<action>` to find a feature.
- * - Make one logical change at a time and commit it with Git.
- * - Do not rename stored LocalStorage keys unless you also write a migration.
+ * Gemini-first assistant engine.
+ * One delegated event layer, no guided/pre-scripted assistant flow.
  */
-
 (function(){
+  'use strict';
+
+  const CHAT_KEY='JUAN_AI_GEMINI_CHAT_V1';
   const BUBBLE_KEY='JUAN_ASSISTANT_BUBBLE_ENABLED';
   const NUDGE_DISMISS_KEY='JUAN_ASSISTANT_NUDGE_DISMISSED';
+  const MAX_HISTORY=16;
+  let busy=false;
+  let csrfToken='';
+  let geminiConfigured=false;
+  let authenticated=false;
+  let messages=[];
+
   const localDate=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
-  const readProjects=()=>{try{return JSON.parse(localStorage.getItem('JUAN_PROJECTS_LOCAL')||'[]')}catch(e){return []}};
+  const readJSON=(key,fallback=[])=>{try{const v=JSON.parse(localStorage.getItem(key)||'null');return v??fallback}catch{return fallback}};
+  const readProjects=()=>{const v=readJSON('JUAN_PROJECTS_LOCAL',[]);return Array.isArray(v)?v:[]};
+  const readClients=()=>{const v=readJSON('JUAN_CLIENTS_LOCAL',[]);return Array.isArray(v)?v:[]};
   const activeProjects=()=>readProjects().filter(p=>!p.deleted&&p.status!=='Completed'&&p.delivery_status!=='Delivered'&&!p.archived_at);
   const projectRef=p=>`JP-${String(Number(p.project_number||0)).padStart(3,'0')}`;
-  const currency=n=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP'}).format(Number(n||0));
-  const dateLong=iso=>{const d=iso?new Date(`${iso}T00:00:00`):new Date();return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('en-PH',{weekday:'long',month:'long',day:'numeric',year:'numeric'})};
-  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const currency=n=>new Intl.NumberFormat('en-PH',{style:'currency',currency:'PHP',maximumFractionDigits:2}).format(Number(n||0));
 
-  function setComposer(enabled,placeholder='',value=''){
-    const wrap=document.getElementById('assistantComposer'),input=document.getElementById('assistantPageInput'),send=document.getElementById('assistantSendBtn'),hint=document.getElementById('assistantComposerHint');
-    if(!input||!wrap)return;
-    wrap.classList.toggle('is-locked',!enabled);input.readOnly=!enabled;input.placeholder=placeholder|| (enabled?'Fill in the requested details…':'Choose an option above to continue.');send&&(send.disabled=!enabled);
-    if(typeof value==='string')input.value=value;
-    if(hint)hint.innerHTML=enabled?'<svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg> Fill the requested template':'<svg class="icon-svg sm" viewBox="0 0 24 24"><path d="M12 3v18M3 12h18"/></svg> Guided assistant';
-    if(enabled)setTimeout(()=>input.focus(),50);
+  function loadChat(){
+    try{
+      const saved=JSON.parse(sessionStorage.getItem(CHAT_KEY)||'[]');
+      messages=Array.isArray(saved)?saved.filter(x=>x&&['user','assistant'].includes(x.role)&&typeof x.content==='string').slice(-MAX_HISTORY):[];
+    }catch{messages=[]}
   }
-  function suggestions(items=[]){const box=document.getElementById('assistantSuggestions');if(!box)return;box.innerHTML=items.map(i=>`<button type="button" onclick="${i.action}"><strong>${esc(i.label)}</strong>${i.sub?`<span>${esc(i.sub)}</span>`:''}</button>`).join('')}
-  function appendMessage(text,role='assistant'){const box=document.getElementById('assistantPageMessages');if(!box)return;const el=document.createElement('div');el.className=`assistant-page-message ${role}`;el.innerHTML=`${role==='assistant'?'<strong>JUAN Assistant</strong>':''}<span></span>`;el.querySelector('span').textContent=text;box.appendChild(el);box.scrollTop=box.scrollHeight}
-  function appendCard(html){const box=document.getElementById('assistantPageMessages');if(!box)return;const el=document.createElement('div');el.className='assistant-inline-card';el.innerHTML=html;box.appendChild(el);box.scrollTop=box.scrollHeight;return el}
-  function afterHelp(message){appendMessage(message);appendMessage('Anything else I can help you with?');setComposer(false);suggestions([{label:'I need more help',sub:'Return to the main topics',action:'juanAI.home()'},{label:"I'm done",sub:'End this conversation',action:'juanAI.finish()'}])}
+  function saveChat(){
+    try{sessionStorage.setItem(CHAT_KEY,JSON.stringify(messages.slice(-MAX_HISTORY)))}catch{}
+  }
+  function addToHistory(role,content){
+    messages.push({role,content:String(content||'').slice(0,8000)});
+    messages=messages.slice(-MAX_HISTORY);
+    saveChat();
+  }
 
-  window.juanAI={
-    flow:null,draft:{},editingProjectId:null,pendingEdit:null,
-    setBubbleEnabled(v){localStorage.setItem(BUBBLE_KEY,v?'true':'false');this.refreshBubble()},
-    message:appendMessage,
-    newChat(){this.home(true)},
-    home(clear=false){this.flow=null;this.draft={};this.editingProjectId=null;setComposer(false);const box=document.getElementById('assistantPageMessages');if(clear&&box)box.innerHTML='';if(!box?.children.length)appendMessage(`Hi! I’m JUAN. What would you like to work on today?`);suggestions([{label:'Projects',sub:'Current records, encode, or edit',action:'juanAI.topicProjects()'},{label:'Deadlines & Today',sub:'Date, due today, due soon',action:'juanAI.topicDeadlines()'},{label:'Finance',sub:'Receivables and payment overview',action:'juanAI.topicFinance()'},{label:'Clients',sub:'Open the client directory',action:"app.navigateTo('clients')"}])},
-    topicProjects(){appendMessage('Sure — what would you like to do with your projects?');setComposer(false);suggestions([{label:'Current projects',sub:'Show active project records',action:'juanAI.showCurrentProjects()'},{label:'Encode project',sub:'Add the 5 basic details',action:'juanAI.beginEncode()'},{label:'Edit project',sub:'Choose a Project ID and review its data',action:'juanAI.beginEdit()'},{label:'Back',sub:'Main topics',action:'juanAI.home()'}])},
-    topicDeadlines(){appendMessage('What would you like me to check for you?');setComposer(false);suggestions([{label:"Today's date",sub:'Show the current local date',action:'juanAI.showToday()'},{label:'Due today',sub:'Projects with a deadline today',action:'juanAI.showDueToday()'},{label:'Due in 7 days',sub:'Upcoming active deadlines',action:'juanAI.showDueSoon()'},{label:'Overdue projects',sub:'Past project deadlines not delivered',action:'juanAI.showOverdue()'},{label:'Back',sub:'Main topics',action:'juanAI.home()'}])},
-    topicFinance(){appendMessage('What would you like to check in Finance?');setComposer(false);suggestions([{label:'Finance summary',sub:'Total, collected, outstanding',action:'juanAI.showFinanceSummary()'},{label:'Pending payments',sub:'Projects with an unpaid balance',action:'juanAI.showPendingPayments()'},{label:'Open Finance',sub:'Go to Invoices & Payments',action:"app.navigateTo('payments')"},{label:'Back',sub:'Main topics',action:'juanAI.home()'}])},
-    showToday(){afterHelp(`Today is ${dateLong(localDate())}.`)},
-    showCurrentProjects(){const rows=activeProjects().sort((a,b)=>Number(a.project_number||0)-Number(b.project_number||0));afterHelp(rows.length?`You have ${rows.length} current project${rows.length===1?'':'s'}:\n${rows.slice(0,12).map(p=>`• ${projectRef(p)} — ${p.title||'Untitled Project'}`).join('\n')}`:'There are no current projects.')},
-    showDueToday(){const t=localDate(),rows=activeProjects().filter(p=>String(p.deadline_date||'')===t);afterHelp(rows.length?`${rows.length} project${rows.length===1?' is':'s are'} due today:\n${rows.map(p=>`• ${projectRef(p)} — ${p.title||'Untitled Project'}`).join('\n')}`:'There are no project deadlines today.')},
-    showDueSoon(){const now=new Date(`${localDate()}T00:00:00`),end=new Date(now);end.setDate(end.getDate()+7);const rows=activeProjects().filter(p=>{if(!p.deadline_date)return false;const d=new Date(`${p.deadline_date}T00:00:00`);return d>=now&&d<=end}).sort((a,b)=>String(a.deadline_date).localeCompare(String(b.deadline_date)));afterHelp(rows.length?`Projects due within 7 days:\n${rows.map(p=>`• ${projectRef(p)} — ${p.title||'Untitled Project'} · ${dateLong(p.deadline_date)}`).join('\n')}`:'There are no active projects due within the next 7 days.')},
-    showOverdue(){const today=localDate(),rows=activeProjects().filter(p=>p.deadline_date&&String(p.deadline_date)<today).sort((a,b)=>String(a.deadline_date).localeCompare(String(b.deadline_date)));afterHelp(rows.length?`Projects past their project deadline:\n${rows.map(p=>`• ${projectRef(p)} — ${p.title||'Untitled Project'} · ${dateLong(p.deadline_date)}`).join('\n')}`:'There are no overdue active projects.')},
-    showFinanceSummary(){const rows=readProjects().filter(p=>!p.deleted),total=rows.reduce((s,p)=>s+Number(p.total_amount||0),0),paid=rows.reduce((s,p)=>s+(p.payments||[]).reduce((a,x)=>a+Number(x.amount_paid||x.amount||0),0),0),out=Math.max(0,total-paid);afterHelp(`Finance summary:\n• Total project value: ${currency(total)}\n• Recorded payments: ${currency(paid)}\n• Outstanding balance: ${currency(out)}`)},
-    showPendingPayments(){const rows=readProjects().filter(p=>!p.deleted).map(p=>({p,paid:(p.payments||[]).reduce((a,x)=>a+Number(x.amount_paid||x.amount||0),0)})).filter(x=>Math.max(0,Number(x.p.total_amount||0)-x.paid)>0);afterHelp(rows.length?`${rows.length} project${rows.length===1?' has':'s have'} an outstanding balance:\n${rows.slice(0,12).map(x=>`• ${projectRef(x.p)} — ${x.p.title||'Untitled Project'} · ${currency(Math.max(0,Number(x.p.total_amount||0)-x.paid))}`).join('\n')}`:'There are no outstanding project balances.')},
-    beginEncode(){this.flow='encode';this.draft={};suggestions([]);const template=`Full name:\nAddress:\nEmail address:\nPhone number:\nProject name:`;appendMessage('Please fill all required information in ONE message using the template below. This is the only free-text step.');setComposer(true,'Fill all five fields, then Send.',template)},
-    parseTemplate(text){const labels={fullName:/^full\s*name\s*:\s*(.*)$/im,address:/^address\s*:\s*(.*)$/im,email:/^email(?:\s*address)?\s*:\s*(.*)$/im,phone:/^phone(?:\s*number)?\s*:\s*(.*)$/im,projectName:/^project\s*name\s*:\s*(.*)$/im};const out={};Object.entries(labels).forEach(([k,r])=>{const m=text.match(r);out[k]=m?m[1].trim():''});return out},
-    send(){if(this.flow!=='encode')return;const input=document.getElementById('assistantPageInput'),text=input?.value||'';const d=this.parseTemplate(text),missing=[['fullName','Full Name'],['address','Address'],['email','Email Address'],['phone','Phone Number'],['projectName','Project Name']].filter(([k])=>!d[k]).map(x=>x[1]);if(missing.length){appendMessage(`Please complete these fields in the same message: ${missing.join(', ')}.`);setComposer(true,'Complete all five fields, then Send.',text);return}this.draft=d;appendMessage(text,'user');setComposer(false);this.flow='confirm';this.showConfirmation()},
-    showConfirmation(){const d=this.draft;appendCard(`<div class="section-kicker">CONFIRM DETAILS</div><div class="assistant-confirm-grid"><span>Full Name</span><strong>${esc(d.fullName)}</strong><span>Address</span><strong>${esc(d.address)}</strong><span>Email Address</span><strong>${esc(d.email)}</strong><span>Phone Number</span><strong>${esc(d.phone)}</strong><span>Project Name</span><strong>${esc(d.projectName)}</strong></div><div class="assistant-confirm-actions"><button class="btn btn-secondary btn-sm" onclick="juanAI.cancelEncode()">Cancel</button><button class="btn btn-confirm btn-sm" onclick="juanAI.confirmEncode()">Confirm & Save</button></div>`)},
-    confirmEncode(){const result=app.assistantCreateSimpleProject(this.draft);if(!result?.ok){afterHelp(result?.message||'I could not save the project record.');return}this.flow=null;setComposer(false);const status=document.getElementById('actionStatusModal');if(status){document.getElementById('actionStatusTitle').textContent='Saving Project';document.getElementById('actionStatusMessage').textContent='Encoding the confirmed details…';document.getElementById('actionStatusGraphic').innerHTML='<span class="action-spinner"></span>';status.classList.add('active')}setTimeout(()=>{if(status){document.getElementById('actionStatusGraphic').innerHTML='<span class="action-check"><svg viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>';document.getElementById('actionStatusTitle').textContent='Project Saved';document.getElementById('actionStatusMessage').textContent=`${result.projectRef} was created successfully.`}setTimeout(()=>status?.classList.remove('active'),500);afterHelp(`Glad I could help. ${result.projectRef} was created successfully.`);this.refreshBubble()},420)},
-    cancelEncode(){this.flow=null;this.draft={};setComposer(false);afterHelp('Project encoding was cancelled.')},
-    beginEdit(){const rows=readProjects().filter(p=>!p.deleted).sort((a,b)=>Number(a.project_number||0)-Number(b.project_number||0));appendMessage('Which Project ID would you like to edit?');setComposer(false);suggestions([]);appendCard(`<div class="assistant-inline-card-title">Select project</div><div class="assistant-inline-card-sub">Choose a Project ID to review its current basic data.</div><select class="assistant-project-select" onchange="if(this.value)juanAI.previewProject(this.value)"><option value="">Select Project ID…</option>${rows.map(p=>`<option value="${esc(p.id)}">${projectRef(p)} — ${esc(p.title||'Untitled Project')}</option>`).join('')}</select>`)},
-    previewProject(id){const p=readProjects().find(x=>String(x.id)===String(id));if(!p)return;this.editingProjectId=id;appendCard(`<div class="assistant-inline-card-title">${projectRef(p)} — ${esc(p.title||'Untitled Project')}</div><div class="assistant-inline-card-sub">Edit only the basic client/project details below.</div><div class="assistant-edit-grid"><div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="aiEditFullName" value="${esc(p.client_name||'')}"></div><div class="form-group"><label class="form-label">Email Address</label><input class="form-control" id="aiEditEmail" value="${esc(p.client_email||'')}"></div><div class="form-group"><label class="form-label">Phone Number</label><input class="form-control" id="aiEditPhone" value="${esc(p.client_phone||'')}"></div><div class="form-group"><label class="form-label">Project Name</label><input class="form-control" id="aiEditProjectName" value="${esc(p.title||'')}"></div><div class="form-group assistant-span-2"><label class="form-label">Address</label><input class="form-control" id="aiEditAddress" value="${esc(p.client_address||'')}"></div></div><div class="assistant-inline-actions"><button class="btn btn-secondary btn-sm" onclick="juanAI.home()">Cancel</button><button class="btn btn-confirm btn-sm" onclick="juanAI.reviewEdit()">Review Changes</button></div>`)},
-    reviewEdit(){const d={fullName:document.getElementById('aiEditFullName')?.value.trim(),email:document.getElementById('aiEditEmail')?.value.trim(),phone:document.getElementById('aiEditPhone')?.value.trim(),projectName:document.getElementById('aiEditProjectName')?.value.trim(),address:document.getElementById('aiEditAddress')?.value.trim()};if(Object.values(d).some(v=>!v)){appendMessage('Please complete all five basic fields before reviewing changes.');return}this.pendingEdit=d;appendMessage('Please confirm the updated information.');appendCard(`<div class="assistant-confirm-grid"><span>Full Name</span><strong>${esc(d.fullName)}</strong><span>Address</span><strong>${esc(d.address)}</strong><span>Email Address</span><strong>${esc(d.email)}</strong><span>Phone Number</span><strong>${esc(d.phone)}</strong><span>Project Name</span><strong>${esc(d.projectName)}</strong></div><div class="assistant-confirm-actions"><button class="btn btn-secondary btn-sm" onclick="juanAI.beginEdit()">Cancel</button><button class="btn btn-confirm btn-sm" onclick="juanAI.commitEdit()">Confirm Update</button></div>`)},
-    commitEdit(){const p=state.projects?.find(x=>String(x.id)===String(this.editingProjectId)),d=this.pendingEdit;if(!p||!d){afterHelp('I could not find that project record.');return}Object.assign(p,{client_name:d.fullName,client_address:d.address,client_email:d.email,client_phone:d.phone,title:d.projectName,updated_at:new Date().toISOString()});const client=state.clients?.find(c=>String(c.id)===String(p.client_id));if(client)Object.assign(client,{name:d.fullName,address:d.address,email:d.email,phone:d.phone});persistProjectsState();if(client)persistClientsState();renderOverviewDashboard?.();renderProjects?.();this.pendingEdit=null;afterHelp(`Glad I could help. ${projectRef(p)} was updated successfully.`)},
-    finish(){appendMessage('All set. You can start another guided task whenever you need me.');setComposer(false);suggestions([{label:'Start again',sub:'Open a new guided conversation',action:'juanAI.newChat()'}])},
-    dismissNudge(e){e?.stopPropagation();sessionStorage.setItem(NUDGE_DISMISS_KEY,localDate());const n=document.getElementById('assistantDeadlineNudge');if(n)n.hidden=true},
-    refreshBubble(){const enabled=localStorage.getItem(BUBBLE_KEY)!=='false',wrap=document.getElementById('assistantBubbleWrap'),toggle=document.getElementById('assistantBubbleToggle'),badge=document.getElementById('assistantFabBadge'),nudge=document.getElementById('assistantDeadlineNudge'),t=localDate(),count=activeProjects().filter(p=>String(p.deadline_date||'')===t).length,dismissed=sessionStorage.getItem(NUDGE_DISMISS_KEY)===t;if(toggle)toggle.checked=enabled;if(wrap)wrap.style.display=enabled?'flex':'none';if(badge){badge.hidden=!count;badge.textContent=count}if(nudge){nudge.hidden=!count||dismissed;nudge.innerHTML=count?`<button class="assistant-nudge-close" type="button" aria-label="Close reminder" onclick="juanAI.dismissNudge(event)">×</button><span class="assistant-nudge-title">Deadline reminder</span><span class="assistant-nudge-copy">${count} project${count===1?' is':'s are'} due today.</span>`:''}}
-  };
+  function appendMessage(text,role='assistant',{ephemeral=false,error=false}={}){
+    const box=document.getElementById('assistantPageMessages');
+    if(!box)return null;
+    const el=document.createElement('div');
+    el.className=`assistant-page-message ${role}${error?' is-error':''}${ephemeral?' is-ephemeral':''}`;
+    if(role==='assistant'){
+      const label=document.createElement('strong');label.textContent='JUAN AI';el.appendChild(label);
+    }
+    const span=document.createElement('span');span.textContent=String(text||'');el.appendChild(span);
+    box.appendChild(el);box.scrollTop=box.scrollHeight;
+    return el;
+  }
+  function renderChat(){
+    const box=document.getElementById('assistantPageMessages');
+    if(!box)return;
+    box.innerHTML='';
+    if(!messages.length){
+      appendMessage('Hi! I’m JUAN AI. Ask me anything about your workspace, projects, clients, deadlines, payments, or general creative work.','assistant',{ephemeral:true});
+      return;
+    }
+    messages.forEach(m=>appendMessage(m.content,m.role));
+  }
 
-  /* Replace the old free-chat boot state with the guided home. */
-  const previousNavigate=app.navigateTo.bind(app);app.navigateTo=function(view){previousNavigate(view);if(view==='assistant')setTimeout(()=>juanAI.home(true),60);setTimeout(()=>juanAI.refreshBubble(),80)};
-  const previousOverview=app.renderOverviewDashboard?.bind(app);if(previousOverview)app.renderOverviewDashboard=function(){const r=previousOverview();setTimeout(()=>juanAI.refreshBubble(),0);return r};
+  function setMode(status,title,text){
+    const pill=document.getElementById('assistantModePill');
+    const titleEl=document.getElementById('assistantConnectionTitle');
+    const textEl=document.getElementById('assistantConnectionText');
+    const card=document.querySelector('.assistant-ai-connection-card');
+    const normalized=['ready','checking','error','offline'].includes(status)?status:'offline';
+    if(pill){pill.dataset.status=normalized;pill.textContent=status==='ready'?'GEMINI · READY':status==='checking'?'CHECKING…':status==='error'?'GEMINI · ERROR':'CONNECT GEMINI';}
+    if(titleEl)titleEl.textContent=title;
+    if(textEl)textEl.textContent=text;
+    if(card)card.dataset.status=normalized;
+  }
 
-  /* Local OCR — receipt reference number suggestion. Requires bundled Tesseract assets. */
+  async function sessionStatus(){
+    try{
+      const r=await fetch('/api/session',{method:'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
+      const body=await r.json().catch(()=>({}));
+      authenticated=!!body.authenticated;
+      csrfToken=String(body.csrfToken||'');
+      return authenticated;
+    }catch{
+      authenticated=false;csrfToken='';return false;
+    }
+  }
+
+  async function checkStatus(){
+    setMode('checking','Checking Gemini…','Validating server configuration and secure session');
+    try{
+      const r=await fetch('/api/gemini',{method:'GET',credentials:'same-origin',cache:'no-store',headers:{Accept:'application/json'}});
+      const body=await r.json().catch(()=>({}));
+      geminiConfigured=!!body.configured;
+      authenticated=!!body.authenticated;
+      if(authenticated)await sessionStatus();
+      if(!geminiConfigured){setMode('error','Gemini is not configured','Add GEMINI_API_KEY in Vercel, then redeploy');return false;}
+      if(!authenticated){setMode('offline','Gemini needs a secure session','Connect Cloud with your workspace password');return false;}
+      setMode('ready','Gemini is ready','Server-secured API connection active');return true;
+    }catch(error){
+      setMode('error','Gemini endpoint unavailable',String(error?.message||'Check the Vercel deployment'));return false;
+    }
+  }
+
+  function workspaceContext(){
+    const projects=readProjects().filter(p=>!p.deleted).slice(-30);
+    const clients=readClients().slice(-40);
+    const today=localDate();
+    const projectRows=projects.map(p=>{
+      const paid=(p.payments||[]).reduce((s,x)=>s+Number(x.amount_paid||x.amount||0),0);
+      const total=Number(p.total_amount||0);
+      return {
+        id:projectRef(p),title:p.title||'',client:p.client_name||'',status:p.status||'',deliveryStatus:p.delivery_status||'',deadline:p.deadline_date||'',priority:!!p.priority,total:currency(total),paid:currency(paid),balance:currency(Math.max(0,total-paid)),items:(p.project_items||[]).map(i=>i.name).filter(Boolean).slice(0,12),deliverables:(p.deliverables||[]).filter(d=>!d.is_group).map(d=>({name:d.name||d.item_name||'',completed:!!d.completed})).slice(0,20)
+      };
+    });
+    const clientRows=clients.map(c=>({id:c.id||'',name:c.name||'',email:c.email||'',phone:c.phone||''}));
+    return JSON.stringify({today,projects:projectRows,clients:clientRows});
+  }
+
+  function syncComposer(){
+    const input=document.getElementById('assistantPageInput');
+    const send=document.getElementById('assistantSendBtn');
+    if(!input||!send)return;
+    send.disabled=busy||!input.value.trim();
+    input.disabled=busy;
+    input.style.height='auto';
+    input.style.height=`${Math.min(180,Math.max(54,input.scrollHeight))}px`;
+    const hint=document.getElementById('assistantComposerHint');
+    if(hint)hint.textContent=busy?'JUAN AI is thinking…':'Gemini can use your workspace context when securely connected.';
+  }
+
+  async function send(){
+    if(busy)return;
+    const input=document.getElementById('assistantPageInput');
+    if(!input)return;
+    const content=input.value.trim();
+    if(!content)return;
+
+    const ready=await checkStatus();
+    if(!ready){
+      if(!geminiConfigured){appendMessage('Gemini is not configured on the server yet. Check GEMINI_API_KEY in Vercel and redeploy.','assistant',{ephemeral:true,error:true});return;}
+      appendMessage('Connect Cloud first so I can open a secure Gemini session. Your message is still here.','assistant',{ephemeral:true});
+      app.openCloudLogin?.();
+      return;
+    }
+
+    input.value='';
+    appendMessage(content,'user');
+    addToHistory('user',content);
+    busy=true;syncComposer();
+    const typing=appendMessage('Thinking…','assistant',{ephemeral:true});
+    typing?.classList.add('is-typing');
+    try{
+      const history=messages.slice(-MAX_HISTORY).map(m=>({role:m.role,content:m.content}));
+      const r=await fetch('/api/gemini',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','Accept':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify({messages:history,workspaceContext:workspaceContext()})});
+      const body=await r.json().catch(()=>({}));
+      typing?.remove();
+      if(!r.ok){
+        if(r.status===401||r.status===403){authenticated=false;csrfToken='';setMode('offline','Gemini needs a secure session','Connect Cloud with your workspace password');app.openCloudLogin?.();}
+        throw new Error(body.error||`Gemini request failed (HTTP ${r.status})`);
+      }
+      const answer=String(body.text||'').trim()||'I did not receive a text response. Please try again.';
+      appendMessage(answer,'assistant');addToHistory('assistant',answer);
+    }catch(error){
+      typing?.remove();
+      appendMessage(String(error?.message||'JUAN AI could not complete that request.'),'assistant',{ephemeral:true,error:true});
+    }finally{busy=false;syncComposer();input.focus();}
+  }
+
+  function newChat(){
+    messages=[];saveChat();renderChat();
+    const input=document.getElementById('assistantPageInput');if(input){input.value='';input.focus();}syncComposer();checkStatus();
+  }
+
+  function openConnect(){
+    if(authenticated&&geminiConfigured){checkStatus();return;}
+    app.openCloudLogin?.();
+  }
+
+  function setBubbleEnabled(v){localStorage.setItem(BUBBLE_KEY,v?'true':'false');refreshBubble()}
+  function dismissNudge(e){e?.stopPropagation();sessionStorage.setItem(NUDGE_DISMISS_KEY,localDate());const n=document.getElementById('assistantDeadlineNudge');if(n)n.hidden=true}
+  function refreshBubble(){
+    const enabled=localStorage.getItem(BUBBLE_KEY)!=='false',wrap=document.getElementById('assistantBubbleWrap'),toggle=document.getElementById('assistantBubbleToggle'),badge=document.getElementById('assistantFabBadge'),nudge=document.getElementById('assistantDeadlineNudge'),t=localDate(),count=activeProjects().filter(p=>String(p.deadline_date||'')===t).length,dismissed=sessionStorage.getItem(NUDGE_DISMISS_KEY)===t;
+    if(toggle)toggle.checked=enabled;if(wrap)wrap.style.display=enabled?'flex':'none';if(badge){badge.hidden=!count;badge.textContent=count}
+    if(nudge){nudge.hidden=!count||dismissed;nudge.innerHTML=count?`<button class="assistant-nudge-close" type="button" aria-label="Close reminder" data-ai-action="dismiss-nudge">×</button><span class="assistant-nudge-title">Deadline reminder</span><span class="assistant-nudge-copy">${count} project${count===1?' is':'s are'} due today.</span>`:''}
+  }
+
+  window.juanAI={send,newChat,checkStatus,refreshBubble,setBubbleEnabled,dismissNudge,message:appendMessage};
+
+  // Preserve navigation behavior without resetting the conversation every time the Assistant view opens.
+  if(window.app?.navigateTo){
+    const previousNavigate=app.navigateTo.bind(app);
+    app.navigateTo=function(view){
+      previousNavigate(view);
+      if(view==='assistant')setTimeout(()=>{renderChat();checkStatus();syncComposer();document.getElementById('assistantPageInput')?.focus();},60);
+      setTimeout(refreshBubble,80);
+    };
+  }
+  const previousOverview=app.renderOverviewDashboard?.bind(app);
+  if(previousOverview)app.renderOverviewDashboard=function(){const r=previousOverview();setTimeout(refreshBubble,0);return r};
+
+  // Local OCR — receipt reference number suggestion. Requires bundled Tesseract assets.
   window.localOCR={
     worker:null,
     status(text,cls=''){const el=document.getElementById('paymentOcrStatus');if(!el)return;el.className=`receipt-ocr-status ${cls}`;el.textContent=text},
     async prepare(file){const bmp=await createImageBitmap(file),maxW=1500,scale=Math.min(1,maxW/bmp.width),w=Math.max(1,Math.round(bmp.width*scale)),h=Math.max(1,Math.round(bmp.height*scale)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d',{willReadFrequently:true});x.drawImage(bmp,0,0,w,h);const img=x.getImageData(0,0,w,h),d=img.data;for(let i=0;i<d.length;i+=4){const g=.299*d[i]+.587*d[i+1]+.114*d[i+2],v=Math.max(0,Math.min(255,(g-128)*1.28+128));d[i]=d[i+1]=d[i+2]=v}x.putImageData(img,0,0);bmp.close?.();return c},
     reference(text){const lines=String(text||'').split(/\r?\n/).map(x=>x.trim()).filter(Boolean);for(const line of lines){if(/ref(?:erence)?|transaction\s*(?:id|no)/i.test(line)){const m=line.match(/(?:ref(?:erence)?(?:\s*(?:no\.?|number))?|transaction\s*(?:id|no\.?))\s*[:#-]?\s*([A-Z0-9][A-Z0-9\s-]{6,28})/i);if(m){const v=m[1].replace(/[^A-Z0-9]/gi,'');if(v.length>=7&&v.length<=24)return v}}}const digits=String(text||'').match(/\b\d(?:[\s-]?\d){9,17}\b/g)||[];return digits.map(x=>x.replace(/\D/g,'')).find(x=>x.length>=10&&x.length<=18)||''},
-    async getWorker(){if(this.worker)return this.worker;if(!window.Tesseract)throw new Error('Offline OCR engine is not installed. Run setup_ocr.command once.');this.worker=await Tesseract.createWorker('eng',1,{workerPath:'./ocr/worker.min.js',corePath:'./ocr/core',langPath:'./ocr/lang',logger:m=>{if(m.status==='recognizing text')this.status(`Scanning receipt locally… ${Math.round((m.progress||0)*100)}%`,'is-working')}});return this.worker},
+    async getWorker(){if(this.worker)return this.worker;if(!window.Tesseract)throw new Error('Offline OCR engine is not installed.');this.worker=await Tesseract.createWorker('eng',1,{workerPath:'./ocr/worker.min.js',corePath:'./ocr/core',langPath:'./ocr/lang',logger:m=>{if(m.status==='recognizing text')this.status(`Scanning receipt locally… ${Math.round((m.progress||0)*100)}%`,'is-working')}});return this.worker},
     async handle(file){if(!file)return;if(!String(file.type||'').startsWith('image/')){this.status('Reference detection works with image receipts. PDF can still be attached manually.');return}try{this.status('Preparing receipt for local OCR…','is-working');const canvas=await this.prepare(file),worker=await this.getWorker(),res=await worker.recognize(canvas),ref=this.reference(res?.data?.text||'');if(ref){const input=document.getElementById('paymentRefInput');if(input&&!input.value.trim())input.value=ref;this.status(`Reference detected: ${ref}`,'is-success')}else this.status('No reference number detected. You can enter it manually.')}catch(e){console.warn('Local OCR unavailable:',e);this.status('OCR unavailable. You can enter the reference number manually.','is-error')}},
     bind(){const input=document.getElementById('paymentReceiptInput');if(!input||input.dataset.ocrBound)return;input.dataset.ocrBound='1';input.addEventListener('change',()=>this.handle(input.files?.[0]||null))}
   };
-  let booted=false;function bootAssistant(){if(booted)return;booted=true;juanAI.home(true);juanAI.refreshBubble();localOCR.bind();document.addEventListener('click',e=>{const send=e.target.closest('#assistantSendBtn');if(send){e.preventDefault();juanAI.send?.();}});document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target?.id==='assistantPageInput'){e.preventDefault();juanAI.send?.();}});window.addEventListener('storage',e=>{if(e.key===BUBBLE_KEY||e.key==='JUAN_PROJECTS_LOCAL')juanAI.refreshBubble();});}
+
+  let booted=false;
+  function bootAssistant(){
+    if(booted)return;booted=true;loadChat();renderChat();refreshBubble();syncComposer();localOCR.bind();checkStatus();
+    document.addEventListener('click',e=>{
+      const target=e.target.closest('[data-ai-action]');if(!target)return;
+      const action=target.dataset.aiAction;
+      if(action==='send'){e.preventDefault();send();}
+      else if(action==='new-chat'){e.preventDefault();newChat();}
+      else if(action==='connect'){e.preventDefault();openConnect();}
+      else if(action==='dismiss-nudge'){e.preventDefault();dismissNudge(e);}
+    });
+    document.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey&&e.target?.id==='assistantPageInput'){e.preventDefault();send();}});
+    document.addEventListener('input',e=>{if(e.target?.id==='assistantPageInput')syncComposer();});
+    window.addEventListener('juan:cloud-connected',()=>checkStatus());
+    window.addEventListener('juan:cloud-disconnected',()=>checkStatus());
+    window.addEventListener('juan:cloud-status',e=>{if(e.detail?.status==='connected')checkStatus();});
+    window.addEventListener('online',()=>checkStatus());
+    window.addEventListener('offline',()=>setMode('offline','You are offline','Gemini requires an internet connection'));
+    window.addEventListener('storage',e=>{if(e.key===BUBBLE_KEY||e.key==='JUAN_PROJECTS_LOCAL')refreshBubble();});
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootAssistant,{once:true});else bootAssistant();
 })();

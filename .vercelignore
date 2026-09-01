@@ -1,0 +1,7 @@
+.git
+.patch-backups
+*.zip
+.env.example
+docs
+sql
+scripts
