@@ -72,3 +72,82 @@
 
     @media(max-width:1100px){.finance-kpi-row{grid-template-columns:repeat(3,minmax(0,1fr))}.finance-main-grid{grid-template-columns:1fr}.assistant-page-shell{grid-template-columns:170px minmax(0,1fr)}}
     @media(max-width:760px){#view-assistant.active{height:auto;overflow:visible}.assistant-page-shell{display:block}.assistant-page-sidebar{display:none}.assistant-page-main{padding:18px}.assistant-chat-stage{min-height:68vh}.assistant-page-message{max-width:88%}.finance-kpi-row{grid-template-columns:1fr 1fr}.project-batch-selected-row{grid-template-columns:1fr 80px 34px!important}.batch-discount-control{grid-column:1/3}.assistant-deadline-nudge{display:none}}
+
+/* ========================================================================== 
+   V8.4 — UNIFIED SYSTEM FEEDBACK
+   Central SystemModal, SystemToast, InlineValidation and ComponentLoader.
+   Uses existing JUAN PROJECT tokens only.
+   ========================================================================== */
+body.system-modal-open,body.feature-modal-open{overflow:hidden}
+.system-modal-backdrop{z-index:9200!important;background:rgba(17,18,20,.28)!important;backdrop-filter:blur(2px)!important;transition:opacity .18s ease!important}
+.system-modal-backdrop .system-modal-card{width:min(440px,calc(100vw - 32px))!important;max-width:440px!important;padding:24px!important;border-radius:var(--radius-lg)!important;text-align:left!important;overflow:visible!important;transform:translateY(6px) scale(.99)!important;transition:transform .18s ease,opacity .18s ease!important;box-shadow:var(--shadow-modal)!important;border:1px solid var(--border-subtle)!important;background:var(--bg-card)!important}
+.system-modal-backdrop.active .system-modal-card{transform:translateY(0) scale(1)!important}
+.system-modal-card.system-modal-processing{max-width:420px!important;text-align:center!important}
+.system-modal-topline{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+.system-modal-icon{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--mint-light-bg);color:var(--primary-mint-dark)}
+.system-modal-icon .icon-svg{width:21px;height:21px}
+.system-modal-card[data-danger="true"] .system-modal-icon-confirm,.system-modal-icon-error{background:rgba(255,59,48,.09);color:var(--status-red)}
+.system-modal-icon-warning{background:rgba(255,149,0,.10);color:var(--status-orange)}
+.system-modal-icon-processing{background:var(--mint-light-bg);color:var(--primary-mint-dark)}
+.system-modal-close{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:var(--text-tertiary);font:inherit;font-size:20px;line-height:1;cursor:pointer;transition:background .15s ease,color .15s ease}
+.system-modal-close:hover,.system-modal-close:focus-visible{background:var(--bg-subtle);color:var(--text-primary)}
+.system-modal-copy .modal-title{font-size:20px;line-height:1.2;letter-spacing:-.012em;margin:0 0 9px;font-weight:700}
+.system-modal-copy p{font-size:13px;line-height:1.55;color:var(--text-secondary);margin:0;white-space:pre-line}
+.system-modal-details{margin-top:14px;padding:12px 13px;border:1px solid var(--border-subtle);border-radius:12px;background:var(--bg-subtle);font-size:12px;line-height:1.5;color:var(--text-secondary);white-space:pre-line}
+.system-modal-actions{display:grid!important;grid-template-columns:1fr 1fr;gap:10px!important;margin-top:24px!important}
+.system-modal-actions .btn{width:100%;min-height:42px}
+.system-modal-processing .system-modal-topline{justify-content:center;margin-bottom:18px}
+.system-modal-processing .system-modal-icon{margin:2px auto 0}
+.system-modal-processing .system-modal-copy{text-align:center}
+.system-modal-processing .system-modal-copy p{max-width:320px;margin:0 auto}
+.system-modal-processing .system-modal-actions{display:none!important}
+.system-processing-spinner,.button-loader{display:inline-block;border-radius:50%;border-style:solid;animation:systemSpin .72s linear infinite}
+.system-processing-spinner{width:23px;height:23px;border-width:3px;border-color:rgba(25,186,117,.18);border-top-color:var(--primary-mint-dark)}
+.button-loader{width:14px;height:14px;border-width:2px;border-color:currentColor;border-right-color:transparent;vertical-align:-2px}
+@keyframes systemSpin{to{transform:rotate(360deg)}}
+
+/* Toasts are non-blocking, white, compact and top-right. */
+.system-toast{position:relative;pointer-events:auto;display:grid;grid-template-columns:4px 28px minmax(0,1fr) auto 28px;gap:10px;align-items:center;min-height:62px;padding:10px 10px 10px 0;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:14px;box-shadow:0 14px 34px rgba(0,0,0,.10);color:var(--text-primary);opacity:0;transform:translateY(-6px);transition:opacity .18s ease,transform .18s ease;overflow:hidden}
+.system-toast.is-visible{opacity:1;transform:none}
+.system-toast-accent{align-self:stretch;width:4px;border-radius:0 4px 4px 0;background:var(--primary-mint-dark)}
+.system-toast-warning .system-toast-accent{background:var(--status-orange)}
+.system-toast-error .system-toast-accent{background:var(--status-red)}
+.system-toast-info .system-toast-accent{background:var(--status-gray)}
+.system-toast-icon{width:28px;height:28px;border-radius:9px;background:var(--mint-light-bg);color:var(--primary-mint-dark);display:flex;align-items:center;justify-content:center}
+.system-toast-warning .system-toast-icon{background:rgba(255,149,0,.09);color:var(--status-orange)}
+.system-toast-error .system-toast-icon{background:rgba(255,59,48,.08);color:var(--status-red)}
+.system-toast-info .system-toast-icon{background:var(--bg-subtle);color:var(--text-secondary)}
+.system-toast-icon .icon-svg{width:16px;height:16px}
+.system-toast-copy{min-width:0}.system-toast-copy strong{display:block;font-size:13px;font-weight:700;line-height:1.3}.system-toast-copy span{display:block;margin-top:3px;font-size:11px;line-height:1.35;color:var(--text-secondary)}
+.system-toast-actions{display:flex;align-items:center}.system-toast-action{border:0;background:transparent;color:var(--primary-mint-dark);font:inherit;font-size:11px;font-weight:700;cursor:pointer;padding:7px 6px;border-radius:8px}.system-toast-action:hover{background:var(--mint-light-bg)}
+.system-toast-close{width:28px;height:28px;border:0;border-radius:8px;background:transparent;color:var(--text-tertiary);font-size:17px;cursor:pointer}.system-toast-close:hover{background:var(--bg-subtle);color:var(--text-primary)}
+body.system-modal-open .toast-container{opacity:.55;pointer-events:none}
+
+/* Feature modal processing: keep the open form visible, locked and stable. */
+.feature-modal-busy .modal-card{cursor:progress}
+.feature-modal-busy .modal-body{opacity:.72;pointer-events:none}
+.btn[aria-busy="true"]{cursor:progress!important;gap:8px!important}
+
+/* Shared inline validation behavior. */
+.form-control[aria-invalid="true"]{border-color:var(--status-red)!important;box-shadow:0 0 0 2px rgba(255,59,48,.06)!important}
+.inline-error.hidden{display:none!important}
+
+/* Component-local skeleton loader — never full-screen. */
+.component-skeleton{display:grid;gap:0;border:1px solid var(--border-subtle);border-radius:var(--radius-md);overflow:hidden;background:var(--bg-card)}
+.skeleton-row{min-height:58px;display:grid;grid-template-columns:minmax(180px,1fr) minmax(90px,.28fr) 56px;gap:14px;align-items:center;padding:0 16px;border-bottom:1px solid var(--border-subtle)}
+.skeleton-row:last-child{border-bottom:0}.skeleton-block{display:block;height:10px;border-radius:999px;background:var(--bg-subtle);position:relative;overflow:hidden}.skeleton-block:after{content:"";position:absolute;inset:0;transform:translateX(-100%);background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:skeletonSweep 1.25s ease-in-out infinite}.skeleton-main{width:min(78%,420px)}.skeleton-meta{width:78%}.skeleton-small{width:42px}
+@keyframes skeletonSweep{to{transform:translateX(100%)}}
+
+/* Destructive PIN dialogs remain feature dialogs but visually align to the system. */
+#destructivePinModal .compact-validation-modal,#resetDataPinModal .compact-validation-modal{max-width:440px!important;border-radius:var(--radius-lg)!important;padding:24px!important}
+#destructivePinModal .validation-graphic,#resetDataPinModal .validation-graphic{width:42px!important;height:42px!important;border-radius:14px!important;margin-bottom:16px!important}
+#destructivePinModal .validation-graphic:after,#resetDataPinModal .validation-graphic:after{display:none!important}
+
+@media(max-width:640px){
+  .toast-container{top:12px!important;right:16px!important;left:16px!important;width:auto!important;max-width:none!important}
+  .system-modal-backdrop{padding:16px!important;align-items:center!important}
+  .system-modal-backdrop .system-modal-card{width:calc(100vw - 32px)!important;padding:22px 20px!important}
+  .system-modal-actions{gap:8px!important}
+  .system-modal-actions .btn{min-height:44px}
+  .system-toast{grid-template-columns:4px 26px minmax(0,1fr) 28px}.system-toast-actions{grid-column:3/4}.system-toast-icon{width:26px;height:26px}
+}

@@ -15,42 +15,398 @@ function formatCurrency(amount) {
       return `₱ ${num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
     }
 
+    /* ==========================================================================
+       V8.4 — UNIFIED SYSTEM FEEDBACK ARCHITECTURE
+       SystemModal · SystemToast · InlineValidation · ComponentLoader
+       ========================================================================== */
+    const _featureModalFocus = new WeakMap();
+    const _systemModalState = {
+      mode: null,
+      trigger: null,
+      resolver: null,
+      confirmHandler: null,
+      cancelHandler: null,
+      closeAllowed: true,
+      escapeAllowed: true
+    };
+
+    function _feedbackEls() {
+      return {
+        root: document.getElementById('systemModal'),
+        card: document.getElementById('systemModalCard'),
+        icon: document.getElementById('systemModalIcon'),
+        close: document.getElementById('systemModalClose'),
+        title: document.getElementById('systemModalTitle'),
+        message: document.getElementById('systemModalMessage'),
+        details: document.getElementById('systemModalDetails'),
+        secondary: document.getElementById('systemModalSecondaryBtn'),
+        primary: document.getElementById('systemModalPrimaryBtn')
+      };
+    }
+
+    function _feedbackIcon(mode, danger = false) {
+      const icons = {
+        confirm: danger ? '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 15H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>' : '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg>',
+        warning: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.6 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',
+        processing: '<span class="system-processing-spinner" aria-hidden="true"></span>',
+        error: '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6"/><path d="M12 17h.01"/></svg>'
+      };
+      return icons[mode] || icons.confirm;
+    }
+
+    function _systemModalFocusable(root) {
+      if (!root) return [];
+      return [...root.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])')]
+        .filter(el => !el.hidden && el.offsetParent !== null);
+    }
+
+    function _closeSystemModal(result = false, { restoreFocus = true } = {}) {
+      const els = _feedbackEls();
+      if (!els.root) return;
+      els.root.classList.remove('active');
+      els.root.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('system-modal-open');
+      const resolver = _systemModalState.resolver;
+      const trigger = _systemModalState.trigger;
+      _systemModalState.mode = null;
+      _systemModalState.resolver = null;
+      _systemModalState.confirmHandler = null;
+      _systemModalState.cancelHandler = null;
+      _systemModalState.closeAllowed = true;
+      _systemModalState.escapeAllowed = true;
+      if (typeof resolver === 'function') resolver(!!result);
+      if (restoreFocus && trigger && document.contains(trigger) && typeof trigger.focus === 'function') {
+        setTimeout(() => trigger.focus({ preventScroll: true }), 0);
+      }
+    }
+
+    function _showSystemModal({
+      mode = 'confirm',
+      title = 'Confirm action',
+      message = '',
+      details = '',
+      confirmLabel = 'Continue',
+      cancelLabel = 'Cancel',
+      showCancel = true,
+      allowClose = true,
+      escapeAllowed = allowClose,
+      onConfirm = null,
+      onCancel = null,
+      trigger = null,
+      danger = false
+    } = {}) {
+      const els = _feedbackEls();
+      if (!els.root || !els.card) return Promise.resolve(false);
+
+      // One system response at a time. Update/replace the active response instead of stacking.
+      if (els.root.classList.contains('active') && _systemModalState.resolver) {
+        const previousResolver = _systemModalState.resolver;
+        _systemModalState.resolver = null;
+        previousResolver(false);
+      }
+
+      _systemModalState.mode = mode;
+      _systemModalState.trigger = trigger || document.activeElement;
+      _systemModalState.confirmHandler = typeof onConfirm === 'function' ? onConfirm : null;
+      _systemModalState.cancelHandler = typeof onCancel === 'function' ? onCancel : null;
+      _systemModalState.closeAllowed = !!allowClose;
+      _systemModalState.escapeAllowed = !!escapeAllowed;
+
+      els.card.dataset.mode = mode;
+      els.card.dataset.danger = danger ? 'true' : 'false';
+      els.card.className = `modal-card system-modal-card system-modal-${mode}`;
+      els.icon.className = `system-modal-icon system-modal-icon-${mode}`;
+      els.icon.innerHTML = _feedbackIcon(mode, danger);
+      els.title.textContent = String(title || '');
+      els.message.textContent = String(message || '');
+      els.message.hidden = !String(message || '').trim();
+      els.details.textContent = String(details || '');
+      els.details.hidden = !String(details || '').trim();
+      els.close.hidden = !allowClose || mode === 'processing';
+      els.secondary.hidden = !showCancel || mode === 'processing';
+      els.primary.hidden = mode === 'processing';
+      els.secondary.textContent = String(cancelLabel || 'Cancel');
+      els.primary.textContent = String(confirmLabel || (mode === 'error' ? 'Try Again' : 'Continue'));
+      els.primary.classList.toggle('btn-danger', mode === 'confirm' && danger);
+      els.primary.classList.toggle('btn-primary', !(mode === 'confirm' && danger));
+      els.primary.disabled = false;
+      els.secondary.disabled = false;
+
+      els.root.classList.add('active');
+      els.root.setAttribute('aria-hidden', 'false');
+      els.root.setAttribute('role', mode === 'error' || mode === 'confirm' ? 'alertdialog' : 'dialog');
+      els.root.setAttribute('aria-modal', 'true');
+      document.body.classList.add('system-modal-open');
+
+      return new Promise(resolve => {
+        _systemModalState.resolver = resolve;
+        requestAnimationFrame(() => {
+          const focusables = _systemModalFocusable(els.card);
+          const target = mode === 'processing' ? els.card : (els.primary.hidden ? focusables[0] : els.primary);
+          if (target && typeof target.focus === 'function') target.focus({ preventScroll: true });
+        });
+      });
+    }
+
+    const SystemModal = {
+      confirm(options = {}) {
+        return _showSystemModal({ mode: 'confirm', confirmLabel: 'Confirm', ...options });
+      },
+      warning(options = {}) {
+        return _showSystemModal({ mode: 'warning', confirmLabel: 'Continue', ...options });
+      },
+      processing(options = {}) {
+        return _showSystemModal({
+          mode: 'processing',
+          title: 'Processing…',
+          message: 'Please keep this window open.',
+          showCancel: false,
+          allowClose: false,
+          escapeAllowed: false,
+          ...options
+        });
+      },
+      error(options = {}) {
+        return _showSystemModal({ mode: 'error', confirmLabel: 'Try Again', ...options });
+      },
+      update({ title, message, details } = {}) {
+        const els = _feedbackEls();
+        if (!els.root?.classList.contains('active')) return;
+        if (title !== undefined) els.title.textContent = String(title || '');
+        if (message !== undefined) { els.message.textContent = String(message || ''); els.message.hidden = !String(message || '').trim(); }
+        if (details !== undefined) { els.details.textContent = String(details || ''); els.details.hidden = !String(details || '').trim(); }
+      },
+      close(result = false) { _closeSystemModal(result); },
+      isOpen() { return !!_feedbackEls().root?.classList.contains('active'); }
+    };
+
+    function _toastIcon(type) {
+      if (type === 'error') return '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16.5h.01"/></svg>';
+      if (type === 'warning') return '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.3 3.6 2.6 17a2 2 0 0 0 1.7 3h15.4a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>';
+      if (type === 'info') return '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5"/><path d="M12 8h.01"/></svg>';
+      return '<svg class="icon-svg" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></svg>';
+    }
+
+    const SystemToast = {
+      show({ type = 'success', title = '', message = '', actionLabel = '', onAction = null, duration = 4200 } = {}) {
+        const container = document.getElementById('toastContainer');
+        if (!container) return null;
+        const toast = document.createElement('div');
+        toast.className = `system-toast system-toast-${type}`;
+        toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+        toast.innerHTML = `<div class="system-toast-accent"></div><div class="system-toast-icon">${_toastIcon(type)}</div><div class="system-toast-copy"><strong></strong><span></span></div><div class="system-toast-actions"></div><button type="button" class="system-toast-close" aria-label="Dismiss notification">×</button>`;
+        const strong = toast.querySelector('.system-toast-copy strong');
+        const span = toast.querySelector('.system-toast-copy span');
+        strong.textContent = String(title || message || 'Updated');
+        span.textContent = String(message && message !== title ? message : '');
+        span.hidden = !span.textContent;
+        const actions = toast.querySelector('.system-toast-actions');
+        if (actionLabel && typeof onAction === 'function') {
+          const action = document.createElement('button');
+          action.type = 'button';
+          action.className = 'system-toast-action';
+          action.textContent = String(actionLabel);
+          action.addEventListener('click', () => { onAction(); toast.remove(); });
+          actions.appendChild(action);
+        }
+        toast.querySelector('.system-toast-close').addEventListener('click', () => toast.remove());
+        container.appendChild(toast);
+        requestAnimationFrame(() => toast.classList.add('is-visible'));
+        if (duration > 0) setTimeout(() => { toast.classList.remove('is-visible'); setTimeout(() => toast.remove(), 180); }, duration);
+        return toast;
+      },
+      success(options = {}) { return this.show({ type: 'success', ...options }); },
+      info(options = {}) { return this.show({ type: 'info', ...options }); },
+      warning(options = {}) { return this.show({ type: 'warning', ...options }); },
+      error(options = {}) { return this.show({ type: 'error', ...options }); }
+    };
+
     function showToast(message, actionLabel = null, actionCallback = null) {
-      const container = document.getElementById("toastContainer");
-      if (!container) return;
-
-      const toast = document.createElement("div");
-      toast.className = "toast";
-      
-      const messageSpan=document.createElement('span');messageSpan.textContent=String(message??'');toast.appendChild(messageSpan);
-      if (actionLabel && actionCallback) {
-        const action=document.createElement('button');action.className='btn btn-sm btn-primary';action.style.cssText='padding:2px 8px;font-size:12px;margin-left:8px';action.textContent=String(actionLabel);toast.appendChild(action);
-      }
-
-      if (actionLabel && actionCallback) {
-        toast.querySelector("button").onclick = () => {
-          actionCallback();
-          toast.remove();
-        };
-      }
-
-      container.appendChild(toast);
-      setTimeout(() => {
-        if (toast.parentNode) toast.remove();
-      }, 5000);
+      const text = String(message ?? '');
+      const errorLike = /failed|could not|unable|invalid|incorrect|wrong|cannot|can\'t|must be|required|no receipt|allow pop-ups|not configured/i.test(text);
+      const warningLike = /warning|offline|saved locally|will sync/i.test(text);
+      return SystemToast.show({
+        type: errorLike ? 'error' : warningLike ? 'warning' : 'success',
+        title: text,
+        actionLabel: actionLabel || '',
+        onAction: typeof actionCallback === 'function' ? actionCallback : null
+      });
     }
 
-    function openModal(modalId) {
-      const el=document.getElementById(modalId);if(el){el.classList.add('active');setTimeout(()=>refreshSearchableSelects(el),30);}
+    const InlineValidation = {
+      set(inputOrId, errorOrId, message) {
+        const input = typeof inputOrId === 'string' ? document.getElementById(inputOrId) : inputOrId;
+        let error = typeof errorOrId === 'string' ? document.getElementById(errorOrId) : errorOrId;
+        if (!error && input) {
+          const generatedId = typeof errorOrId === 'string' && errorOrId ? errorOrId : `${input.id || 'field'}Error`;
+          error = document.createElement('span');
+          error.id = generatedId;
+          error.className = 'inline-error inline-validation-message hidden';
+          const group = input.closest('.form-group') || input.parentElement;
+          (group || input.parentElement)?.appendChild(error);
+        }
+        if (input) {
+          input.classList.toggle('is-invalid', !!message);
+          input.setAttribute('aria-invalid', message ? 'true' : 'false');
+          if (error?.id) input.setAttribute('aria-describedby', error.id);
+        }
+        if (error) {
+          error.textContent = String(message || '');
+          error.classList.toggle('hidden', !message);
+        }
+        return !message;
+      },
+      message(inputOrId, message) {
+        const input = typeof inputOrId === 'string' ? document.getElementById(inputOrId) : inputOrId;
+        if (!input) return !message;
+        return this.set(input, `${input.id || 'field'}Error`, message);
+      },
+      clear(inputOrId, errorOrId) { return this.set(inputOrId, errorOrId, ''); },
+      clearMessage(inputOrId) {
+        const input = typeof inputOrId === 'string' ? document.getElementById(inputOrId) : inputOrId;
+        if (!input) return true;
+        return this.set(input, `${input.id || 'field'}Error`, '');
+      }
+    };
+
+    const ComponentLoader = {
+      show(containerOrId, rows = 4) {
+        const el = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
+        if (!el || el.dataset.loading === '1') return;
+        el.dataset.loading = '1';
+        el.dataset.loaderPrevious = el.innerHTML;
+        el.setAttribute('aria-busy', 'true');
+        el.innerHTML = `<div class="component-skeleton" aria-hidden="true">${Array.from({length: Math.max(1, Number(rows)||4)}, (_,i)=>`<div class="skeleton-row"><span class="skeleton-block skeleton-main"></span><span class="skeleton-block skeleton-meta"></span>${i===0?'<span class="skeleton-block skeleton-small"></span>':''}</div>`).join('')}</div>`;
+      },
+      hide(containerOrId, html = null) {
+        const el = typeof containerOrId === 'string' ? document.getElementById(containerOrId) : containerOrId;
+        if (!el) return;
+        const previous = el.dataset.loaderPrevious || '';
+        el.innerHTML = html === null ? previous : html;
+        delete el.dataset.loaderPrevious;
+        delete el.dataset.loading;
+        el.removeAttribute('aria-busy');
+      }
+    };
+
+    function setButtonLoading(buttonOrId, loading, loadingLabel = 'Working…') {
+      const btn = typeof buttonOrId === 'string' ? document.getElementById(buttonOrId) : buttonOrId;
+      if (!btn) return;
+      if (loading) {
+        if (btn.dataset.loading === '1') return;
+        btn.dataset.loading = '1';
+        btn.dataset.originalHtml = btn.innerHTML;
+        btn.disabled = true;
+        btn.setAttribute('aria-busy', 'true');
+        btn.innerHTML = `<span class="button-loader" aria-hidden="true"></span><span>${String(loadingLabel).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</span>`;
+      } else {
+        if (btn.dataset.originalHtml !== undefined) btn.innerHTML = btn.dataset.originalHtml;
+        delete btn.dataset.originalHtml;
+        delete btn.dataset.loading;
+        btn.disabled = false;
+        btn.removeAttribute('aria-busy');
+      }
     }
+
+    function setFeatureModalBusy(modalId, busy, buttonId = null, label = 'Working…') {
+      const modal = document.getElementById(modalId);
+      if (!modal) return;
+      modal.dataset.blockClose = busy ? 'true' : 'false';
+      modal.classList.toggle('feature-modal-busy', !!busy);
+      modal.querySelectorAll('input,select,textarea,.modal-close').forEach(el => { if (busy) { el.dataset.wasDisabled = el.disabled ? '1' : '0'; el.disabled = true; } else if (el.dataset.wasDisabled !== undefined) { el.disabled = el.dataset.wasDisabled === '1'; delete el.dataset.wasDisabled; } });
+      if (buttonId) setButtonLoading(buttonId, busy, label);
+    }
+
     function refreshSearchableSelects(root=document){
       root.querySelectorAll('select.form-control').forEach(select=>{if(select.options.length<=5||select.dataset.searchEnhanced==='1')return;select.dataset.searchEnhanced='1';const wrap=document.createElement('div');wrap.className='generic-search-select';select.parentNode.insertBefore(wrap,select);wrap.appendChild(select);select.classList.add('native-search-select');const input=document.createElement('input');input.className='form-control generic-search-select-input';input.placeholder='Type to search…';input.value=select.options[select.selectedIndex]?.text||'';wrap.appendChild(input);const menu=document.createElement('div');menu.className='typeahead-menu generic-search-select-menu';wrap.appendChild(menu);const render=()=>{const q=input.value.trim().toLowerCase(),opts=[...select.options].filter(o=>!q||o.text.toLowerCase().includes(q));menu.innerHTML=opts.map(o=>`<button type="button" class="typeahead-option" data-value="${escapeHtml(o.value)}">${escapeHtml(o.text)}</button>`).join('');menu.classList.add('open');menu.querySelectorAll('button').forEach(btn=>btn.onmousedown=e=>{e.preventDefault();select.value=btn.dataset.value;input.value=select.options[select.selectedIndex]?.text||'';select.dispatchEvent(new Event('change',{bubbles:true}));menu.classList.remove('open');});};input.onfocus=render;input.oninput=render;input.onblur=()=>setTimeout(()=>menu.classList.remove('open'),120);});
     }
 
+    function openModal(modalId) {
+      const el=document.getElementById(modalId);
+      if(!el) return;
+      _featureModalFocus.set(el, document.activeElement);
+      el.classList.add('active');
+      el.setAttribute('aria-hidden','false');
+      if(!el.hasAttribute('role')) el.setAttribute('role','dialog');
+      el.setAttribute('aria-modal','true');
+      document.body.classList.add('feature-modal-open');
+      setTimeout(()=>{
+        refreshSearchableSelects(el);
+        const first=el.querySelector('[autofocus], input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled])');
+        if(first&&typeof first.focus==='function') first.focus({preventScroll:true});
+      },30);
+      if(el.dataset.backdropBound!=='1'){
+        el.dataset.backdropBound='1';
+        el.addEventListener('mousedown',event=>{
+          if(event.target===el && el.dataset.blockClose!=='true') closeModal(modalId);
+        });
+      }
+    }
+
     function closeModal(modalId) {
       const el = document.getElementById(modalId);
-      if (el) el.classList.remove("active");
+      if (!el || el.dataset.blockClose === 'true') return;
+      el.classList.remove('active');
+      el.setAttribute('aria-hidden','true');
+      if(!document.querySelector('.modal-backdrop.active:not(#systemModal)')) document.body.classList.remove('feature-modal-open');
+      const trigger=_featureModalFocus.get(el);_featureModalFocus.delete(el);
+      if(trigger&&document.contains(trigger)&&typeof trigger.focus==='function')setTimeout(()=>trigger.focus({preventScroll:true}),0);
     }
+
+    document.addEventListener('keydown', event => {
+      const systemRoot = document.getElementById('systemModal');
+      if (systemRoot?.classList.contains('active')) {
+        if (event.key === 'Escape' && _systemModalState.escapeAllowed) { event.preventDefault(); _closeSystemModal(false); return; }
+        if (event.key === 'Tab') {
+          const focusables = _systemModalFocusable(document.getElementById('systemModalCard'));
+          if (!focusables.length) { event.preventDefault(); document.getElementById('systemModalCard')?.focus(); return; }
+          const first=focusables[0],last=focusables[focusables.length-1];
+          if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+          else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+        }
+        return;
+      }
+      const activeFeature=[...document.querySelectorAll('.modal-backdrop.active:not(#systemModal)')].pop();
+      if (event.key === 'Tab' && activeFeature) {
+        const focusables=_systemModalFocusable(activeFeature);
+        if(!focusables.length){event.preventDefault();activeFeature.querySelector('.modal-card')?.focus?.();return;}
+        const first=focusables[0],last=focusables[focusables.length-1];
+        if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+        else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+      }
+      if (event.key === 'Escape') {
+        if(activeFeature&&activeFeature.dataset.blockClose!=='true'){event.preventDefault();closeModal(activeFeature.id);}
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const els=_feedbackEls();
+      els.close?.addEventListener('click',()=>{if(_systemModalState.closeAllowed)_closeSystemModal(false);});
+      els.secondary?.addEventListener('click',()=>{
+        const fn=_systemModalState.cancelHandler;
+        _closeSystemModal(false);
+        if(fn)fn();
+      });
+      els.primary?.addEventListener('click',async()=>{
+        const fn=_systemModalState.confirmHandler;
+        if(fn){
+          try{
+            const result=fn();
+            if(result&&typeof result.then==='function'){
+              els.primary.disabled=true;
+              await result;
+              els.primary.disabled=false;
+            }
+          }catch(error){
+            console.error('System modal action failed:',error);
+            els.primary.disabled=false;
+            return;
+          }
+        }
+        _closeSystemModal(true);
+      });
+      els.root?.addEventListener('mousedown',event=>{if(event.target===els.root&&_systemModalState.closeAllowed)_closeSystemModal(false);});
+    });
 
     const DEFAULT_SOLO_SERVICES = [
       { product_code: "SRV-001", name: "STUDIO", category: "TV Broadcast Graphics", description: "VIDEO, BLENDER, AE", price: 3000.00, active: true, type: "SOLO" },
@@ -823,10 +1179,8 @@ function formatCurrency(amount) {
 
       function updateOwnerName(val) {
         const name = val.trim();
-        if (!name) {
-          showToast("Owner name cannot be empty.");
-          return;
-        }
+        if (!name) { InlineValidation.message('ownerNameInput', 'Owner name is required.'); return; }
+        InlineValidation.clearMessage('ownerNameInput');
         state.ownerName = name;
         state.settings.ownerName = name;
         localStorage.setItem("JUAN_OWNER_NAME", name);
@@ -843,10 +1197,8 @@ function formatCurrency(amount) {
 
       function updateOwnerPhone(val) {
         const phone = normalizePhilippinePhone(val);
-        if (phone && !/^[\+\d\s\-\(\)]+$/.test(phone)) {
-          showToast("Please enter a valid phone number.");
-          return;
-        }
+        if (phone && !/^[\+\d\s\-\(\)]+$/.test(phone)) { InlineValidation.message('ownerPhoneInput', 'Enter a valid phone number.'); return; }
+        InlineValidation.clearMessage('ownerPhoneInput');
         state.ownerPhone = phone;
         localStorage.setItem("JUAN_OWNER_PHONE", phone);
         showToast("Contact phone updated.");
@@ -854,10 +1206,8 @@ function formatCurrency(amount) {
 
       function updateOwnerEmail(val) {
         const email = val.trim();
-        if (email && !email.includes("@")) {
-          showToast("Please enter a valid email address.");
-          return;
-        }
+        if (email && !email.includes("@")) { InlineValidation.message('ownerEmailInput', 'Enter a valid email address.'); return; }
+        InlineValidation.clearMessage('ownerEmailInput');
         state.ownerEmail = email;
         state.settings.email = email;
         localStorage.setItem("JUAN_OWNER_EMAIL", email);
@@ -865,21 +1215,79 @@ function formatCurrency(amount) {
       }
 
       function showConfirmationDialog(title, description, actionBtnLabel, actionCallback) {
-        const titleEl=document.getElementById('confirmModalTitle'),descEl=document.getElementById('confirmModalDescription'),actionBtn=document.getElementById('confirmModalActionBtn');if(!titleEl||!descEl||!actionBtn){if(window.confirm(`${title}
-
-${description}`))actionCallback();return;}
-        const label=String(actionBtnLabel||'Confirm'),destructive=/delete|remove|discard|reset|permanent|replace|overwrite|exit/i.test(label+' '+title);titleEl.innerText=title;descEl.innerText=description;actionBtn.innerText=label;actionBtn.classList.toggle('btn-danger',destructive);actionBtn.classList.toggle('btn-confirm',!destructive);const modal=document.querySelector('#confirmationModal .compact-validation-modal'),graphic=document.getElementById('confirmModalGraphic');modal?.classList.toggle('destructive-validation',destructive);modal?.classList.toggle('confirm-validation',!destructive);if(graphic)graphic.innerHTML=destructive?`<svg class="icon-svg lg" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2M19 6l-1 15H6L5 6"/><path d="M10 11v5M14 11v5"/></svg>`:`<svg class="icon-svg lg" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg>`;actionBtn.onclick=()=>{closeModal('confirmationModal');showActionStatus('Processing','Please wait…',false);setTimeout(()=>{closeModal('actionStatusModal');actionCallback();},320);};openModal('confirmationModal');
+        const label=String(actionBtnLabel||'Confirm');
+        const danger=/delete|remove|discard|reset|permanent|replace|overwrite|clear/i.test(`${label} ${title}`);
+        SystemModal.confirm({
+          title: String(title||'Confirm action'),
+          message: String(description||''),
+          confirmLabel: label,
+          cancelLabel: 'Cancel',
+          danger
+        }).then(confirmed=>{ if(confirmed && typeof actionCallback==='function') actionCallback(); });
       }
+
       function showActionStatus(title,message,success=false){
-        const modal=document.getElementById('actionStatusModal'),graphic=document.getElementById('actionStatusGraphic'),t=document.getElementById('actionStatusTitle'),m=document.getElementById('actionStatusMessage');if(!modal||!graphic)return;if(t)t.textContent=title;if(m)m.textContent=message;graphic.innerHTML=success?`<span class="action-check"><svg class="icon-svg lg" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></span>`:`<span class="action-spinner"></span>`;openModal('actionStatusModal');
+        if(success){
+          if(SystemModal.isOpen()) SystemModal.close(false);
+          SystemToast.success({title:String(title||'Completed'),message:String(message||'')});
+          return;
+        }
+        if(SystemModal.isOpen()) SystemModal.update({title:String(title||'Processing…'),message:String(message||'Please keep this window open.')});
+        else SystemModal.processing({title:String(title||'Processing…'),message:String(message||'Please keep this window open.')});
       }
-
 
       const WORKSPACE_RESET_PIN = "729333";
-      function requestDestructivePin(title,description,callback){
-        state.pendingDestructiveAction=typeof callback==='function'?callback:null;const titleEl=document.getElementById('destructivePinTitle'),desc=document.getElementById('destructivePinDescription'),input=document.getElementById('destructivePinInput'),error=document.getElementById('destructivePinError');if(titleEl)titleEl.textContent=title||'Confirm deletion';if(desc)desc.textContent=(description||'This action changes or removes saved data.')+' Enter your 6-digit PIN to continue.';clearPinBoxes('destructivePinInput');if(error)error.classList.add('hidden');openModal('destructivePinModal');setTimeout(()=>document.querySelector('.pin-code-grid[data-pin-target="destructivePinInput"] .pin-digit')?.focus(),70);
+      function _openDestructivePin(title,description,callback,returnModalId=''){
+        state.pendingDestructiveAction=typeof callback==='function'?callback:null;
+        state.pendingDestructiveReturnModalId=returnModalId||'';
+        const titleEl=document.getElementById('destructivePinTitle'),desc=document.getElementById('destructivePinDescription'),error=document.getElementById('destructivePinError');
+        if(titleEl)titleEl.textContent=title||'Confirm deletion';
+        if(desc)desc.textContent=(description||'This action changes or removes saved data.')+' Enter your 6-digit PIN to continue.';
+        clearPinBoxes('destructivePinInput');
+        if(error)error.classList.add('hidden');
+        openModal('destructivePinModal');
+        setTimeout(()=>document.querySelector('.pin-code-grid[data-pin-target="destructivePinInput"] .pin-digit')?.focus(),70);
       }
-      function confirmDestructivePin(){const input=document.getElementById('destructivePinInput'),error=document.getElementById('destructivePinError'),pin=String(input?.value||'').replace(/\D/g,'').slice(0,6);if(pin!==WORKSPACE_RESET_PIN){document.querySelectorAll('.pin-code-grid[data-pin-target="destructivePinInput"] .pin-digit').forEach(x=>x.classList.add('is-invalid'));if(error)error.classList.remove('hidden');return;}if(error)error.classList.add('hidden');document.querySelectorAll('.pin-code-grid[data-pin-target="destructivePinInput"] .pin-digit').forEach(x=>x.classList.remove('is-invalid'));const action=state.pendingDestructiveAction;state.pendingDestructiveAction=null;closeModal('destructivePinModal');if(action)action();}
+      function requestDestructivePin(title,description,callback,skipSystemConfirm=false){
+        const activeFeature=[...document.querySelectorAll('.modal-backdrop.active:not(#systemModal):not(#destructivePinModal):not(#resetDataPinModal)')].pop();
+        const returnModalId=activeFeature?.id||'';
+        if(activeFeature) closeModal(returnModalId);
+        const launch=()=>_openDestructivePin(title,description,callback,returnModalId);
+        if(skipSystemConfirm){launch();return;}
+        const confirmLabel=/^delete\b/i.test(title||'')?String(title):/^remove\b/i.test(title||'')?String(title):'Continue';
+        SystemModal.confirm({
+          title:String(title||'Confirm action'),
+          message:String(description||'This action changes or removes saved data.'),
+          confirmLabel,
+          cancelLabel:'Cancel',
+          danger:true
+        }).then(ok=>{
+          if(ok) launch();
+          else if(returnModalId) setTimeout(()=>openModal(returnModalId),40);
+        });
+      }
+      function cancelDestructivePin(){
+        const returnId=state.pendingDestructiveReturnModalId||'';
+        state.pendingDestructiveAction=null;
+        state.pendingDestructiveReturnModalId='';
+        closeModal('destructivePinModal');
+        if(returnId)setTimeout(()=>openModal(returnId),40);
+      }
+      function confirmDestructivePin(){
+        const input=document.getElementById('destructivePinInput'),error=document.getElementById('destructivePinError'),pin=String(input?.value||'').replace(/\D/g,'').slice(0,6);
+        if(pin!==WORKSPACE_RESET_PIN){
+          document.querySelectorAll('.pin-code-grid[data-pin-target="destructivePinInput"] .pin-digit').forEach(x=>x.classList.add('is-invalid'));
+          if(error)error.classList.remove('hidden');
+          return;
+        }
+        if(error)error.classList.add('hidden');
+        document.querySelectorAll('.pin-code-grid[data-pin-target="destructivePinInput"] .pin-digit').forEach(x=>x.classList.remove('is-invalid'));
+        const action=state.pendingDestructiveAction;
+        state.pendingDestructiveAction=null;
+        state.pendingDestructiveReturnModalId='';
+        closeModal('destructivePinModal');
+        if(action)action();
+      }
 
       function openResetDataModal(){
         const error=document.getElementById('resetDataPinError');clearPinBoxes('resetDataPinInput');if(error)error.classList.add('hidden');openModal('resetDataPinModal');setTimeout(()=>document.querySelector('.pin-code-grid[data-pin-target=\"resetDataPinInput\"] .pin-digit')?.focus(),80);
@@ -1646,7 +2054,10 @@ function calculateRushFromTimeline(startValue,deadlineValue,standardDays=14,deli
 
       function saveTask(){
         const pid=document.getElementById("taskProjectInput").value, p=state.projects.find(x=>x.id===pid), name=document.getElementById("taskNameInput").value.trim();
-        if(!p||!name){showToast("Project and task name are required.");return;}
+        if(!p){InlineValidation.message('taskProjectInput','Select a project.');return;}
+        InlineValidation.clearMessage('taskProjectInput');
+        if(!name){InlineValidation.message('taskNameInput','Task name is required.');return;}
+        InlineValidation.clearMessage('taskNameInput');
         const did=document.getElementById("taskDeliverableInput").value, d=(p.deliverables||[]).find(x=>x.id===did);
         state.tasks.unshift({id:"task_"+Date.now(),project_id:pid,projectName:p.title,deliverable_id:did||null,deliverableName:d?.item_name||d?.name||"",name,description:document.getElementById("taskDescriptionInput").value.trim(),deadline:document.getElementById("taskDeadlineInput").value,priority:document.getElementById("taskPriorityInput").value,status:document.getElementById("taskStatusInput").value,progress:0,created_at:new Date().toISOString()});
         persistTasksState(); closeModal("taskModal"); renderTasks(); renderOverviewDashboard(); showToast("Task created.");
@@ -2167,10 +2578,8 @@ function calculateRushFromTimeline(startValue,deadlineValue,standardDays=14,deli
         const discountVal = Number(document.getElementById("cartDiscountVal")?.value || 0);
         const discountType = document.getElementById("cartDiscountType")?.value || "fixed";
 
-        if (discountVal < 0) {
-          showToast("Discount cannot be negative.");
-          return;
-        }
+        if (discountVal < 0) { InlineValidation.message('cartDiscountVal', 'Discount cannot be negative.'); return; }
+        InlineValidation.clearMessage('cartDiscountVal');
 
         state.cart.discountVal = discountVal;
         state.cart.discountType = discountType;
@@ -2279,80 +2688,88 @@ function updateRushCalculations() {
   if(durationEl)durationEl.textContent=`${durationDays} day${durationDays===1?'':'s'}`;if(badgeEl)badgeEl.textContent=(rushFee+workloadRush.fee)>0?'RUSH':'STANDARD';if(rushTextEl)rushTextEl.textContent=formatCurrency(rushFee+workloadRush.fee);if(rushDisplay)rushDisplay.style.display='block';updateCartCalculations();
 }
       /* VALIDATION FOR NEW ORDER */
-      function showOrderConfirmation() {
+      async function showOrderConfirmation() {
         updateRushCalculations();
-        const deadlineErr = document.getElementById("orderDeadlineError");
-        if (deadlineErr) deadlineErr.innerText = "";
+        const deadlineInput=document.getElementById('orderDeadlineDate');
+        const projectNameInput=document.getElementById('orderProjectName');
+        const clientSelect=document.getElementById('orderClientSelect');
+        const newClientNameInput=document.getElementById('newClientName');
+        const newClientEmailInput=document.getElementById('newClientEmail');
+
+        InlineValidation.clear(deadlineInput,'orderDeadlineError');
+        InlineValidation.clear(projectNameInput,'orderProjectNameError');
+        InlineValidation.clear(clientSelect,'orderClientSelectError');
+        InlineValidation.clear(newClientNameInput,'newClientNameError');
+        InlineValidation.clear(newClientEmailInput,'newClientEmailError');
 
         if (new Date(`${state.cart.deadlineDate}T00:00:00`) <= new Date(`${state.cart.startDate}T00:00:00`)) {
-          if (deadlineErr) deadlineErr.innerText = "Deadline date must be after the start date.";
-          showToast("Deadline date must be after the start date.");
+          InlineValidation.set(deadlineInput,'orderDeadlineError','Deadline date must be after the start date.');
+          deadlineInput?.focus();
           return;
         }
-
         if (state.cart.items.length === 0) {
-          showToast("Please add items to your cart before proceeding.");
+          SystemToast.warning({title:'Add at least one order item',message:'Choose a service or package before creating the project.'});
           return;
         }
 
-        const projectNameInput = document.getElementById("orderProjectName");
-        const projectNameError = document.getElementById("orderProjectNameError");
-        const projectName = projectNameInput ? projectNameInput.value.trim() : "";
-        if (projectNameError) projectNameError.innerText = "";
+        const projectName = projectNameInput ? projectNameInput.value.trim() : '';
         if (!projectName) {
-          if (projectNameError) projectNameError.innerText = "Project name is required.";
-          showToast("Project name is required.");
-          if (projectNameInput) projectNameInput.focus();
+          InlineValidation.set(projectNameInput,'orderProjectNameError','Project name is required.');
+          projectNameInput?.focus();
           return;
         }
         state.cart.projectName = projectName;
         persistCartState();
 
-        let clientName = "";
-        const clientSelErr = document.getElementById("orderClientSelectError");
-        if (clientSelErr) clientSelErr.innerText = "";
-
         if (state.cart.clientMode === 'existing') {
           const client = state.clients.find(c => c.id === state.cart.selectedClientId);
           if (!client) {
-            if (clientSelErr) clientSelErr.innerText = "Please select a client.";
-            showToast("Please select a client.");
+            InlineValidation.set(clientSelect,'orderClientSelectError','Select a client for this project.');
+            clientSelect?.focus();
             return;
           }
-          clientName = client.name;
         } else {
-          clientName = document.getElementById("newClientName").value.trim();
-          const email = document.getElementById("newClientEmail").value.trim();
-          const emailErr = document.getElementById("newClientEmailError");
-          if (emailErr) emailErr.innerText = "";
-
+          const clientName = newClientNameInput?.value.trim() || '';
+          const email = newClientEmailInput?.value.trim() || '';
           if (!clientName) {
-            document.getElementById("newClientNameError").innerText = "Client name is required.";
-            showToast("Client name is required.");
+            InlineValidation.set(newClientNameInput,'newClientNameError','Client name is required.');
+            newClientNameInput?.focus();
             return;
           }
-          if (!email || !email.includes("@")) {
-            if (emailErr) emailErr.innerText = "Please enter a valid email address.";
-            showToast("Please enter a valid email address.");
+          if (!email || !email.includes('@')) {
+            InlineValidation.set(newClientEmailInput,'newClientEmailError','Enter a valid email address.');
+            newClientEmailInput?.focus();
             return;
           }
         }
 
-        const body = document.getElementById("orderSummaryModalBody");
-        body.innerHTML = `
-          <div class="mb-4"><strong>Project Name:</strong> ${escapeHtml(projectName)}</div>
-          <div class="mb-4"><strong>Client:</strong> ${escapeHtml(clientName)}</div>
-          <div class="mb-4"><strong>Start Date:</strong> ${state.cart.startDate}</div>
-          <div class="mb-4"><strong>Deadline Date:</strong> ${state.cart.deadlineDate}</div>
-          <div class="divider"></div>
-          <div class="font-bold mb-2">Order Items:</div>
-          ${state.cart.items.map(i => `<div class="summary-row"><span>${escapeHtml(i.name)} (x${Math.max(1,Number(i.qty||1))})</span><span>${formatCurrency(i.price * i.qty)}</span></div>`).join("")}
-          <div class="divider"></div>
-          ${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0)+ (state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0))>0?`<div class="summary-section-label additional-fees-heading">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))>0?`<div class="summary-row compact-fee-row"><span>Rush Fee</span><span>${formatCurrency(Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0))}</span></div>`:''}${state.cart.items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?`<div class="summary-row compact-fee-row"><span>System Maintenance Fee</span><span>${formatCurrency(SYSTEM_MAINTENANCE_FEE)}</span></div>`:''}
-          <div class="summary-row summary-total"><span>Total Amount</span><span>${document.getElementById("summaryTotal").innerText}</span></div>
-        `;
+        const rushAmount=Number(state.cart.rushFee||0)+Number(state.cart.workloadRushFee||0);
+        if(rushAmount>0){
+          const proceed=await SystemModal.warning({
+            title:'Deadline requires a Rush Fee',
+            message:`The selected deadline is earlier than the standard turnaround and will add ${formatCurrency(rushAmount)} in rush charges.`,
+            cancelLabel:'Change Deadline',
+            confirmLabel:'Continue'
+          });
+          if(!proceed){deadlineInput?.focus();return;}
+        }
 
-        openModal("orderSummaryModal");
+        try {
+          await confirmAndCreateOrder();
+        } catch(error) {
+          console.error('Create project failed:', error);
+          clearTimeout(state.createOrderProcessingTimer);
+          state.createOrderProcessingTimer=null;
+          setButtonLoading('createOrderBtn',false);
+          if(SystemModal.isOpen())SystemModal.close(false);
+          const retry=await SystemModal.error({
+            title:'Project could not be created',
+            message:'The operation could not be completed. Your current order details are still available.',
+            cancelLabel:'Cancel',
+            confirmLabel:'Try Again'
+          });
+          if(retry)showOrderConfirmation();
+        }
       }
 
       async function syncProjectToDatabase(project) {
@@ -2450,6 +2867,9 @@ function updateRushCalculations() {
         return result;
       }
       async function confirmAndCreateOrder() {
+        setButtonLoading('createOrderBtn',true,'Creating…');
+        clearTimeout(state.createOrderProcessingTimer);
+        state.createOrderProcessingTimer=setTimeout(()=>{if(!SystemModal.isOpen())SystemModal.processing({title:'Creating project…',message:'Please keep this window open.'});},420);
         let clientId = state.cart.selectedClientId;
         let clientName = "";
         let clientEmail = "";
@@ -2546,8 +2966,11 @@ function updateRushCalculations() {
         if(state.editingDraftId){deleteOrderDraft(state.editingDraftId,true);state.editingDraftId=null;}
         resetNewOrderForm(true);
 
-        closeModal("orderSummaryModal");
-        showToast("Order created successfully!");
+        clearTimeout(state.createOrderProcessingTimer);
+        state.createOrderProcessingTimer=null;
+        if(SystemModal.isOpen())SystemModal.close(false);
+        setButtonLoading('createOrderBtn',false);
+        SystemToast.success({title:'Project created',message:`${formatProjectId(newProject)} · ${newProject.title}`});
         openProjectDetails(newProject.id);
       }
 
@@ -2589,14 +3012,31 @@ function updateRushCalculations() {
       }
 
       async function saveInvoicePDF() {
-        const proj=state.projects.find(p=>p.id===state.activeProjectId);
-        if(proj){ensureInvoiceNumber(proj);renderInvoicePaper(proj);}
-        showToast("Use your browser Print dialog and choose Save as PDF.");
-        setTimeout(() => window.print(), 100);
+        setButtonLoading('invoicePdfBtn',true,'Preparing…');
+        const timer=setTimeout(()=>{if(!SystemModal.isOpen())SystemModal.processing({title:'Preparing PDF…',message:'Please keep this window open.'});},320);
+        try{
+          const proj=state.projects.find(p=>p.id===state.activeProjectId);
+          if(!proj)throw new Error('No active project');
+          ensureInvoiceNumber(proj);renderInvoicePaper(proj);
+          await new Promise(r=>setTimeout(r,380));
+          clearTimeout(timer);
+          if(SystemModal.isOpen())SystemModal.close(false);
+          setButtonLoading('invoicePdfBtn',false);
+          setTimeout(()=>window.print(),80);
+          SystemToast.success({title:'PDF ready',message:'Choose Save as PDF in the print dialog.'});
+        }catch(error){
+          clearTimeout(timer);setButtonLoading('invoicePdfBtn',false);if(SystemModal.isOpen())SystemModal.close(false);
+          console.error('PDF preparation failed:',error);
+          const retry=await SystemModal.error({title:'Unable to prepare PDF',message:'The invoice could not be prepared for printing.',cancelLabel:'Cancel',confirmLabel:'Try Again'});
+          if(retry)saveInvoicePDF();
+        }
       }
 
       async function saveInvoiceImage() {
-        showToast("Offline mode does not require external image libraries. Use Save as PDF or your device screenshot tool.");
+        setButtonLoading('invoiceImageBtn',true,'Preparing…');
+        await new Promise(r=>setTimeout(r,180));
+        setButtonLoading('invoiceImageBtn',false);
+        SystemToast.info({title:'Image export is not available offline',message:'Use Save as PDF or your device screenshot tool.'});
       }
 
 
@@ -2626,7 +3066,11 @@ function updateRushCalculations() {
       function submitEditProject(){
         const proj=state.projects.find(p=>p.id===state.activeProjectId); if(!proj)return;
         const title=document.getElementById("editProjectTitle").value.trim(),clientName=document.getElementById("editProjectClientName").value.trim(),email=document.getElementById("editProjectClientEmail").value.trim();
-        if(!title||!clientName){showToast("Project and client name are required.");return;} if(email&&!email.includes('@')){showToast("Please enter a valid client email.");return;}
+        let editValid=true;
+        editValid=InlineValidation.message('editProjectTitle',title?'':'Project name is required.')&&editValid;
+        editValid=InlineValidation.message('editProjectClientName',clientName?'':'Client name is required.')&&editValid;
+        editValid=InlineValidation.message('editProjectClientEmail',email&&!email.includes('@')?'Enter a valid client email address.':'')&&editValid;
+        if(!editValid)return;
         proj.title=title; proj.project_type=document.getElementById("editProjectType").value.trim(); proj.client_name=clientName; proj.client_email=email;
         proj.total_amount=Math.max(0,Number(document.getElementById("editProjectAmount").value||0)); proj.legacy_reference=document.getElementById("editProjectLegacyRef").value.trim(); proj.record_date=document.getElementById("editProjectRecordDate").value; proj.start_date=document.getElementById("editProjectStartDate").value; proj.deadline_date=document.getElementById("editProjectDeadline").value;
         proj.priority=document.getElementById('editProjectPriority').value==='YES';
@@ -2835,7 +3279,8 @@ function openProjectOrderBatchModal(){
         const qty=Math.max(1,Math.round(Number(document.getElementById('projectOrderItemQty').value||1)));
         const price=Math.max(0,Number(document.getElementById('projectOrderItemPrice').value||0));
         const type=document.getElementById('projectOrderItemType').value||'SOLO';const lineTotal=price*qty,itemDiscount=String(type).toUpperCase()==='PACKAGE'?0:Math.min(lineTotal,Math.max(0,Number(document.getElementById('projectOrderItemDiscount')?.value||0)));
-        if(!name){showToast('Item name is required.');return;}
+        if(!name){InlineValidation.message('projectOrderItemName','Item name is required.');return;}
+        InlineValidation.clearMessage('projectOrderItemName');
         const selected=state.projectOrderItemSelected&&String(state.projectOrderItemSelected.name||'').toLowerCase()===name.toLowerCase()?state.projectOrderItemSelected:null;
         const raw=document.getElementById('projectOrderItemIndex').value; const index=raw===''?null:Number(raw);
         const base={name,qty,price,item_discount:itemDiscount,type,product_code:selected?.code||null,category:selected?.category||'',id:index!==null&&proj.project_items[index]?.id?proj.project_items[index].id:`oi_${proj.id}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`};
@@ -2855,7 +3300,7 @@ function openProjectOrderBatchModal(){
       function selectProjectDeliverableSuggestion(index){const x=(state.projectDeliverableSuggestionCache||[])[Number(index)];if(!x)return;state.projectDeliverableSelected=x;document.getElementById('projectDeliverableName').value=x.name;document.getElementById('projectDeliverableSuggestions')?.classList.remove('open');}
       function openProjectDeliverableModal(){state.projectDeliverableSelected=null;const input=document.getElementById('projectDeliverableName');if(input)input.value='';document.getElementById('projectDeliverableSuggestions')?.classList.remove('open');openModal('projectDeliverableModal');setTimeout(()=>renderProjectDeliverableSuggestions(''),30);}
       function saveProjectDeliverable(){
-        const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const name=document.getElementById('projectDeliverableName').value.trim();if(!name){showToast('Deliverable name is required.');return;}if(!Array.isArray(proj.deliverables))proj.deliverables=[];
+        const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const name=document.getElementById('projectDeliverableName').value.trim();if(!name){InlineValidation.message('projectDeliverableName','Deliverable name is required.');return;}InlineValidation.clearMessage('projectDeliverableName');if(!Array.isArray(proj.deliverables))proj.deliverables=[];
         const selected=state.projectDeliverableSelected&&String(state.projectDeliverableSelected.name||'').toLowerCase()===name.toLowerCase()?state.projectDeliverableSelected:null;const baseId=`del_manual_${proj.id}_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
         if(selected?.type==='PACKAGE'&&Array.isArray(selected.includedServiceNames)&&selected.includedServiceNames.length){const parent={id:baseId,item_name:name,name,source_type:'MANUAL',is_group:true,completed:false,progress:0,status:'Pending'};proj.deliverables.push(parent,...selected.includedServiceNames.map((n,i)=>({id:`${baseId}_child_${i}`,item_name:n,name:n,source_type:'MANUAL',parent_id:baseId,package_name:name,completed:false,progress:0,status:'Pending'})));}else proj.deliverables.push({id:baseId,item_name:name,name,source_type:'MANUAL',completed:false,progress:0,status:'Pending',completed_at:null});
         proj.updated_at=new Date().toISOString();persistProjectsState();closeModal('projectDeliverableModal');renderProjectDeliverablesList(proj);renderOverviewDashboard();showToast('Deliverable added.');
@@ -2924,7 +3369,7 @@ function openProjectOrderBatchModal(){
       function openRecordPaymentModal(paymentId=null) {
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;state.editingPaymentId=paymentId||null;const payment=paymentId?(proj.payments||[]).find(p=>String(p.id)===String(paymentId)):null;
         document.getElementById('recordPaymentModalTitle').textContent=payment?'Edit Payment':'Record Payment';
-        document.getElementById('recordPaymentSaveBtn').textContent=payment?'Review Changes':'Continue';
+        document.getElementById('recordPaymentSaveBtn').textContent=payment?'Save Changes':'Record Payment';
         document.getElementById('paymentAmountInput').value=payment?Number(payment.amount_paid||payment.amount||0):'';
         document.getElementById('paymentDateInput').value=payment?.payment_date||effectiveOperationalDate();
         document.getElementById('paymentMethodInput').value=payment?.payment_method||payment?.method||'GCash';
@@ -2932,29 +3377,113 @@ function openProjectOrderBatchModal(){
         document.getElementById('paymentNotesInput').value=payment?.notes||'';
         const receiptInput=document.getElementById('paymentReceiptInput');if(receiptInput)receiptInput.value='';
         const current=document.getElementById('paymentReceiptCurrent');if(current)current.textContent=payment?.receipt_name?`Current receipt: ${payment.receipt_name}`:'Optional · image or PDF up to 3 MB';
-        document.getElementById('paymentAmountError').innerText='';document.getElementById('paymentDateError').innerText='';openModal('recordPaymentModal');
+        InlineValidation.clear(document.getElementById('paymentAmountInput'),'paymentAmountError');InlineValidation.clear(document.getElementById('paymentDateInput'),'paymentDateError');InlineValidation.clear(document.getElementById('paymentReceiptInput'),'paymentReceiptError');openModal('recordPaymentModal');
       }
 
       async function submitPaymentRecord() {
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
-        const amountInput=document.getElementById('paymentAmountInput'),dateInput=document.getElementById('paymentDateInput'),errAmount=document.getElementById('paymentAmountError'),errDate=document.getElementById('paymentDateError');
-        errAmount.innerText='';errDate.innerText='';amountInput.classList.remove('is-invalid');dateInput.classList.remove('is-invalid');
-        const draft={amount:Number(amountInput.value),payment_date:dateInput.value,payment_method:document.getElementById('paymentMethodInput').value,reference_no:document.getElementById('paymentRefInput').value.trim(),notes:document.getElementById('paymentNotesInput').value.trim(),editingId:state.editingPaymentId||null};
-        let valid=true;if(!Number.isFinite(draft.amount)||draft.amount<=0){errAmount.innerText='Payment amount must be greater than ₱0.';amountInput.classList.add('is-invalid');valid=false}if(!draft.payment_date){errDate.innerText='Payment date is required.';dateInput.classList.add('is-invalid');valid=false}if(!valid)return;
+        const amountInput=document.getElementById('paymentAmountInput'),dateInput=document.getElementById('paymentDateInput');
+        InlineValidation.clear(amountInput,'paymentAmountError');
+        InlineValidation.clear(dateInput,'paymentDateError');
+        InlineValidation.clear(document.getElementById('paymentReceiptInput'),'paymentReceiptError');
+
+        const draft={
+          amount:Number(amountInput.value),
+          payment_date:dateInput.value,
+          payment_method:document.getElementById('paymentMethodInput').value,
+          reference_no:document.getElementById('paymentRefInput').value.trim(),
+          notes:document.getElementById('paymentNotesInput').value.trim(),
+          editingId:state.editingPaymentId||null
+        };
+        let valid=true;
+        if(!Number.isFinite(draft.amount)||draft.amount<=0){InlineValidation.set(amountInput,'paymentAmountError','Payment amount must be greater than ₱0.');valid=false;}
+        if(!draft.payment_date){InlineValidation.set(dateInput,'paymentDateError','Payment date is required.');valid=false;}
+        if(!valid){(amountInput.classList.contains('is-invalid')?amountInput:dateInput)?.focus();return;}
+
         const receiptFile=document.getElementById('paymentReceiptInput')?.files?.[0]||null;
-        if(receiptFile){try{const receipt=await readReceiptFile(receiptFile);draft.receipt_data=receipt.data;draft.receipt_name=receipt.name;draft.receipt_type=receipt.type}catch(e){showToast(e.message);return}}
-        closeModal('recordPaymentModal');showConfirmationDialog(draft.editingId?'Confirm Payment Changes':'Confirm Payment',`${formatCurrency(draft.amount)} · ${formatProjectDate(draft.payment_date)} · ${draft.payment_method}`,'Confirm',()=>finalizePaymentRecord(proj,draft));
-      }
-      async function finalizePaymentRecord(proj,draft){
-        showActionStatus('Processing Payment','Saving payment details…',false);await new Promise(r=>setTimeout(r,350));let record;
-        if(draft.editingId){
-          record=(proj.payments||[]).find(p=>String(p.id)===String(draft.editingId));
-          if(record){Object.assign(record,{amount_paid:draft.amount,amount:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no,notes:draft.notes,updated_at:new Date().toISOString()});if(draft.receipt_data)Object.assign(record,{receipt_data:draft.receipt_data,receipt_name:draft.receipt_name,receipt_type:draft.receipt_type});}
+        if(receiptFile){
+          try{
+            const receipt=await readReceiptFile(receiptFile);
+            draft.receipt_data=receipt.data;draft.receipt_name=receipt.name;draft.receipt_type=receipt.type;
+          }catch(e){
+            InlineValidation.set(document.getElementById('paymentReceiptInput'),'paymentReceiptError',String(e.message||'The receipt could not be attached.'));
+            return;
+          }
         }
-        if(!record){record={id:'pay_'+Date.now(),project_id:proj.id,amount_paid:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no,notes:draft.notes,receipt_data:draft.receipt_data||'',receipt_name:draft.receipt_name||'',receipt_type:draft.receipt_type||'',created_at:new Date().toISOString()};if(!proj.payments)proj.payments=[];proj.payments.push(record);}
-        proj.pending_amount=Math.max(0,getProjectInvoiceTotal(proj)-getProjectPaid(proj));proj.payment_status=getProjectPaymentStatus(proj);proj.updated_at=new Date().toISOString();persistProjectsState();
-        if(supabaseClient&&state.isConnected){try{await syncProjectBundleToDatabase(proj)}catch(e){console.warn('Payment sync unavailable:',e.message);}}
-        renderPaymentTracker(proj);renderInvoicePaper(proj);renderPaymentsView();renderOverviewDashboard();showActionStatus('Payment Successful',draft.editingId?'Payment changes were saved.':'Payment was recorded successfully.',true);state.editingPaymentId=null;setTimeout(()=>closeModal('actionStatusModal'),750);
+
+        const currentFinancial=getProjectFinancialBreakdown(proj);
+        const existing=draft.editingId?(proj.payments||[]).find(p=>String(p.id)===String(draft.editingId)):null;
+        const existingAmount=Number(existing?.amount_paid||existing?.amount||0);
+        const availableBalance=Math.max(0,Number(currentFinancial.balance||0)+existingAmount);
+        if(draft.amount>availableBalance+0.009){
+          closeModal('recordPaymentModal');
+          const proceed=await SystemModal.warning({
+            title:'Payment exceeds Balance Due',
+            message:`This payment is ${formatCurrency(draft.amount-availableBalance)} above the current balance of ${formatCurrency(availableBalance)}.`,
+            cancelLabel:'Change Amount',
+            confirmLabel:'Continue'
+          });
+          if(!proceed){openModal('recordPaymentModal');setTimeout(()=>amountInput?.focus(),40);return;}
+          openModal('recordPaymentModal');
+        }
+
+        await finalizePaymentRecord(proj,draft);
+      }
+
+      async function finalizePaymentRecord(proj,draft){
+        setFeatureModalBusy('recordPaymentModal',true,'recordPaymentSaveBtn',draft.editingId?'Saving…':'Recording…');
+        let localSaved=false;
+        try{
+          // Avoid a flicker for instant local saves while still making the action visibly responsive.
+          await new Promise(r=>setTimeout(r,220));
+          let record;
+          if(draft.editingId){
+            record=(proj.payments||[]).find(p=>String(p.id)===String(draft.editingId));
+            if(record){
+              Object.assign(record,{amount_paid:draft.amount,amount:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no,notes:draft.notes,updated_at:new Date().toISOString()});
+              if(draft.receipt_data)Object.assign(record,{receipt_data:draft.receipt_data,receipt_name:draft.receipt_name,receipt_type:draft.receipt_type});
+            }
+          }
+          if(!record){
+            record={id:'pay_'+Date.now(),project_id:proj.id,amount_paid:draft.amount,payment_date:draft.payment_date,payment_method:draft.payment_method,reference_no:draft.reference_no,notes:draft.notes,receipt_data:draft.receipt_data||'',receipt_name:draft.receipt_name||'',receipt_type:draft.receipt_type||'',created_at:new Date().toISOString()};
+            if(!proj.payments)proj.payments=[];
+            proj.payments.push(record);
+          }
+          proj.pending_amount=Math.max(0,getProjectInvoiceTotal(proj)-getProjectPaid(proj));
+          proj.payment_status=getProjectPaymentStatus(proj);
+          proj.updated_at=new Date().toISOString();
+          persistProjectsState();
+          localSaved=true;
+
+          let queuedOrLocal=false;
+          if(supabaseClient&&state.isConnected){
+            try{await syncProjectBundleToDatabase(proj)}
+            catch(e){console.warn('Payment sync unavailable:',e.message);queuedOrLocal=true;}
+          }else if(!navigator.onLine||!state.isConnected){queuedOrLocal=true;}
+
+          renderPaymentTracker(proj);renderInvoicePaper(proj);renderPaymentsView();renderOverviewDashboard();
+          state.editingPaymentId=null;
+          setFeatureModalBusy('recordPaymentModal',false,'recordPaymentSaveBtn');
+          closeModal('recordPaymentModal');
+          if(queuedOrLocal)SystemToast.warning({title:draft.editingId?'Payment updated locally':'Payment recorded locally',message:'The change is saved and will synchronize when cloud access is available.'});
+          else SystemToast.success({title:draft.editingId?'Payment updated':'Payment recorded',message:`${formatCurrency(draft.amount)} · ${formatProjectDate(draft.payment_date)}`});
+        }catch(error){
+          console.error('Payment save failed:',error);
+          setFeatureModalBusy('recordPaymentModal',false,'recordPaymentSaveBtn');
+          if(localSaved){
+            SystemToast.warning({title:'Payment saved locally',message:'Cloud synchronization is still pending.'});
+            return;
+          }
+          closeModal('recordPaymentModal');
+          const retry=await SystemModal.error({
+            title:'Payment could not be recorded',
+            message:'The payment was not saved. Your form values have been kept.',
+            cancelLabel:'Cancel',
+            confirmLabel:'Try Again'
+          });
+          openModal('recordPaymentModal');
+          if(retry)setTimeout(()=>submitPaymentRecord(),40);
+        }
       }
       function viewPaymentReceipt(paymentId){
         const proj=state.projects.find(p=>p.id===state.activeProjectId),payment=(proj?.payments||[]).find(p=>String(p.id)===String(paymentId));if(!payment?.receipt_data){showToast('No receipt attached.');return}
@@ -3001,42 +3530,50 @@ function openFeeInfo(type='all'){
         paper.innerHTML=`<div class="invoice-layout-v82"><div class="invoice-document-v82"><div class="invoice-header invoice-header-v82"><div class="invoice-brand-block"><h2>${escapeHtml(state.settings.businessName||'JUAN PROJECT')}</h2><div>${escapeHtml(state.ownerEmail||'')}</div><div>${escapeHtml(state.ownerPhone||'')}</div></div><div class="invoice-header-stack"><div class="invoice-label">Invoice</div><div class="invoice-number">${invoiceNo}</div><span class="invoice-status ${present.className}">${escapeHtml(f.status)}</span><div class="invoice-issued-date">Issued ${issueLabel}</div></div></div><div class="invoice-meta-grid invoice-meta-grid-v82"><div><div class="invoice-label">Bill To</div><div class="font-bold">${escapeHtml(proj.client_name||'—')}</div><div class="text-sm text-secondary">${escapeHtml(proj.client_email||'')}</div></div><div><div class="invoice-label">Project</div><div class="font-bold">${escapeHtml(proj.title||'—')}</div><div class="text-sm text-secondary">Due ${dueLabel}</div></div></div><div class="invoice-items-wrap invoice-items-wrap-v82"><table class="invoice-items-table"><thead><tr><th>Order Item</th><th>Qty</th><th>Amount</th></tr></thead><tbody>${itemRows}</tbody></table></div><div class="text-sm text-tertiary invoice-thankyou">Thank you for choosing ${escapeHtml(state.settings.businessName||'JUAN PROJECT')}.</div></div><aside class="invoice-summary-panel-v82"><div class="invoice-summary-row"><span>Items Subtotal</span><strong>${formatCurrency(f.itemsSubtotal)}</strong></div>${f.additionalCharges?`<div class="invoice-summary-section">Additional Charges</div>${chargeRows}`:''}${f.discount?`<div class="invoice-summary-row"><span>Discount</span><strong>− ${formatCurrency(f.discount)}</strong></div>`:''}<div class="invoice-summary-divider"></div><div class="invoice-summary-row invoice-total-row-v82"><span>Total</span><strong>${formatCurrency(f.total)}</strong></div><div class="invoice-summary-row invoice-paid-row-v82"><span>Amount Paid</span><strong>${formatCurrency(f.paid)}</strong></div><div class="invoice-balance-card-v82 ${present.className}"><span>Balance Due</span><strong>${formatCurrency(f.balance)}</strong><small>${present.helper}</small></div></aside></div>`;
       }
 
-      function sendDeadlineReminderEmail(projId = null) {
+      async function sendDeadlineReminderEmail(projId = null) {
         const id = projId || state.activeProjectId;
         const proj = state.projects.find(p => p.id === id);
         if (!proj) return;
-
-        if (!proj.client_email || !proj.client_email.includes("@")) {
-          showToast("Please enter a valid email address for this client.");
+        if (!proj.client_email || !proj.client_email.includes('@')) {
+          SystemToast.error({title:'Client email is invalid',message:'Add a valid client email before sending a reminder.'});
           return;
         }
-
-        const subject = encodeURIComponent(`Deadline Reminder: ${proj.title}`);
-        const body = encodeURIComponent(`Hi ${proj.client_name},\n\nThis is a friendly reminder that your project "${proj.title}" deadline is set for ${proj.deadline_date}.\n\nThank you,\n${state.ownerName}`);
-        
-        window.open(`mailto:${proj.client_email}?subject=${subject}&body=${body}`, '_blank');
-        showToast("Email client opened with deadline reminder.");
+        setButtonLoading('deadlineEmailBtn',true,'Preparing…');
+        try{
+          const subject = encodeURIComponent(`Deadline Reminder: ${proj.title}`);
+          const body = encodeURIComponent(`Hi ${proj.client_name},\n\nThis is a friendly reminder that your project "${proj.title}" deadline is set for ${proj.deadline_date}.\n\nThank you,\n${state.ownerName}`);
+          await new Promise(r=>setTimeout(r,160));
+          window.open(`mailto:${proj.client_email}?subject=${subject}&body=${body}`, '_blank');
+          SystemToast.success({title:'Deadline reminder ready',message:'Your email app was opened with the message prepared.'});
+        }catch(error){
+          console.error('Deadline reminder failed:',error);
+          SystemToast.error({title:'Unable to prepare email',message:'The reminder could not be opened.'});
+        }finally{setButtonLoading('deadlineEmailBtn',false);}
       }
 
-      function sendBalanceReminderEmail(projId = null) {
+      async function sendBalanceReminderEmail(projId = null) {
         const id = projId || state.activeProjectId;
         const proj = state.projects.find(p => p.id === id);
         if (!proj) return;
-
-        if (!proj.client_email || !proj.client_email.includes("@")) {
-          showToast("Please enter a valid email address for this client.");
+        if (!proj.client_email || !proj.client_email.includes('@')) {
+          SystemToast.error({title:'Client email is invalid',message:'Add a valid client email before sending a balance reminder.'});
           return;
         }
-
-        const totalPaid = (proj.payments || []).reduce((sum, p) => sum + Number(p.amount_paid), 0);
-        const remaining = Math.max(0, getProjectInvoiceTotal(proj) - totalPaid);
-
-        const subject = encodeURIComponent(`Invoice Balance Reminder: ${proj.title}`);
-        const body = encodeURIComponent(`Hi ${proj.client_name},\n\nThis is a friendly reminder regarding the outstanding balance of ${formatCurrency(remaining)} for project "${proj.title}".\n\nThank you,\n${state.ownerName}`);
-        
-        window.open(`mailto:${proj.client_email}?subject=${subject}&body=${body}`, '_blank');
-        showToast("Email client opened with payment reminder.");
+        setButtonLoading('balanceEmailBtn',true,'Preparing…');
+        try{
+          const totalPaid = (proj.payments || []).reduce((sum, p) => sum + Number(p.amount_paid), 0);
+          const remaining = Math.max(0, getProjectInvoiceTotal(proj) - totalPaid);
+          const subject = encodeURIComponent(`Invoice Balance Reminder: ${proj.title}`);
+          const body = encodeURIComponent(`Hi ${proj.client_name},\n\nThis is a friendly reminder regarding the outstanding balance of ${formatCurrency(remaining)} for project "${proj.title}".\n\nThank you,\n${state.ownerName}`);
+          await new Promise(r=>setTimeout(r,160));
+          window.open(`mailto:${proj.client_email}?subject=${subject}&body=${body}`, '_blank');
+          SystemToast.success({title:'Balance reminder ready',message:'Your email app was opened with the message prepared.'});
+        }catch(error){
+          console.error('Balance reminder failed:',error);
+          SystemToast.error({title:'Unable to prepare email',message:'The balance reminder could not be opened.'});
+        }finally{setButtonLoading('balanceEmailBtn',false);}
       }
+
 
       /* ==========================================================================
          PROJECT TEMPLATES
@@ -3127,15 +3664,14 @@ function openFeeInfo(type='all'){
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = function(evt) {
+        reader.onload = async function(evt) {
           try {
             const data = JSON.parse(evt.target.result);
             const projectsValid = Array.isArray(data?.projects);
             const clientsValid = Array.isArray(data?.clients);
-
             if (!data || (!projectsValid && !clientsValid)) {
-              showToast("Invalid JUAN Workspace backup file.");
-              if (input) input.value = "";
+              if(input)input.value='';
+              await SystemModal.error({title:'Invalid workspace backup',message:'The selected file does not contain a valid JUAN Workspace backup.',showCancel:false,confirmLabel:'Close'});
               return;
             }
 
@@ -3143,94 +3679,78 @@ function openFeeInfo(type='all'){
             const clientCount = clientsValid ? data.clients.length : 0;
             const serviceCount = Array.isArray(data.soloServices) ? data.soloServices.length : 0;
             const packageCount = Array.isArray(data.packagesList) ? data.packagesList.length : 0;
-            const backupVersion = String(data.version || "Unknown");
+            const backupVersion = String(data.version || 'Unknown');
+            if(input)input.value='';
 
-            // Clear the file picker now so the same backup can be selected again
-            // even if the user cancels the confirmation/PIN dialog.
-            if (input) input.value = "";
+            const confirmed=await SystemModal.confirm({
+              title:'Restore workspace backup?',
+              message:'Your current local workspace will be replaced by the selected backup.',
+              details:`Backup v${backupVersion}\n${projectCount} project${projectCount===1?'':'s'} · ${clientCount} client${clientCount===1?'':'s'} · ${serviceCount} service${serviceCount===1?'':'s'} · ${packageCount} package${packageCount===1?'':'s'}`,
+              cancelLabel:'Cancel',
+              confirmLabel:'Restore Backup',
+              danger:true
+            });
+            if(!confirmed)return;
 
-            showConfirmationDialog(
-              "Restore JSON Backup",
-              `Backup v${backupVersion} contains ${projectCount} project${projectCount === 1 ? "" : "s"}, ${clientCount} client${clientCount === 1 ? "" : "s"}, ${serviceCount} service${serviceCount === 1 ? "" : "s"}, and ${packageCount} package${packageCount === 1 ? "" : "s"}. Restoring will replace the current workspace data in this browser.`,
-              "Replace & Restore",
-              () => requestDestructivePin(
-                "Restore Backup",
-                "This will replace the current projects, clients, templates, services, packages, tasks, and active order/cart data with the selected backup.",
-                () => {
-                  try {
-                    // Deep-copy backup records so the in-memory state is isolated
-                    // from the parsed FileReader object.
-                    state.clients = clientsValid ? JSON.parse(JSON.stringify(data.clients)) : [];
-                    state.projects = projectsValid ? JSON.parse(JSON.stringify(data.projects)) : [];
-                    state.templates = Array.isArray(data.templates) ? JSON.parse(JSON.stringify(data.templates)) : [];
-                    state.soloServices = Array.isArray(data.soloServices) ? JSON.parse(JSON.stringify(data.soloServices)) : [];
-                    state.packagesList = Array.isArray(data.packagesList)
-                      ? normalizeBroadcastPackageNames(JSON.parse(JSON.stringify(data.packagesList)))
-                      : [];
-
-                    // Rebuild catalog categories from restored services/packages.
-                    state.catalogCategories = [...new Set([
-                      ...state.soloServices.map(item => String(item?.category || "").trim()),
-                      ...state.packagesList.map(item => String(item?.category || "").trim())
-                    ].filter(Boolean))];
-
-                    // A restore should not keep unrelated temporary work from the
-                    // browser that existed before the backup was selected.
-                    state.tasks = [];
-                    state.cart.items = [];
-                    state.cart.selectedClientId = "";
-                    state.cart.projectName = "";
-                    state.cart.discountVal = 0;
-                    state.cart.startDate = "";
-                    state.cart.deadlineDate = "";
-                    state.cart.deadlineManuallySet = false;
-                    state.cart.rushFee = 0;
-                    state.cart.rushDaysEarly = 0;
-
-                    // Keep the public JP-001, JP-002 ... sequence continuous even
-                    // when a legacy backup contains duplicate/misaligned numbers.
-                    renumberProjectSequence();
-
-                    persistProjectsState();
-                    persistClientsState();
-                    persistTemplatesState();
-                    persistCatalogState();
-                    persistTasksState();
-                    localStorage.removeItem("JUAN_CART_STATE");
-
-                    // Prevent the built-in sample seeder from replacing a restored
-                    // legacy-only backup on the next page load.
-                    localStorage.setItem("JUAN_LEGACY_SEEDED", "1");
-                    localStorage.setItem("JUAN_SAMPLE_DATA_VERSION", SAMPLE_DATA_VERSION);
-                    localStorage.setItem("JUAN_LAST_BACKUP_RESTORE", new Date().toISOString());
-                    localStorage.setItem("JUAN_LAST_BACKUP_VERSION", backupVersion);
-
-                    renderCurrentView();
-                    renderTemplatesDropdown();
-                    showActionStatus("Backup Restored", `${state.projects.length} projects and ${state.clients.length} clients are now loaded.`, true);
-                    setTimeout(() => closeModal("actionStatusModal"), 1200);
-                    showToast("JSON backup restored successfully.");
-                  } catch (restoreErr) {
-                    console.error("Backup restore failed:", restoreErr);
-                    showToast("Backup was valid, but the workspace could not restore it.");
-                  } finally {
-                    if (input) input.value = "";
-                  }
+            requestDestructivePin(
+              'Restore Backup',
+              'This will replace the current projects, clients, templates, services, packages, tasks, and active order/cart data with the selected backup.',
+              async () => {
+                showActionStatus('Restoring workspace…','Please keep this window open.',false);
+                try {
+                  await new Promise(r=>setTimeout(r,220));
+                  state.clients = clientsValid ? JSON.parse(JSON.stringify(data.clients)) : [];
+                  state.projects = projectsValid ? JSON.parse(JSON.stringify(data.projects)) : [];
+                  state.templates = Array.isArray(data.templates) ? JSON.parse(JSON.stringify(data.templates)) : [];
+                  state.soloServices = Array.isArray(data.soloServices) ? JSON.parse(JSON.stringify(data.soloServices)) : [];
+                  state.packagesList = Array.isArray(data.packagesList)
+                    ? normalizeBroadcastPackageNames(JSON.parse(JSON.stringify(data.packagesList)))
+                    : [];
+                  state.catalogCategories = [...new Set([
+                    ...state.soloServices.map(item => String(item?.category || '').trim()),
+                    ...state.packagesList.map(item => String(item?.category || '').trim())
+                  ].filter(Boolean))];
+                  state.tasks = [];
+                  state.cart.items = [];
+                  state.cart.selectedClientId = '';
+                  state.cart.projectName = '';
+                  state.cart.discountVal = 0;
+                  state.cart.startDate = '';
+                  state.cart.deadlineDate = '';
+                  state.cart.deadlineManuallySet = false;
+                  state.cart.rushFee = 0;
+                  state.cart.rushDaysEarly = 0;
+                  renumberProjectSequence();
+                  persistProjectsState();persistClientsState();persistTemplatesState();persistCatalogState();persistTasksState();
+                  localStorage.removeItem('JUAN_CART_STATE');
+                  localStorage.setItem('JUAN_LEGACY_SEEDED','1');
+                  localStorage.setItem('JUAN_SAMPLE_DATA_VERSION',SAMPLE_DATA_VERSION);
+                  localStorage.setItem('JUAN_LAST_BACKUP_RESTORE',new Date().toISOString());
+                  localStorage.setItem('JUAN_LAST_BACKUP_VERSION',backupVersion);
+                  renderCurrentView();renderTemplatesDropdown();
+                  if(SystemModal.isOpen())SystemModal.close(false);
+                  SystemToast.success({title:'Workspace restored',message:`${state.projects.length} projects and ${state.clients.length} clients are now loaded.`});
+                } catch (restoreErr) {
+                  console.error('Backup restore failed:', restoreErr);
+                  if(SystemModal.isOpen())SystemModal.close(false);
+                  await SystemModal.error({title:'Backup restore failed',message:'The workspace could not complete the restore. Your browser may need more available storage.',showCancel:false,confirmLabel:'Close'});
                 }
-              )
+              },
+              true
             );
           } catch(err) {
-            console.error("Backup JSON parse failed:", err);
-            showToast("Failed to parse backup JSON.");
-            if (input) input.value = "";
+            console.error('Backup JSON parse failed:', err);
+            if(input)input.value='';
+            await SystemModal.error({title:'Invalid backup file',message:'JUAN Workspace could not read the selected JSON backup.',showCancel:false,confirmLabel:'Close'});
           }
         };
-        reader.onerror = function() {
-          showToast("The selected backup file could not be read.");
-          if (input) input.value = "";
+        reader.onerror = async function() {
+          if(input)input.value='';
+          await SystemModal.error({title:'Backup file could not be read',message:'The selected file could not be opened by this browser.',showCancel:false,confirmLabel:'Close'});
         };
         reader.readAsText(file);
       }
+
 
       /* ==========================================================================
          CALENDAR TRUE BOX/GRID LAYOUT
@@ -3252,7 +3772,7 @@ function openFeeInfo(type='all'){
         openModal('calendarEventModal');
       }
       function saveCalendarEvent(){
-        const id=document.getElementById('calendarEventId').value,title=document.getElementById('calendarEventTitle').value.trim(),date=document.getElementById('calendarEventDate').value,type=document.getElementById('calendarEventType').value,startTime=document.getElementById('calendarEventStartTime').value,endTime=document.getElementById('calendarEventEndTime').value,projectId=document.getElementById('calendarEventProject').value,notes=document.getElementById('calendarEventNotes').value.trim();if(!title||!date){showToast('Add an event title and date.');return;}
+        const id=document.getElementById('calendarEventId').value,title=document.getElementById('calendarEventTitle').value.trim(),date=document.getElementById('calendarEventDate').value,type=document.getElementById('calendarEventType').value,startTime=document.getElementById('calendarEventStartTime').value,endTime=document.getElementById('calendarEventEndTime').value,projectId=document.getElementById('calendarEventProject').value,notes=document.getElementById('calendarEventNotes').value.trim();let eventValid=true;eventValid=InlineValidation.message('calendarEventTitle',title?'':'Event title is required.')&&eventValid;eventValid=InlineValidation.message('calendarEventDate',date?'':'Event date is required.')&&eventValid;if(!eventValid)return;
         const payload={id:id||`evt_${Date.now()}`,title,date,type,start_time:startTime,end_time:endTime,project_id:projectId,notes,updated_at:new Date().toISOString()};const idx=(state.manualEvents||[]).findIndex(e=>e.id===id);if(idx>=0)state.manualEvents[idx]={...state.manualEvents[idx],...payload};else state.manualEvents.push({...payload,created_at:new Date().toISOString()});persistCalendarEvents();closeModal('calendarEventModal');renderCalendar();renderOverviewUpcomingEvents();showToast(id?'Calendar event updated.':'Calendar event added.');
       }
       function deleteCalendarEvent(){const id=document.getElementById('calendarEventId').value;if(!id)return;const event=(state.manualEvents||[]).find(e=>e.id===id);requestDestructivePin('Delete Calendar Event',`Delete "${event?.title||'this event'}"?`,()=>{state.manualEvents=(state.manualEvents||[]).filter(e=>e.id!==id);persistCalendarEvents();closeModal('calendarEventModal');renderCalendar();renderOverviewUpcomingEvents();showToast('Calendar event deleted.');});}
@@ -3371,10 +3891,7 @@ function openFeeInfo(type='all'){
           valid = false;
         }
 
-        if (!valid) {
-          showToast("Please correct the validation errors.");
-          return;
-        }
+        if (!valid) return;
 
         const client = state.clients.find(c => c.id === clientId);
         if (!client) {
@@ -3488,11 +4005,11 @@ function openFeeInfo(type='all'){
       function switchPricelistTab(tab){state.catalogManagerFilter=tab==='PACKAGE'?'Packages':'Items';renderPricelist()}
       function filterPricelistTable(){renderPricelist()}
       function openCatalogCategoryModal(existing=''){ensureCatalogCategories();document.getElementById('catalogCategoryOldName').value=existing||'';document.getElementById('catalogCategoryName').value=existing||'';document.getElementById('catalogCategoryModalTitle').textContent=existing?'Edit Category':'Add Category';document.getElementById('catalogCategoryDeleteBtn')?.classList.toggle('hidden',!existing);openModal('catalogCategoryModal')}
-      function saveCatalogCategory(){const old=document.getElementById('catalogCategoryOldName').value.trim(),name=document.getElementById('catalogCategoryName').value.trim();if(!name){showToast('Category name is required.');return}ensureCatalogCategories();const dup=state.catalogCategories.some(c=>c.toLowerCase()===name.toLowerCase()&&c!==old);if(dup){showToast('That Category already exists.');return}if(old){const idx=state.catalogCategories.indexOf(old);if(idx>-1)state.catalogCategories[idx]=name;state.soloServices.forEach(s=>{if(String(s.category||'')===old)s.category=name});state.packagesList.forEach(pkg=>{if(String(pkg.category||'')===old)pkg.category=name});if(state.catalogManagerCategory===old)state.catalogManagerCategory=name}else state.catalogCategories.push(name);persistCatalogState();closeModal('catalogCategoryModal');renderPricelist();renderServiceCatalog();showToast(old?'Category updated.':'Category added.')}
+      function saveCatalogCategory(){const old=document.getElementById('catalogCategoryOldName').value.trim(),name=document.getElementById('catalogCategoryName').value.trim();if(!name){InlineValidation.message('catalogCategoryName','Category name is required.');return}InlineValidation.clearMessage('catalogCategoryName');ensureCatalogCategories();const dup=state.catalogCategories.some(c=>c.toLowerCase()===name.toLowerCase()&&c!==old);if(dup){InlineValidation.message('catalogCategoryName','That category already exists.');return}if(old){const idx=state.catalogCategories.indexOf(old);if(idx>-1)state.catalogCategories[idx]=name;state.soloServices.forEach(s=>{if(String(s.category||'')===old)s.category=name});state.packagesList.forEach(pkg=>{if(String(pkg.category||'')===old)pkg.category=name});if(state.catalogManagerCategory===old)state.catalogManagerCategory=name}else state.catalogCategories.push(name);persistCatalogState();closeModal('catalogCategoryModal');renderPricelist();renderServiceCatalog();showToast(old?'Category updated.':'Category added.')}
       function openCatalogServiceModal(code=''){
         ensureCatalogCategories();if(!state.catalogCategories.length){openCatalogCategoryModal();showToast('Create a Category first.');return;}const item=code?state.soloServices.find(s=>s.product_code===code):null;document.getElementById('catalogServiceModalTitle').textContent=item?'Edit Item':'Add Item';document.getElementById('catalogServiceCode').value=item?.product_code||'';document.getElementById('catalogServiceName').value=item?.name||'';document.getElementById('catalogServiceDescription').value=item?.description||'';enforceWordLimit(document.getElementById('catalogServiceDescription'),60,'catalogServiceDescriptionCount');document.getElementById('catalogServicePrice').value=item?.price??'';document.getElementById('catalogServiceDeleteBtn')?.classList.toggle('hidden',!item);const sel=document.getElementById('catalogServiceCategory');sel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');sel.value=item?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);openModal('catalogServiceModal')
       }
-      function saveCatalogService(){const code=document.getElementById('catalogServiceCode').value,name=document.getElementById('catalogServiceName').value.trim(),category=document.getElementById('catalogServiceCategory').value,desc=document.getElementById('catalogServiceDescription').value.trim(),price=Number(document.getElementById('catalogServicePrice').value);if(!name||!category||!Number.isFinite(price)||price<0){showToast('Enter a valid Item name, Category, and price.');return}if(code){const item=state.soloServices.find(s=>s.product_code===code);if(item)Object.assign(item,{name:titleCaseProductName(name),category,description:desc,price,active:item.active!==false,type:'SOLO'})}else{const nums=state.soloServices.map(s=>Number(String(s.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.soloServices.push({product_code:`SRV-${String(next).padStart(3,'0')}`,name:titleCaseProductName(name),category,description:desc,price,active:true,type:'SOLO'})}persistCatalogState();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast(code?'Item updated.':'Item added.')}
+      function saveCatalogService(){const code=document.getElementById('catalogServiceCode').value,name=document.getElementById('catalogServiceName').value.trim(),category=document.getElementById('catalogServiceCategory').value,desc=document.getElementById('catalogServiceDescription').value.trim(),price=Number(document.getElementById('catalogServicePrice').value);let serviceValid=true;serviceValid=InlineValidation.message('catalogServiceName',name?'':'Item name is required.')&&serviceValid;serviceValid=InlineValidation.message('catalogServiceCategory',category?'':'Select a service category.')&&serviceValid;serviceValid=InlineValidation.message('catalogServicePrice',Number.isFinite(price)&&price>=0?'':'Enter a valid price of ₱0 or more.')&&serviceValid;if(!serviceValid)return;if(code){const item=state.soloServices.find(s=>s.product_code===code);if(item)Object.assign(item,{name:titleCaseProductName(name),category,description:desc,price,active:item.active!==false,type:'SOLO'})}else{const nums=state.soloServices.map(s=>Number(String(s.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.soloServices.push({product_code:`SRV-${String(next).padStart(3,'0')}`,name:titleCaseProductName(name),category,description:desc,price,active:true,type:'SOLO'})}persistCatalogState();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast(code?'Item updated.':'Item added.')}
       function packageDisplayDescription(pkg){const d=String(pkg?.description||'').trim();return /^includes\s*:/i.test(d)?'':d;}
       function renderPackageServiceChoices(query=''){
         const box=document.getElementById('catalogPackageServiceChoices');if(!box)return;const q=String(query||'').toLowerCase(),category=document.getElementById('catalogPackageCategory')?.value||'',selected=new Set(state.packageBuilderSelectedNames||[]),items=state.soloServices.filter(s=>(!category||String(s.category||'')===category)&&(`${s.name||''} ${s.category||''}`).toLowerCase().includes(q));box.innerHTML=items.map(s=>`<label class="package-service-choice"><input type="checkbox" value="${escapeHtml(s.name)}" data-price="${Number(s.price||0)}" ${selected.has(s.name)?'checked':''} onchange="app.togglePackageBuilderService(this.value,this.checked)"><span><strong>${escapeHtml(s.name)}</strong><small>${escapeHtml(displayCategory(s.category||''))} · Item · ${formatCurrency(s.price||0)}</small></span></label>`).join('')||`<div class="typeahead-empty">No matching Items in this Service</div>`;updatePackagePriceSummary()
@@ -3503,7 +4020,7 @@ function openFeeInfo(type='all'){
         ensureCatalogCategories();if(!state.catalogCategories.length){showToast('Create a Category and Items first.');return}const pkg=code?state.packagesList.find(p=>p.product_code===code):null;state.packageBuilderSelectedNames=[...(pkg?.includedServiceNames||[])];document.getElementById('catalogPackageModalTitle').textContent=pkg?'Edit Package':'Create Package';document.getElementById('catalogPackageCode').value=pkg?.product_code||'';document.getElementById('catalogPackageName').value=pkg?normalizeBroadcastPackageName(pkg.name):'';document.getElementById('catalogPackageDescription').value=packageDisplayDescription(pkg);enforceWordLimit(document.getElementById('catalogPackageDescription'),80,'catalogPackageDescriptionCount');document.getElementById('catalogPackageSellingPrice').value=pkg?.sellingPrice??'';document.getElementById('catalogPackageDeleteBtn')?.classList.toggle('hidden',!pkg);const categorySel=document.getElementById('catalogPackageCategory');categorySel.innerHTML=state.catalogCategories.map(c=>`<option value="${escapeHtml(c)}">${escapeHtml(displayCategory(c))}</option>`).join('');categorySel.value=pkg?.category||(state.catalogManagerCategory!=='ALL'?state.catalogManagerCategory:state.catalogCategories[0]);document.getElementById('catalogPackageServiceSearch').value='';renderPackageServiceChoices('');openModal('catalogPackageModal')
       }
       function saveCatalogPackage(){
-        const code=document.getElementById('catalogPackageCode').value,name=document.getElementById('catalogPackageName').value.trim(),category=document.getElementById('catalogPackageCategory').value,description=document.getElementById('catalogPackageDescription')?.value.trim()||'',selling=Number(document.getElementById('catalogPackageSellingPrice').value),included=[...(state.packageBuilderSelectedNames||[])],selected=new Set(included),original=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);if(!name||!category||!included.length||!Number.isFinite(selling)||selling<0){showToast('Add a Package name, Category, at least one Item, and a valid offer price.');return}const current=code?state.packagesList.find(p=>p.product_code===code):null;const payload={name:titleCaseProductName(name),category,description,type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:current?current.active!==false:true};if(code){const pkg=current;if(pkg)Object.assign(pkg,payload)}else{const nums=state.packagesList.map(p=>Number(String(p.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.packagesList.push({product_code:`PKG-${String(next).padStart(3,'0')}`,...payload})}persistCatalogState();closeModal('catalogPackageModal');renderPricelist();renderServiceCatalog();showToast(code?'Package updated.':'Package created.')
+        const code=document.getElementById('catalogPackageCode').value,name=document.getElementById('catalogPackageName').value.trim(),category=document.getElementById('catalogPackageCategory').value,description=document.getElementById('catalogPackageDescription')?.value.trim()||'',selling=Number(document.getElementById('catalogPackageSellingPrice').value),included=[...(state.packageBuilderSelectedNames||[])],selected=new Set(included),original=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);let packageValid=true;packageValid=InlineValidation.message('catalogPackageName',name?'':'Package name is required.')&&packageValid;packageValid=InlineValidation.message('catalogPackageCategory',category?'':'Select a service category.')&&packageValid;packageValid=InlineValidation.message('catalogPackageSellingPrice',Number.isFinite(selling)&&selling>=0?'':'Enter a valid offer price of ₱0 or more.')&&packageValid;if(!included.length){SystemToast.warning({title:'Add at least one item',message:'Select an item in Package Inclusions before saving.'});packageValid=false;}if(!packageValid)return;const current=code?state.packagesList.find(p=>p.product_code===code):null;const payload={name:titleCaseProductName(name),category,description,type:'PACKAGE',sellingPrice:selling,originalPrice:original,discount:Math.max(0,original-selling),includedServiceNames:included,active:current?current.active!==false:true};if(code){const pkg=current;if(pkg)Object.assign(pkg,payload)}else{const nums=state.packagesList.map(p=>Number(String(p.product_code||'').match(/(\d+)$/)?.[1]||0)),next=Math.max(0,...nums)+1;state.packagesList.push({product_code:`PKG-${String(next).padStart(3,'0')}`,...payload})}persistCatalogState();closeModal('catalogPackageModal');renderPricelist();renderServiceCatalog();showToast(code?'Package updated.':'Package created.')
       }
       function deleteCatalogCategory(){const name=document.getElementById('catalogCategoryOldName')?.value.trim();if(!name)return;const usedServices=state.soloServices.filter(s=>String(s.category||'')===name).length,usedPackages=state.packagesList.filter(p=>String(p.category||'')===name).length;requestDestructivePin('Delete Category',`Delete "${name}"? ${usedServices+usedPackages?`It contains ${usedServices} item${usedServices===1?'':'s'} and ${usedPackages} package${usedPackages===1?'':'s'}; move or delete them first.`:'The Category is empty.'}`,()=>{if(usedServices||usedPackages){showToast('Move or delete the items in this category first.');return;}state.catalogCategories=state.catalogCategories.filter(c=>c!==name);if(state.catalogManagerCategory===name)state.catalogManagerCategory='ALL';persistCatalogState();closeModal('catalogCategoryModal');renderPricelist();showToast('Category deleted.');});}
       function deleteCatalogService(){const code=document.getElementById('catalogServiceCode')?.value;if(!code)return;const svc=state.soloServices.find(s=>s.product_code===code);if(!svc)return;const bundles=state.packagesList.filter(p=>(p.includedServiceNames||[]).includes(svc.name));requestDestructivePin('Delete Item',`Delete "${svc.name}"?${bundles.length?` It will also be removed from ${bundles.length} package${bundles.length===1?'':'s'}.`:''}`,()=>{state.soloServices=state.soloServices.filter(s=>s.product_code!==code);state.packagesList.forEach(p=>{p.includedServiceNames=(p.includedServiceNames||[]).filter(n=>n!==svc.name);const selected=new Set(p.includedServiceNames);p.originalPrice=state.soloServices.filter(s=>selected.has(s.name)).reduce((sum,s)=>sum+Number(s.price||0),0);p.discount=Math.max(0,Number(p.originalPrice||0)-Number(p.sellingPrice||0));});persistCatalogState();closeModal('catalogServiceModal');renderPricelist();renderServiceCatalog();showToast('Item deleted.');});}
@@ -3544,10 +4061,7 @@ function openFeeInfo(type='all'){
           valid = false;
         }
 
-        if (!valid) {
-          showToast("Please fix the validation errors before saving.");
-          return;
-        }
+        if (!valid) return;
 
         if (type === 'SOLO') {
           const item = state.soloServices.find(s => s.product_code === code);
@@ -3621,10 +4135,7 @@ function openFeeInfo(type='all'){
           valid = false;
         }
 
-        if (!valid) {
-          showToast("Please enter a valid Item name and price.");
-          return;
-        }
+        if (!valid) return;
 
         addToCart(name, price, 'SOLO', qty);
         closeModal("customProductModal");
@@ -3679,7 +4190,7 @@ function openFeeInfo(type='all'){
         ensureAdditionalFees();const fee=code?getFeeConfig(code):null;document.getElementById('additionalFeeModalTitle').textContent=fee?'Edit Fee':'Add Fee';document.getElementById('additionalFeeCode').value=fee?.code||'';document.getElementById('additionalFeeName').value=fee?.name||'';document.getElementById('additionalFeeAmount').value=fee?.amount??'';document.getElementById('additionalFeeRule').value=fee?.rule||'manual';document.getElementById('additionalFeeDescription').value=fee?.description||'';document.getElementById('additionalFeeActive').checked=fee?.active!==false;document.getElementById('additionalFeeDeleteBtn')?.classList.toggle('hidden',!fee||fee.locked);enforceWordLimit(document.getElementById('additionalFeeDescription'),45,'additionalFeeDescriptionCount');openModal('additionalFeeModal');
       }
       function saveAdditionalFee(){const lockedCode=String(document.getElementById('additionalFeeCode')?.value||'').toUpperCase();if(lockedCode==='REVISION')document.getElementById('additionalFeeAmount').value=REVISION_FEE_PER_REVISION;if(lockedCode==='SYSTEM_MAINTENANCE')document.getElementById('additionalFeeAmount').value=SYSTEM_MAINTENANCE_FEE;
-        ensureAdditionalFees();let code=String(document.getElementById('additionalFeeCode')?.value||'').trim().toUpperCase(),name=document.getElementById('additionalFeeName')?.value.trim()||'',amount=Math.max(0,Number(document.getElementById('additionalFeeAmount')?.value||0)),rule=document.getElementById('additionalFeeRule')?.value||'manual',description=document.getElementById('additionalFeeDescription')?.value.trim()||'',active=!!document.getElementById('additionalFeeActive')?.checked;if(!name){showToast('Fee name is required.');return;}if(!code){code='CUSTOM_'+Date.now();state.additionalFees.push({code,name,amount,rule,description,active,locked:false});}else{const fee=state.additionalFees.find(f=>f.code===code);if(fee)Object.assign(fee,{name,amount,rule,description,active});}
+        ensureAdditionalFees();let code=String(document.getElementById('additionalFeeCode')?.value||'').trim().toUpperCase(),name=document.getElementById('additionalFeeName')?.value.trim()||'',amount=Math.max(0,Number(document.getElementById('additionalFeeAmount')?.value||0)),rule=document.getElementById('additionalFeeRule')?.value||'manual',description=document.getElementById('additionalFeeDescription')?.value.trim()||'',active=!!document.getElementById('additionalFeeActive')?.checked;if(!name){InlineValidation.message('additionalFeeName','Fee name is required.');return;}InlineValidation.clearMessage('additionalFeeName');if(!code){code='CUSTOM_'+Date.now();state.additionalFees.push({code,name,amount,rule,description,active,locked:false});}else{const fee=state.additionalFees.find(f=>f.code===code);if(fee)Object.assign(fee,{name,amount,rule,description,active});}
         persistAdditionalFees();state.projects.forEach(p=>{if(projectHasPackage(p))p.system_maintenance_charge=getFeeAmount('SYSTEM_MAINTENANCE',21);});persistProjectsState();closeModal('additionalFeeModal');renderAdditionalFeesManager();updateCartCalculations();const proj=state.projects.find(p=>p.id===state.activeProjectId);if(proj){recalculateProjectFromOrderItems(proj);renderProjectOrderItems(proj);renderInvoicePaper(proj);}showToast('Additional fee updated.');
       }
       function deleteAdditionalFee(code=''){
@@ -3733,13 +4244,16 @@ function openFeeInfo(type='all'){
       function setCloudConnectBusy(busy,label="Connect"){
         const btn=document.getElementById('cloudLoginConnectBtn');
         const input=document.getElementById('cloudPasswordInput');
-        if(btn){btn.disabled=!!busy;btn.textContent=busy?label:"Connect";}
+        const modal=document.getElementById('cloudLoginModal');
+        if(modal)modal.dataset.blockClose=busy?'true':'false';
         if(input)input.disabled=!!busy;
+        modal?.querySelector('.modal-close')?.toggleAttribute('disabled',!!busy);
+        if(btn)setButtonLoading(btn,!!busy,label);
       }
       function openCloudLogin(){
         const input=document.getElementById('cloudPasswordInput');
-        if(input){input.value='';input.disabled=false;}
-        setCloudLoginFeedback("Enter your workspace password to start a secure session.","info");
+        if(input){input.value='';input.disabled=false;InlineValidation.clear(input,'cloudLoginError');}
+        setCloudLoginFeedback('Enter your workspace password to start a secure session.','info');
         setCloudConnectBusy(false);
         openModal('cloudLoginModal');
         setTimeout(()=>input?.focus(),40);
@@ -3747,39 +4261,59 @@ function openFeeInfo(type='all'){
       async function connectCloud(){
         const input=document.getElementById('cloudPasswordInput');
         const password=String(input?.value||'');
-        if(!password){setCloudLoginFeedback('Enter the workspace password.','error');input?.focus();return false;}
-        setCloudConnectBusy(true,"Authenticating…");
-        setCloudLoginFeedback("Authenticating workspace password…","working");
-        updateConnectionStatus("connecting","AUTHENTICATING…","Validating the secure workspace session.");
+        InlineValidation.clear(input,'cloudLoginError');
+        if(!password){InlineValidation.set(input,'cloudLoginError','Enter the workspace password.');input?.focus();return false;}
+        setCloudConnectBusy(true,'Authenticating…');
+        setCloudLoginFeedback('Authenticating…','working');
+        updateConnectionStatus('connecting','AUTHENTICATING…','Validating the secure workspace session.');
         try{
           const response=await fetch('/api/session',{method:'POST',credentials:'same-origin',cache:'no-store',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify({password})});
           const body=await response.json().catch(()=>({}));
           if(!response.ok){
-            const message=response.status===401?'Wrong workspace password.':(body.error||`Authentication failed (HTTP ${response.status}).`);
-            throw new Error(message);
+            if(response.status===401){
+              state.cloudAuthenticated=false;state.isConnected=false;
+              setCloudConnectBusy(false);
+              setCloudLoginFeedback('Incorrect workspace password.','error');
+              InlineValidation.set(input,'cloudLoginError','Incorrect workspace password.');
+              updateConnectionStatus('offline','OFFLINE · LOCAL','Workspace authentication was not accepted. Local data remains available.');
+              input?.focus();
+              return false;
+            }
+            throw new Error(body.error||`Authentication failed (HTTP ${response.status}).`);
           }
           state.csrfToken=String(body.csrfToken||'');
           state.cloudAuthenticated=true;
-          setCloudLoginFeedback("Password accepted. Connecting to Supabase…","working");
-          setCloudConnectBusy(true,"Connecting…");
-          const connected=await initSupabase();
-          if(!connected){
-            const detail=document.getElementById('cloudConnectionDetail')?.textContent||'Supabase connection failed. Check Vercel environment variables and database installation.';
-            throw new Error(detail);
-          }
-          setCloudLoginFeedback("Connected. Supabase sync and Gemini are ready.","success");
-          setCloudConnectBusy(true,"Connected");
-          showToast('Secure cloud sync connected.');
-          setTimeout(()=>{closeModal('cloudLoginModal');setCloudConnectBusy(false);},500);
+          setCloudLoginFeedback('Connecting to cloud…','working');
+          setCloudConnectBusy(true,'Connecting…');
+          updateConnectionStatus('connecting','CONNECTING…','Connecting to the secure workspace database.');
+
+          const connected=await initSupabase({silent:true});
+          if(!connected)throw new Error('Supabase connection could not be established.');
+
+          setCloudLoginFeedback('Syncing workspace…','working');
+          setCloudConnectBusy(true,'Syncing…');
+          await flushCloudQueue();
+          updateConnectionStatus('connected','CLOUD · SYNCED','Secure Supabase synchronization is active.');
+          setCloudLoginFeedback('Workspace connected. All changes are synced to the cloud.','success');
+          await new Promise(r=>setTimeout(r,260));
+          setCloudConnectBusy(false);
+          closeModal('cloudLoginModal');
+          SystemToast.success({title:'Workspace connected',message:'All changes are synced to the cloud.'});
           return true;
         }catch(e){
-          const message=String(e?.message||'Cloud sign-in failed');
+          const technical=String(e?.message||'Cloud sign-in failed');
+          console.warn('Cloud connection failed:',technical);
           state.isConnected=false;
-          if(/wrong workspace password/i.test(message))state.cloudAuthenticated=false;
-          updateConnectionStatus("error","CLOUD · ERROR",message);
-          setCloudLoginFeedback(message,"error");
+          updateConnectionStatus('error','CLOUD · ERROR','Cloud connection needs attention. Local workspace data remains available.');
           setCloudConnectBusy(false);
-          input?.focus();
+          closeModal('cloudLoginModal');
+          const retry=await SystemModal.error({
+            title:'Unable to connect to cloud',
+            message:'JUAN Workspace could not establish a secure cloud connection. Your local data has not been deleted.',
+            cancelLabel:'Cancel',
+            confirmLabel:'Try Again'
+          });
+          if(retry)openCloudLogin();
           return false;
         }
       }
@@ -3863,6 +4397,7 @@ function openFeeInfo(type='all'){
         openResetDataModal,
         confirmResetDataPin,
         requestDestructivePin,
+        cancelDestructivePin,
         confirmDestructivePin,
         deleteCurrentProject,
         deleteProjectById,

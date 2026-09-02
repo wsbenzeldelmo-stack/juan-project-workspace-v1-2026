@@ -16,7 +16,7 @@
 <link href="./manifest.webmanifest" rel="manifest"/>
 <link href="./assets/apple-touch-icon.png" rel="apple-touch-icon"/>
 <link href="./assets/favicon-64.png" rel="icon" sizes="64x64" type="image/png"/>
-<link href="./css/core.css?v=8.1.0" rel="stylesheet"/><link href="./css/visual-language.css" rel="stylesheet"/><link href="./css/responsive.css" rel="stylesheet"/><link href="./css/overview-assistant.css" rel="stylesheet"/><link href="./css/management-layout.css" rel="stylesheet"/><link href="./css/interactions-scroll.css" rel="stylesheet"/><link href="./css/project-catalog.css" rel="stylesheet"/><link href="./css/items-security-performance.css" rel="stylesheet"/><link href="./css/payments-invoice-urgency.css" rel="stylesheet"/><link href="./css/catalog-calendar-receipts.css" rel="stylesheet"/><link href="./css/typography-guided-assistant.css?v=8.1.0" rel="stylesheet"/><link href="./css/mobile-viewer.css" rel="stylesheet"/><link href="./css/shop-refinement.css?v=8.3.0" rel="stylesheet"/><link href="./css/project-details-v8-2.css?v=8.2.0" rel="stylesheet"/></head>
+<link href="./css/core.css?v=8.4.0" rel="stylesheet"/><link href="./css/visual-language.css?v=8.4.0" rel="stylesheet"/><link href="./css/responsive.css" rel="stylesheet"/><link href="./css/overview-assistant.css" rel="stylesheet"/><link href="./css/management-layout.css" rel="stylesheet"/><link href="./css/interactions-scroll.css" rel="stylesheet"/><link href="./css/project-catalog.css" rel="stylesheet"/><link href="./css/items-security-performance.css" rel="stylesheet"/><link href="./css/payments-invoice-urgency.css" rel="stylesheet"/><link href="./css/catalog-calendar-receipts.css" rel="stylesheet"/><link href="./css/typography-guided-assistant.css?v=8.1.0" rel="stylesheet"/><link href="./css/mobile-viewer.css" rel="stylesheet"/><link href="./css/shop-refinement.css?v=8.3.0" rel="stylesheet"/><link href="./css/project-details-v8-2.css?v=8.2.0" rel="stylesheet"/></head>
 <body>
 <!--
   JUAN PROJECT WORKSPACE — MODULAR BUILD
@@ -298,7 +298,7 @@
 <div class="divider"></div>
 <div class="summary-row summary-total"><span>Total</span><span id="summaryTotal">₱ 0.00</span></div>
 </div>
-<button class="btn btn-primary btn-block mt-6" onclick="app.showOrderConfirmation()">Review &amp; Create Order</button>
+<button class="btn btn-primary btn-block mt-6" id="createOrderBtn" onclick="app.showOrderConfirmation()">Create Order</button>
 </div>
 </div>
 </div>
@@ -498,19 +498,19 @@
 
 <div class="tab-content" id="projTab-invoice">
 <div class="invoice-actions-bar invoice-actions-bar-v82 mb-4">
-<button class="btn btn-secondary btn-sm" onclick="app.saveInvoicePDF()">
+<button class="btn btn-secondary btn-sm" id="invoicePdfBtn" onclick="app.saveInvoicePDF()">
 <svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect height="8" width="12" x="6" y="14"></rect></svg>
               Save as PDF
             </button>
-<button class="btn btn-secondary btn-sm" onclick="app.saveInvoiceImage()">
+<button class="btn btn-secondary btn-sm" id="invoiceImageBtn" onclick="app.saveInvoiceImage()">
 <svg class="icon-svg sm" viewbox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="3"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><path d="M21 15l-5-5L5 21"></path></svg>
               Save as Image
             </button>
-<button class="btn btn-secondary btn-sm" onclick="app.sendDeadlineReminderEmail()">
+<button class="btn btn-secondary btn-sm" id="deadlineEmailBtn" onclick="app.sendDeadlineReminderEmail()">
 <svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
               Send Reminder
             </button>
-<button class="btn btn-primary btn-sm" onclick="app.sendBalanceReminderEmail()">
+<button class="btn btn-primary btn-sm" id="balanceEmailBtn" onclick="app.sendBalanceReminderEmail()">
 <svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
               Send Balance Email
             </button>
@@ -864,29 +864,13 @@
 </div>
 <div class="form-group">
 <label class="form-label">Receipt Attachment</label>
-<input accept="image/*,application/pdf" class="form-control" id="paymentReceiptInput" type="file"/><div class="receipt-ocr-status" id="paymentOcrStatus">Attach an image receipt to detect its reference number locally.</div>
+<input accept="image/*,application/pdf" class="form-control" id="paymentReceiptInput" type="file"/><span class="inline-error hidden" id="paymentReceiptError"></span><div class="receipt-ocr-status" id="paymentOcrStatus">Attach an image receipt to detect its reference number locally.</div>
 <div class="text-sm text-muted mt-2" id="paymentReceiptCurrent"></div>
 </div>
 </div>
 <div class="modal-footer">
 <button class="btn btn-secondary" onclick="app.closeModal('recordPaymentModal')">Cancel</button>
 <button class="btn btn-primary" id="recordPaymentSaveBtn" onclick="app.submitPaymentRecord()">Continue</button>
-</div>
-</div>
-</div>
-<!-- MODAL: ORDER CONFIRMATION -->
-<div class="modal-backdrop" id="orderSummaryModal">
-<div class="modal-card">
-<div class="modal-header">
-<h3 class="modal-title">Order Summary</h3>
-<button class="modal-close" onclick="app.closeModal('orderSummaryModal')">
-<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
-</button>
-</div>
-<div class="modal-body" id="orderSummaryModalBody"></div>
-<div class="modal-footer">
-<button class="btn btn-secondary" onclick="app.closeModal('orderSummaryModal')">Back</button>
-<button class="btn btn-primary" onclick="app.confirmAndCreateOrder()">Confirm</button>
 </div>
 </div>
 </div>
@@ -977,17 +961,22 @@
 </div>
 </div>
 <!-- UNIFIED CONFIRMATION / PROCESSING MODALS -->
-<div class="modal-backdrop" id="confirmationModal">
-<div class="modal-card compact-validation-modal">
-<div class="validation-graphic validation-question" id="confirmModalGraphic"><svg class="icon-svg lg" viewbox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9a2.8 2.8 0 0 1 5.1 1.6c0 2-2.6 2.2-2.6 4"></path><path d="M12 18h.01"></path></svg></div>
-<div class="validation-copy"><h3 class="modal-title" id="confirmModalTitle">Confirm Action</h3><p id="confirmModalDescription">Please confirm this action.</p></div>
-<div class="modal-footer validation-actions"><button class="btn btn-secondary" onclick="app.closeModal('confirmationModal')">Cancel</button><button class="btn btn-primary" id="confirmModalActionBtn">Confirm</button></div>
+<!-- V8.4 UNIFIED SYSTEM RESPONSE MODAL -->
+<div class="modal-backdrop system-modal-backdrop" id="systemModal" aria-hidden="true">
+<div class="modal-card system-modal-card" id="systemModalCard" tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="systemModalTitle" aria-describedby="systemModalMessage">
+<div class="system-modal-topline">
+<div class="system-modal-icon" id="systemModalIcon" aria-hidden="true"></div>
+<button class="system-modal-close" id="systemModalClose" type="button" aria-label="Close dialog">×</button>
 </div>
+<div class="system-modal-copy">
+<h3 class="modal-title" id="systemModalTitle">Confirm action</h3>
+<p id="systemModalMessage">Please confirm this action.</p>
+<div class="system-modal-details" id="systemModalDetails" hidden></div>
 </div>
-<div class="modal-backdrop" id="actionStatusModal">
-<div class="modal-card compact-validation-modal action-status-card">
-<div class="action-status-graphic" id="actionStatusGraphic"><span class="action-spinner"></span></div>
-<div class="validation-copy"><h3 class="modal-title" id="actionStatusTitle">Processing</h3><p id="actionStatusMessage">Please wait…</p></div>
+<div class="modal-footer system-modal-actions">
+<button class="btn btn-secondary" id="systemModalSecondaryBtn" type="button">Cancel</button>
+<button class="btn btn-primary" id="systemModalPrimaryBtn" type="button">Continue</button>
+</div>
 </div>
 </div>
 <!-- PIN-PROTECTED DESTRUCTIVE ACTIONS -->
@@ -996,7 +985,7 @@
 <div class="validation-graphic reset-lock-graphic"><svg class="icon-svg lg" viewbox="0 0 24 24"><rect height="10" rx="2" width="14" x="5" y="10"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path><path d="M12 14v2"></path></svg></div>
 <div class="validation-copy"><h3 class="modal-title" id="destructivePinTitle">Confirm deletion</h3><p id="destructivePinDescription">Enter your 6-digit PIN to continue.</p></div>
 <div class="form-group reset-pin-field"><label class="form-label">PIN Code</label><div class="pin-code-grid" data-pin-target="destructivePinInput"><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 1" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 2" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 3" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 4" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 5" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/><input class="pin-digit" inputmode="numeric" maxlength="1" aria-label="PIN digit 6" oninput="app.handlePinDigitInput(event,'destructivePinInput')" onkeydown="app.handlePinDigitKeydown(event,'destructivePinInput')"/></div><input id="destructivePinInput" type="hidden"/><span class="inline-error hidden" id="destructivePinError">Incorrect PIN.</span></div>
-<div class="modal-footer validation-actions"><button class="btn btn-secondary" onclick="app.closeModal('destructivePinModal')">Cancel</button><button class="btn btn-danger" onclick="app.confirmDestructivePin()">Continue</button></div>
+<div class="modal-footer validation-actions"><button class="btn btn-secondary" onclick="app.cancelDestructivePin()">Cancel</button><button class="btn btn-danger" onclick="app.confirmDestructivePin()">Continue</button></div>
 </div>
 </div>
 <!-- PIN-PROTECTED RESET DATA -->
@@ -1108,7 +1097,7 @@
     </div>
   </div>
 </div>
-<script src="./js/app.js?v=8.3.0"></script>
+<script src="./js/app.js?v=8.4.0"></script>
 <div class="modal-backdrop" id="overviewListModal">
 <div class="modal-card modal-wide overview-list-modal-card">
 <div class="modal-header"><div><div class="section-kicker">OVERVIEW</div><h3 class="modal-title" id="overviewListModalTitle">Projects</h3></div><button class="modal-close" onclick="app.closeModal('overviewListModal')">×</button></div>

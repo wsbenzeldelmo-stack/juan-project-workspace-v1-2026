@@ -1,3 +1,18 @@
+# v8.4.0 — Unified System Feedback & Loading UX
+
+- Added one centralized SystemModal architecture with confirm, warning, processing, and error modes; consequential system responses no longer rely on browser-native confirmation dialogs.
+- Added one reusable SystemToast system for lightweight success/information feedback with responsive top-right placement, close controls, and optional retry/actions.
+- Added InlineValidation helpers and moved key form validation into the relevant fields instead of interrupting users with generic popups.
+- Added ComponentLoader/skeleton and reusable asynchronous button loading utilities without introducing full-screen navigation loaders.
+- Unified cloud connection feedback: inline wrong-password feedback, Authentication → Connecting → Syncing phases, success toast, and safe retryable connection errors while preserving local data.
+- Refined payment recording so feature forms never stack a processing modal; fields lock during persistence, values remain intact after failures, and financial views update together after success.
+- Refined New Order flow: normal valid orders create directly, Rush Fee consequences use the warning mode, and project creation uses delayed processing feedback to avoid flicker.
+- Refined invoice PDF/image/email response states and backup restore feedback using the same centralized architecture.
+- Standardized destructive confirmations, focus trapping/restoration, safe Escape/backdrop behavior, modal z-index, minimum mobile touch targets, and no-modal-stacking rules.
+- Removed the obsolete Order Summary confirmation dialog and retained functional form modals such as Record Payment, Shop editors, and Additional Fees management.
+- Preserved offline-first persistence, Supabase synchronization/security routes, Gemini integration, centralized financial calculations, catalog rules, and all existing JUAN PROJECT WORKSPACE visual tokens.
+- No database schema migration required.
+
 # v8.3.0 — Seller / Shop Redesign
 
 - Rebuilt only the Seller / Shop page to match the approved catalog-management reference.
