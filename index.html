@@ -16,7 +16,7 @@
 <link href="./manifest.webmanifest" rel="manifest"/>
 <link href="./assets/apple-touch-icon.png" rel="apple-touch-icon"/>
 <link href="./assets/favicon-64.png" rel="icon" sizes="64x64" type="image/png"/>
-<link href="./css/core.css?v=8.1.0" rel="stylesheet"/><link href="./css/visual-language.css" rel="stylesheet"/><link href="./css/responsive.css" rel="stylesheet"/><link href="./css/overview-assistant.css" rel="stylesheet"/><link href="./css/management-layout.css" rel="stylesheet"/><link href="./css/interactions-scroll.css" rel="stylesheet"/><link href="./css/project-catalog.css" rel="stylesheet"/><link href="./css/items-security-performance.css" rel="stylesheet"/><link href="./css/payments-invoice-urgency.css" rel="stylesheet"/><link href="./css/catalog-calendar-receipts.css" rel="stylesheet"/><link href="./css/typography-guided-assistant.css?v=8.1.0" rel="stylesheet"/><link href="./css/mobile-viewer.css" rel="stylesheet"/><link href="./css/shop-refinement.css" rel="stylesheet"/></head>
+<link href="./css/core.css?v=8.1.0" rel="stylesheet"/><link href="./css/visual-language.css" rel="stylesheet"/><link href="./css/responsive.css" rel="stylesheet"/><link href="./css/overview-assistant.css" rel="stylesheet"/><link href="./css/management-layout.css" rel="stylesheet"/><link href="./css/interactions-scroll.css" rel="stylesheet"/><link href="./css/project-catalog.css" rel="stylesheet"/><link href="./css/items-security-performance.css" rel="stylesheet"/><link href="./css/payments-invoice-urgency.css" rel="stylesheet"/><link href="./css/catalog-calendar-receipts.css" rel="stylesheet"/><link href="./css/typography-guided-assistant.css?v=8.1.0" rel="stylesheet"/><link href="./css/mobile-viewer.css" rel="stylesheet"/><link href="./css/shop-refinement.css" rel="stylesheet"/><link href="./css/project-details-v8-2.css?v=8.2.0" rel="stylesheet"/></head>
 <body>
 <!--
   JUAN PROJECT WORKSPACE — MODULAR BUILD
@@ -381,14 +381,14 @@
 <!-- VIEW 3: PROJECT DETAILS -->
 <section class="view" id="view-project-details">
 <div class="project-detail-sticky-shell">
-<header class="page-header">
+<header class="page-header project-detail-header-v82">
 <div>
 <button class="btn-text mb-2" onclick="app.navigateTo('projects')">
 <svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="19" x2="5" y1="12" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
               Back to Projects
             </button>
 <h1 class="page-title" id="projDetailTitle">Project Title</h1>
-<div class="project-detail-inline-meta" id="projDetailClient">JP-000  |  email@example.com</div>
+<div class="project-detail-inline-meta" id="projDetailClient">JP-000 · email@example.com</div>
 </div>
 <div class="action-buttons-group project-primary-actions">
 <button class="btn btn-secondary" id="btnMarkDeliveredHeader" onclick="app.promptMarkAsDelivered()">
@@ -411,7 +411,7 @@
 <div class="project-overall-progress" id="projectOverallProgress">
 <div class="project-overall-progress-head">
 <div><span>Project Progress</span><strong id="projectOverallProgressPercent">0%</strong></div>
-<span id="projectOverallProgressCount">0 / 0</span>
+<span id="projectOverallProgressCount">0 / 0 completed</span>
 </div>
 <div class="progress-bar-track"><div class="progress-bar-fill" id="projectOverallProgressBar" style="width:0%"></div></div>
 </div>
@@ -423,10 +423,11 @@
 <button class="tab-btn" data-project-tab="notes" onclick="app.switchProjectTab('notes', event)">Notes</button>
 </div>
 </div>
+
 <div class="tab-content" id="projTab-project-data">
-<div class="project-data-grid">
+<div class="project-data-grid project-data-grid-v82">
 <div class="card project-data-card project-client-display-card" onclick="app.openProjectDataClientProfile()" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();app.openProjectDataClientProfile();}">
-<div class="card-header"><div><div class="section-kicker">CLIENT</div><h3 class="card-title">Client Information</h3><div class="text-sm text-muted mt-1">View client profile to edit contact details.</div></div><span class="client-card-arrow">›</span></div>
+<div class="card-header"><div><h3 class="card-title">Client Information</h3></div><span class="client-card-arrow">›</span></div>
 <div class="project-data-form-grid project-client-readonly-grid">
 <div class="form-group"><label class="form-label">Full Name</label><input class="form-control" id="projectDataClientName" placeholder="— FULL NAME —" readonly tabindex="-1"/></div>
 <div class="form-group"><label class="form-label">Email Address</label><input class="form-control" id="projectDataClientEmail" placeholder="name@example.com" readonly tabindex="-1" type="email"/></div>
@@ -435,7 +436,7 @@
 </div>
 </div>
 <div class="card project-data-card project-data-project-card">
-<div class="card-header"><div><div class="section-kicker">PROJECT</div><h3 class="card-title">Project Information</h3></div></div>
+<div class="card-header"><div><h3 class="card-title">Project Information</h3></div></div>
 <div class="project-data-form-grid">
 <div class="form-group"><label class="form-label">Project ID</label><input class="form-control" id="projectDataProjectId" readonly=""/></div>
 <div class="form-group"><label class="form-label">Project Name</label><input class="form-control" id="projectDataProjectName" oninput="app.scheduleProjectDataAutosave()"/></div>
@@ -443,46 +444,60 @@
 <div class="form-group"><label class="form-label">Project Deadline</label><input class="form-control" id="projectDataDeadline" onchange="app.handleProjectDataDeadlineChange();app.scheduleProjectDataAutosave()" type="date"/><div class="project-data-rush-live" id="projectDataRushLive"></div></div>
 </div>
 <div class="project-priority-toggle-row">
-<div><strong>Priority</strong></div>
+<div><strong>Priority</strong><span>Move this project higher in the working queue.</span></div>
 <label class="toggle-switch"><input id="projectDataPriority" onchange="app.scheduleProjectDataAutosave()" type="checkbox"/><span class="toggle-slider"></span></label>
 </div>
 </div>
 </div>
-<div class="card project-items-receipt-card">
+<div class="card project-items-receipt-card project-order-card-v82">
 <div class="card-header">
-<div><div class="section-kicker">ORDER</div><h3 class="card-title">Items</h3><div class="text-sm text-muted mt-1">Items added here are reflected automatically in Deliverables.</div></div>
-<button class="btn btn-secondary btn-sm" onclick="app.openProjectOrderBatchModal()">Add Items</button>
+<div><h3 class="card-title">Order / Items</h3></div>
+<button class="btn btn-secondary btn-sm" onclick="app.openProjectOrderBatchModal()"><span aria-hidden="true">＋</span> Add Items</button>
 </div>
 <div id="projectOrderItemsList"></div>
 </div>
+<div class="project-data-bottom-grid">
+<div class="card project-financial-summary-card">
+<div class="card-header"><h3 class="card-title">Financial Summary</h3></div>
+<div id="projectFinancialSummary"></div>
 </div>
+<div class="card project-notes-preview-card">
+<div class="card-header"><h3 class="card-title">Notes</h3><button class="btn-text" type="button" onclick="app.switchProjectTab('notes')">View Notes</button></div>
+<div id="projectNotesPreview" class="project-notes-preview"></div>
+</div>
+</div>
+</div>
+
 <div class="tab-content active" id="projTab-deliverables">
-<div class="card deliverables-main-card">
-<div class="card-header deliverables-header-row">
-<div><div class="section-kicker">PRODUCTION</div><h3 class="card-title">Deliverables</h3><div class="deliverables-overall-copy"><span id="projDetailProgressCount">0 / 0 completed</span><strong id="projDetailProgressPercent">0%</strong></div></div>
-</div>
+<div class="card deliverables-main-card deliverables-main-card-v82">
+<div class="deliverables-summary-v82">
+<div class="deliverables-progress-primary">
+<div class="section-title-row"><div><span class="section-eyebrow">Production Progress</span><strong id="projDetailProgressPercent">0%</strong></div><span id="projDetailProgressCount">0 of 0 completed</span></div>
 <div class="progress-bar-track deliverables-overall-progress"><div class="progress-bar-fill" id="projDetailProgressBar" style="width:0%"></div></div>
+</div>
+<div id="projectDeliverablesStats" class="deliverables-stats-strip"></div>
+</div>
+<div class="deliverables-table-head"><span>Deliverable</span><span>Status</span><span>Progress</span><span></span></div>
 <div class="deliverables-list" id="projectDeliverablesList"></div>
 </div>
 </div>
+
 <div class="tab-content" id="projTab-payment-tracker">
-<div class="card mb-6">
-<div class="card-header">
-<h3 class="card-title">Payment Overview &amp; Calculations</h3>
-<button class="btn btn-primary btn-sm" onclick="app.openRecordPaymentModal()">
-<svg class="icon-svg sm" viewbox="0 0 24 24"><line x1="12" x2="12" y1="5" y2="19"></line><line x1="5" x2="19" y1="12" y2="12"></line></svg>
-                Record Payment
-              </button>
-</div>
+<div class="payment-overview-layout-v82">
+<div class="card payment-calculation-card-v82">
+<div class="card-header"><h3 class="card-title">Payment Overview &amp; Calculations</h3></div>
 <div id="paymentCalculationsOverview"></div>
 </div>
-<div class="card">
-<div class="card-header"><h3 class="card-title">Payment History</h3></div>
+<div class="card balance-summary-card-v82" id="balanceSummaryCard"></div>
+</div>
+<div class="card payment-history-card-v82">
+<div class="card-header"><h3 class="card-title">Payment History</h3><button class="btn btn-primary btn-sm" onclick="app.openRecordPaymentModal()"><span aria-hidden="true">＋</span> Record Payment</button></div>
 <div id="paymentHistoryList"></div>
 </div>
 </div>
+
 <div class="tab-content" id="projTab-invoice">
-<div class="invoice-actions-bar mb-4">
+<div class="invoice-actions-bar invoice-actions-bar-v82 mb-4">
 <button class="btn btn-secondary btn-sm" onclick="app.saveInvoicePDF()">
 <svg class="icon-svg sm" viewbox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect height="8" width="12" x="6" y="14"></rect></svg>
               Save as PDF
@@ -493,22 +508,26 @@
             </button>
 <button class="btn btn-secondary btn-sm" onclick="app.sendDeadlineReminderEmail()">
 <svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-              Send Deadline Reminder
+              Send Reminder
             </button>
 <button class="btn btn-primary btn-sm" onclick="app.sendBalanceReminderEmail()">
 <svg class="icon-svg sm" viewbox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
               Send Balance Email
             </button>
 </div>
-<div class="invoice-paper" id="invoicePaperPrintable"></div>
+<div class="invoice-paper invoice-paper-v82" id="invoicePaperPrintable"></div>
 </div>
+
 <div class="tab-content" id="projTab-notes">
-<div class="card">
-<h3 class="card-title mb-3">Project Notes</h3>
-<textarea class="form-control fixed-notes-field" id="projectNotesTextarea" placeholder="Add specific client requests, asset URLs, or technical constraints..." rows="5" oninput="app.enforceWordLimit(this,120,'projectNotesWordCount')"></textarea>
-<div class="notes-word-count" id="projectNotesWordCount">0 / 120 words</div>
-<div class="mt-3 text-right">
-<button class="btn btn-primary btn-sm" onclick="app.saveProjectNotes()">Save Notes</button>
+<div class="project-notes-layout-v82">
+<div class="card project-notes-editor-card">
+<div class="card-header"><div><h3 class="card-title">Project Notes</h3><div class="text-sm text-muted mt-1">Internal project requests, links, and technical reminders.</div></div></div>
+<textarea class="form-control fixed-notes-field project-notes-field-v82" id="projectNotesTextarea" placeholder="Add specific client requests, asset URLs, or technical constraints..." rows="8" oninput="app.enforceWordLimit(this,120,'projectNotesWordCount')"></textarea>
+<div class="notes-footer-row"><div class="notes-word-count" id="projectNotesWordCount">0 / 120 words</div><button class="btn btn-primary btn-sm" onclick="app.saveProjectNotes()">Save Notes</button></div>
+</div>
+<div class="card project-activity-card-v82">
+<div class="card-header"><h3 class="card-title">Recent Activity</h3></div>
+<div id="projectActivityList"></div>
 </div>
 </div>
 </div>
@@ -1063,7 +1082,7 @@
     </div>
   </div>
 </div>
-<script src="./js/app.js?v=8.1.0"></script>
+<script src="./js/app.js?v=8.2.0"></script>
 <div class="modal-backdrop" id="overviewListModal">
 <div class="modal-card modal-wide overview-list-modal-card">
 <div class="modal-header"><div><div class="section-kicker">OVERVIEW</div><h3 class="modal-title" id="overviewListModalTitle">Projects</h3></div><button class="modal-close" onclick="app.closeModal('overviewListModal')">×</button></div>

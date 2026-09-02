@@ -1,3 +1,17 @@
+# v8.2.0 — Project Details redesign + unified billing logic
+- Redesigned all Project Details tabs while preserving the existing JUAN PROJECT WORKSPACE sidebar, header, tab, spacing, card, and green-accent visual language.
+- Project Data now separates Client Information, Project Information, Order / Items, Financial Summary, and Notes preview with cleaner hierarchy.
+- Deliverables now uses a production-progress summary, compact metrics, grouped deliverable rows, status chips, and progress indicators.
+- Payment Monitoring now uses one systematic equation: Items Subtotal + Additional Charges − Discounts = Total; Total − Amount Paid = Balance Due.
+- Added a dedicated color-coded Balance Summary card using Paid (green), Partially Paid (amber), Unpaid (orange), and Overdue (red) semantic states while keeping the balance amount dark and readable.
+- Invoice now uses the same centralized financial calculation as Project Data and Payment Monitoring, removes redundant fee/total rows, hides zero-value adjustments, and uses Order Item / Qty / Amount.
+- Project File Request remains a normal order item. Rush Fee, Revision Fee, and System Maintenance Fee are handled as Additional Charges.
+- Revision requests now increment the project revision count instead of creating new visible order-item rows; legacy revision ADDON rows remain supported for existing records.
+- Added fallback handling for legacy/imported projects that have stored totals but no order-item rows.
+- Notes now includes a compact project activity history.
+- Fixed Payment Monitoring rendering against the current DOM IDs.
+- Added a dedicated v8.2 Project Details stylesheet and bumped the service-worker cache so the redesigned UI loads after redeployment.
+
 # v8.1.0 — Cloud authentication feedback + Gemini-first assistant
 - Fixed missing `updateConnectionStatus()` runtime bug that prevented visible cloud-state transitions.
 - Added explicit Authenticating, Connecting, Connected, Wrong Password, and Cloud Error feedback.

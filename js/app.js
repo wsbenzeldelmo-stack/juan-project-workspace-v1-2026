@@ -1093,22 +1093,106 @@ ${description}`))actionCallback();return;}
         return (proj.payments || []).reduce((sum,p) => sum + Number(p.amount_paid || p.amount || 0), 0);
       }
 
+      function isRevisionChargeItem(item){
+        const type=String(item?.type||'').toUpperCase(),addon=String(item?.addon_type||'').toUpperCase(),name=String(item?.name||'').trim().toLowerCase();
+        return ['ADDON','REQUEST'].includes(type)&&(addon==='REVISION'||name==='revision request'||name==='revision fee');
+      }
+
+      function getBillableOrderItems(proj){
+        const items=Array.isArray(proj?.project_items)?proj.project_items:(Array.isArray(proj?.items)?proj.items:[]);
+        return items.filter(item=>!isRevisionChargeItem(item));
+      }
+
+      function titleCaseProductName(value){
+        return String(value||'').trim().split(/\s+/).map(word=>{
+          if(/^[A-Z0-9&+.-]{2,4}$/.test(word))return word;
+          const lower=word.toLowerCase();return lower?lower.charAt(0).toUpperCase()+lower.slice(1):'';
+        }).join(' ');
+      }
+
+      function getProjectFinancialBreakdown(proj){
+        const items=getBillableOrderItems(proj);
+        const rushFee=Math.max(0,Number(proj?.rush_fee||0))+Math.max(0,Number(proj?.workload_rush_fee||0));
+        const storedDiscount=Math.max(0,Number(proj?.discount_amount||0));
+        let grossSubtotal=items.reduce((sum,item)=>sum+Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1)),0);
+        let itemDiscounts=items.reduce((sum,item)=>{const type=String(item.type||'').toUpperCase();if(['PACKAGE','ADDON'].includes(type))return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0);
+        let itemsSubtotal=Math.max(0,grossSubtotal-itemDiscounts);
+        // Preserve legacy/imported projects that only stored subtotal/total and do not have item rows yet.
+        if(!items.length){
+          const storedSubtotal=Math.max(0,Number(proj?.subtotal_amount||0));
+          const storedCoreTotal=Math.max(0,Number(proj?.total_amount||0));
+          itemsSubtotal=storedSubtotal>0?storedSubtotal:Math.max(0,storedCoreTotal-rushFee+storedDiscount);
+          grossSubtotal=itemsSubtotal;
+          itemDiscounts=0;
+        }
+        const revisionFee=Math.max(0,getProjectRevisionFee(proj));
+        const maintenanceFee=Math.max(0,getProjectMaintenanceFee(proj));
+        const additionalCharges=rushFee+revisionFee+maintenanceFee;
+        const discount=Math.min(itemsSubtotal+additionalCharges,storedDiscount);
+        const total=Math.max(0,itemsSubtotal+additionalCharges-discount);
+        const paid=Math.max(0,getProjectPaid(proj));
+        const balance=Math.max(0,total-paid);
+        const dueDate=proj?.invoice_due_date||proj?.payment_due_date||proj?.deadline_date||'';
+        const today=new Date();today.setHours(0,0,0,0);const due=parseDateSafe(dueDate);if(due)due.setHours(0,0,0,0);
+        const status=total>0&&balance<=0.005?'PAID':(due&&due<today&&balance>0?'OVERDUE':(paid>0?'PARTIALLY PAID':'UNPAID'));
+        return {items,grossSubtotal,itemDiscounts,itemsSubtotal,rushFee,revisionFee,maintenanceFee,additionalCharges,discount,total,paid,balance,dueDate,status};
+      }
+
+      function paymentStatusPresentation(status){
+        const key=String(status||'UNPAID').toUpperCase();
+        if(key==='PAID')return {className:'paid',helper:'Payment completed'};
+        if(key==='PARTIALLY PAID')return {className:'partial',helper:'Remaining balance'};
+        if(key==='OVERDUE')return {className:'overdue',helper:'Payment overdue'};
+        return {className:'unpaid',helper:'Payment required'};
+      }
+
+      function renderProjectFinancialSummary(proj){
+        const box=document.getElementById('projectFinancialSummary');if(!box||!proj)return;
+        const f=getProjectFinancialBreakdown(proj);
+        const chargeRows=[f.rushFee?`<div class="financial-summary-row minor"><span>Rush Fee</span><strong>+ ${formatCurrency(f.rushFee)}</strong></div>`:'',f.revisionFee?`<div class="financial-summary-row minor"><span>Revision Fee</span><strong>+ ${formatCurrency(f.revisionFee)}</strong></div>`:'',f.maintenanceFee?`<div class="financial-summary-row minor"><span>System Maintenance Fee</span><strong>+ ${formatCurrency(f.maintenanceFee)}</strong></div>`:''].join('');
+        box.innerHTML=`<div class="financial-summary-v82"><div class="financial-summary-row"><span>Items Subtotal</span><strong>${formatCurrency(f.itemsSubtotal)}</strong></div>${f.additionalCharges?`<div class="financial-summary-label">Additional Charges</div>${chargeRows}`:''}${f.discount?`<div class="financial-summary-row"><span>Discount</span><strong>− ${formatCurrency(f.discount)}</strong></div>`:''}<div class="financial-summary-row total"><span>Project Total</span><strong>${formatCurrency(f.total)}</strong></div></div>`;
+      }
+
+      function renderProjectNotesPreview(proj){
+        const box=document.getElementById('projectNotesPreview');if(!box||!proj)return;
+        const text=String(proj.notes||'').trim();
+        box.innerHTML=text?`<p>${escapeHtml(text)}</p>`:`<div class="project-notes-empty"><strong>No notes added yet.</strong><span>Use the Notes tab to add important details about this project.</span></div>`;
+      }
+
+      function renderProjectNotesTab(proj){
+        if(!proj)return;const notes=document.getElementById('projectNotesTextarea');if(notes){notes.value=proj.notes||'';enforceWordLimit(notes,120,'projectNotesWordCount');}
+        renderProjectNotesPreview(proj);
+        const box=document.getElementById('projectActivityList');if(!box)return;
+        const events=[];const push=(date,title,detail='')=>{if(date)events.push({date,title,detail});};
+        push(proj.created_at,'Project created',formatProjectId(proj));
+        (proj.payments||[]).forEach(p=>push(p.payment_date||p.created_at,'Payment recorded',formatCurrency(Number(p.amount_paid||p.amount||0))+(p.method||p.payment_method?` · ${p.payment_method||p.method}`:'')));
+        (proj.deliverables||[]).filter(d=>d.completed&&d.completed_at&&!d.is_group).forEach(d=>push(d.completed_at,'Deliverable completed',d.item_name||d.name||'Deliverable'));
+        if(proj.updated_at&&proj.updated_at!==proj.created_at)push(proj.updated_at,'Project updated','Latest project data saved');
+        events.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
+        const fmt=date=>{const d=parseDateSafe(date);return d?d.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'—';};
+        box.innerHTML=events.length?`<div class="project-activity-list-v82">${events.slice(0,8).map(e=>`<div class="project-activity-row-v82"><span class="activity-dot"></span><div><strong>${escapeHtml(e.title)}</strong>${e.detail?`<small>${escapeHtml(e.detail)}</small>`:''}</div><time>${fmt(e.date)}</time></div>`).join('')}</div>`:`<div class="project-notes-empty"><strong>No activity yet.</strong><span>Project changes and payments will appear here.</span></div>`;
+      }
+
+
       function projectHasPackage(proj) {
         const items=proj?.project_items||proj?.items||[];
         return Array.isArray(items)&&items.some(i=>String(i?.type||'').toUpperCase()==='PACKAGE');
       }
 function getProjectMaintenanceFee(proj) {
   const fee=getFeeConfig('SYSTEM_MAINTENANCE');
-  return projectHasPackage(proj)&&fee.active!==false?SYSTEM_MAINTENANCE_FEE:0;
+  return projectHasPackage(proj)&&fee.active!==false?Math.max(0,Number(fee.amount||SYSTEM_MAINTENANCE_FEE)):0;
 }
-function getProjectRevisionFee(proj){ return 0; } // Revision requests are explicit PHP 500 ADDON order items.
+function getProjectRevisionFee(proj){
+  const items=Array.isArray(proj?.project_items)?proj.project_items:[];
+  const legacy=items.filter(isRevisionChargeItem).reduce((sum,item)=>sum+Math.max(1,Number(item.qty||1))*Math.max(0,Number(item.price||0)),0);
+  if(legacy>0)return legacy;
+  const count=Math.max(0,Math.floor(Number(proj?.revision_count||0))),per=Math.max(0,Number(proj?.revision_fee_per_revision||getFeeAmount('REVISION',REVISION_FEE_PER_REVISION)));
+  return count*per;
+} // Revision requests are tracked as additional charges; legacy ADDON rows remain supported.
 
-      function getProjectInvoiceTotal(proj){return Math.max(0,Number(proj?.total_amount||0))+getProjectMaintenanceFee(proj)+getProjectRevisionFee(proj);}
+      function getProjectInvoiceTotal(proj){return getProjectFinancialBreakdown(proj).total;}
 
-      function getProjectBalance(proj) {
-        const paid=getProjectPaid(proj),invoiceTotal=getProjectInvoiceTotal(proj);
-        return Math.max(0,invoiceTotal-paid);
-      }
+      function getProjectBalance(proj) { return getProjectFinancialBreakdown(proj).balance; }
 
       function getProjectProgress(proj) {
         const ds=(proj.deliverables||[]).filter(d=>!d.is_group);
@@ -2479,18 +2563,14 @@ function updateRushCalculations() {
         return proj.invoice_number;
       }
 
-      function getProjectPaymentStatus(proj){
-        const total=getProjectInvoiceTotal(proj),paid=Math.max(0,getProjectPaid(proj)),balance=Math.max(0,total-paid);
-        if(total>0&&balance<=0)return 'Completed';
-        if(paid>0)return 'Downpayment';
-        return 'Pending';
-      }
+      function getProjectPaymentStatus(proj){ return getProjectFinancialBreakdown(proj).status; }
 
       function getInvoiceStatus(proj, balance) {
-        if (balance <= 0 && Number(proj.total_amount) > 0) return "PAID";
-        const paid=getProjectPaid(proj);
-        if (paid > 0) return "DOWNPAYMENT";
-        return "UNPAID";
+        const f=getProjectFinancialBreakdown(proj),effectiveBalance=Number.isFinite(Number(balance))?Math.max(0,Number(balance)):f.balance;
+        if(f.total>0&&effectiveBalance<=0.005)return 'PAID';
+        const today=new Date();today.setHours(0,0,0,0);const due=parseDateSafe(f.dueDate);if(due)due.setHours(0,0,0,0);
+        if(due&&due<today&&effectiveBalance>0)return 'OVERDUE';
+        return f.paid>0?'PARTIALLY PAID':'UNPAID';
       }
 
       function switchProjectTab(tab, event) {
@@ -2498,10 +2578,11 @@ function updateRushCalculations() {
         const target=document.getElementById(`projTab-${tab}`);if(target)target.classList.add('active');
         document.querySelectorAll('#view-project-details .tab-btn').forEach(btn=>btn.classList.toggle('active',btn.dataset.projectTab===tab));
         const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
-        if(tab==='project-data')populateProjectData(proj);
+        if(tab==='project-data'){populateProjectData(proj);renderProjectOrderItems(proj);}
+        if(tab==='deliverables')renderProjectDeliverablesList(proj);
         if(tab==='payment-tracker')renderPaymentTracker(proj);
         if(tab==='invoice')renderInvoicePaper(proj);
-        if(tab==='notes'){const notes=document.getElementById('projectNotesTextarea');notes.value=proj.notes||'';enforceWordLimit(notes,120,'projectNotesWordCount');}
+        if(tab==='notes')renderProjectNotesTab(proj);
       }
 
       async function saveInvoicePDF() {
@@ -2552,19 +2633,16 @@ function updateRushCalculations() {
         const client=state.clients.find(c=>c.id===proj.client_id)||state.clients.find(c=>String(c.email||'').toLowerCase()===email.toLowerCase()); if(client){client.name=clientName;if(email)client.email=email;}
         persistProjectsState(); persistClientsState(); closeModal("editProjectModal"); openProjectDetails(proj.id); renderOverviewDashboard(); renderProjects(); showToast("Project record updated.");
       }
-      function openProjectDetails(projId, initialTab='deliverables') {
+      function openProjectDetails(projId, initialTab='project-data') {
         state.activeProjectId=projId;
         const proj=state.projects.find(p=>p.id===projId);if(!proj)return;
         if(Array.isArray(proj.project_items)&&proj.project_items.some(i=>String(i.type||'').toUpperCase()==='HISTORY')&&Array.isArray(proj.deliverables)&&proj.deliverables.length===1&&String(proj.deliverables[0].item_name||proj.deliverables[0].name||'')===String(proj.project_type||'')){proj.deliverables=[];persistProjectsState();}
         const hasOldAutoDeliverables=Array.isArray(proj.deliverables)&&proj.deliverables.some(d=>d.order_item_id&&String(d.source_type||'').toUpperCase()!=='ORDER_ITEM');
         if(hasOldAutoDeliverables&&Array.isArray(proj.project_items)&&!proj.project_items.some(i=>String(i.type||'').toUpperCase()==='HISTORY')){syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();}
         document.getElementById('projDetailTitle').innerText=proj.title||'Untitled Project';
-        document.getElementById('projDetailClient').innerText=[formatProjectId(proj),proj.client_email||'No email'].join('  |  ');
-        populateProjectData(proj);
-        renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);
-        document.getElementById('projectNotesTextarea').value=proj.notes||'';
-        navigateTo('project-details');
-        switchProjectTab(initialTab||'deliverables');
+        document.getElementById('projDetailClient').innerText=[formatProjectId(proj),proj.client_email||'No email'].join(' · ');
+        populateProjectData(proj);renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);renderProjectNotesTab(proj);
+        navigateTo('project-details');switchProjectTab(initialTab||'project-data');
       }
 
       function getProjectClientRecord(proj){
@@ -2576,6 +2654,7 @@ function updateRushCalculations() {
         set('projectDataClientName',proj.client_name||client.name||'');set('projectDataClientEmail',proj.client_email||client.email||'');set('projectDataClientPhone',proj.client_phone||client.phone||'');set('projectDataClientAddress',proj.client_address||client.address||'');
         set('projectDataProjectId',formatProjectId(proj));set('projectDataProjectName',proj.title||'');set('projectDataStartDate',proj.start_date||'');set('projectDataDeadline',proj.deadline_date||'');setTimeout(()=>refreshProjectDataRushPreview(false),0);
         const priorityEl=document.getElementById('projectDataPriority');if(priorityEl)priorityEl.checked=projectIsPriority(proj);
+        renderProjectFinancialSummary(proj);renderProjectNotesPreview(proj);
       }
       function openProjectData(projId){
         if(projId&&projId!==state.activeProjectId){openProjectDetails(projId);setTimeout(()=>switchProjectTab('project-data'),0);return;}
@@ -2636,31 +2715,32 @@ function updateRushCalculations() {
 
       function renderProjectDeliverablesList(proj) {
         const container=document.getElementById('projectDeliverablesList');if(!container)return;
-        const ds=Array.isArray(proj.deliverables)?proj.deliverables:[];ds.forEach((d,i)=>{d.id=d.id||`del_${proj.id}_${i}`;d.item_name=d.item_name||d.name||'Deliverable';d.completed=!!d.completed||String(d.status||'').toLowerCase()==='completed';d.progress=d.completed?100:Number(d.progress||0);d.status=d.completed?'Completed':'Pending';});
-        ds.filter(d=>d.is_group).forEach(parent=>{const children=ds.filter(c=>String(c.parent_id||'')===String(parent.id));if(children.length){parent.completed=children.every(c=>c.completed);parent.progress=Math.round(children.reduce((s,c)=>s+(c.completed?100:Number(c.progress||0)),0)/children.length);parent.status=parent.completed?'Completed':'Pending';}});
-        const countable=ds.filter(d=>!d.is_group),completed=countable.filter(d=>d.completed).length,percent=countable.length?Math.round(completed/countable.length*100):0;const setText=(id,v)=>{const el=document.getElementById(id);if(el)el.innerText=v};setText('projDetailProgressCount',`${completed} / ${countable.length} completed`);setText('projDetailProgressPercent',`${percent}%`);const bar=document.getElementById('projDetailProgressBar');if(bar)bar.style.width=`${percent}%`;const overallBar=document.getElementById('projectOverallProgressBar'),overallPct=document.getElementById('projectOverallProgressPercent'),overallCount=document.getElementById('projectOverallProgressCount');if(overallBar)overallBar.style.width=`${percent}%`;if(overallPct)overallPct.textContent=`${percent}%`;if(overallCount)overallCount.textContent=`${completed} / ${countable.length}`;
-        if(!ds.length){container.innerHTML=`<div class="empty-compact-state"><strong>No deliverables yet</strong><span>Add order items in Project Data. They will appear here automatically.</span></div>`;return;}
-        const roots=ds.filter(d=>!d.parent_id);const row=(d,child=false)=>{const menuId=`deliverableMenu_${String(d.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,progress=d.is_group?Number(d.progress||0):(d.completed?100:Number(d.progress||0));return `<div class="deliverable-checklist-row ${child?'deliverable-child-row':''} ${d.completed?'is-complete':''}"><button type="button" class="deliverable-check ${d.completed?'checked':''}" aria-pressed="${d.completed?'true':'false'}" onclick="app.toggleDeliverable('${proj.id}','${String(d.id).replace(/'/g,"\'")}')"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></button><div class="deliverable-checklist-copy"><strong>${escapeHtml(d.item_name)}</strong>${d.is_group?`<span>${ds.filter(c=>String(c.parent_id||'')===String(d.id)).filter(c=>c.completed).length}/${ds.filter(c=>String(c.parent_id||'')===String(d.id)).length} included items</span>`:''}</div><div class="deliverable-item-progress"><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${progress}%"></div></div><span>${Math.round(progress)}%</span></div><div class="popover-wrap" id="${menuId}"><button class="icon-more-button" onclick="event.stopPropagation();app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action text-danger" onclick="event.stopPropagation();app.deleteProjectDeliverable('${String(d.id).replace(/'/g,"\'")}')">Remove Deliverable</button></div></div></div>`};
-        container.innerHTML=`<div class="deliverable-checklist">${roots.map(root=>`<div class="deliverable-group-block">${row(root,false)}${ds.filter(c=>String(c.parent_id||'')===String(root.id)).map(c=>row(c,true)).join('')}</div>`).join('')}</div>`;
+        const ds=Array.isArray(proj.deliverables)?proj.deliverables:[];
+        ds.forEach((d,i)=>{d.id=d.id||`del_${proj.id}_${i}`;d.item_name=d.item_name||d.name||'Deliverable';d.completed=!!d.completed||String(d.status||'').toLowerCase()==='completed';d.progress=d.completed?100:Math.max(0,Math.min(100,Number(d.progress||0)));if(d.completed)d.status='Completed';else if(!d.status||String(d.status).toLowerCase()==='pending')d.status=d.progress>0?'In Progress':'Not Started';});
+        ds.filter(d=>d.is_group).forEach(parent=>{const children=ds.filter(c=>String(c.parent_id||'')===String(parent.id));if(children.length){parent.completed=children.every(c=>c.completed);parent.progress=Math.round(children.reduce((sum,c)=>sum+(c.completed?100:Number(c.progress||0)),0)/children.length);parent.status=parent.completed?'Completed':parent.progress>0?'In Progress':'Not Started';}});
+        const countable=ds.filter(d=>!d.is_group),completed=countable.filter(d=>d.completed).length,remaining=Math.max(0,countable.length-completed),percent=countable.length?Math.round(completed/countable.length*100):0;
+        const setText=(id,v)=>{const el=document.getElementById(id);if(el)el.innerText=v};setText('projDetailProgressCount',`${completed} of ${countable.length} completed`);setText('projDetailProgressPercent',`${percent}%`);
+        const bar=document.getElementById('projDetailProgressBar');if(bar)bar.style.width=`${percent}%`;const overallBar=document.getElementById('projectOverallProgressBar'),overallPct=document.getElementById('projectOverallProgressPercent'),overallCount=document.getElementById('projectOverallProgressCount');if(overallBar)overallBar.style.width=`${percent}%`;if(overallPct)overallPct.textContent=`${percent}%`;if(overallCount)overallCount.textContent=`${completed} / ${countable.length} completed`;
+        const deadline=parseDateSafe(proj.deadline_date),today=new Date();today.setHours(0,0,0,0);if(deadline)deadline.setHours(0,0,0,0);const onSchedule=!(deadline&&deadline<today&&remaining>0);
+        const stats=document.getElementById('projectDeliverablesStats');if(stats)stats.innerHTML=`<div><span>Total Items</span><strong>${countable.length}</strong></div><div><span>Completed</span><strong>${completed}</strong></div><div><span>Remaining</span><strong>${remaining}</strong></div><div><span>On Schedule</span><strong class="${onSchedule?'positive':'negative'}">${onSchedule?'Yes':'No'}</strong></div>`;
+        if(!ds.length){container.innerHTML=`<div class="empty-compact-state deliverables-empty-v82"><strong>No deliverables yet</strong><span>Add order items in Project Data. They will appear here automatically.</span></div>`;return;}
+        const statusMeta=d=>{const raw=String(d.status||'').toLowerCase();if(d.completed)return ['Completed','completed'];if(raw.includes('block'))return ['Blocked','blocked'];if(raw.includes('review'))return ['For Review','review'];if(Number(d.progress||0)>0)return ['In Progress','progress'];return ['Not Started','not-started'];};
+        const row=(d,child=false)=>{const menuId=`deliverableMenu_${String(d.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,progress=d.is_group?Number(d.progress||0):(d.completed?100:Number(d.progress||0)),[label,statusClass]=statusMeta(d),children=ds.filter(c=>String(c.parent_id||'')===String(d.id));return `<div class="deliverable-v82-row ${child?'is-child':''} ${d.is_group?'is-group':''} ${d.completed?'is-complete':''}"><div class="deliverable-name-cell"><button type="button" class="deliverable-check ${d.completed?'checked':''}" aria-pressed="${d.completed?'true':'false'}" onclick="app.toggleDeliverable('${proj.id}','${String(d.id).replace(/'/g,"\\'")}')"><svg class="icon-svg sm" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></svg></button><div><strong>${escapeHtml(titleCaseProductName(d.item_name))}</strong>${d.is_group?`<small>${children.length} deliverable${children.length===1?'':'s'}</small>`:''}</div></div><div><span class="deliverable-status-chip ${statusClass}">${label}</span></div><div class="deliverable-progress-cell"><span>${Math.round(progress)}%</span><div class="progress-bar-track"><div class="progress-bar-fill" style="width:${progress}%"></div></div></div><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="event.stopPropagation();app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action text-danger" onclick="event.stopPropagation();app.deleteProjectDeliverable('${String(d.id).replace(/'/g,"\\'")}')">Remove Deliverable</button></div></div></div>`;};
+        const roots=ds.filter(d=>!d.parent_id);container.innerHTML=`<div class="deliverables-v82-list">${roots.map(root=>`<div class="deliverable-v82-group">${row(root,false)}${ds.filter(c=>String(c.parent_id||'')===String(root.id)).map(c=>row(c,true)).join('')}</div>`).join('')}</div>`;
       }
 function recalculateProjectFromOrderItems(proj) {
-  const items = Array.isArray(proj.project_items) ? proj.project_items : [];
-  const grossSubtotal = items.reduce((sum,item) => sum + Math.max(0,Number(item.price||0)) * Math.max(1,Number(item.qty||1)), 0);
-  const itemDiscountTotal=items.reduce((sum,item)=>{if(['PACKAGE','ADDON'].includes(String(item.type||'').toUpperCase()))return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0);
-  const subtotal=Math.max(0,grossSubtotal-itemDiscountTotal);
-  proj.subtotal_amount = subtotal;proj.item_discount_amount=itemDiscountTotal;
-  proj.system_maintenance_charge=items.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?SYSTEM_MAINTENANCE_FEE:0;
-  const discount = Math.max(0, Number(proj.discount_amount || 0));
-  const stdDays=standardProductionDaysForProject(proj);
-  if(proj.start_date&&(!proj.deadline_date||proj.deadline_auto===true)){proj.deadline_date=addDaysToDateString(proj.start_date,stdDays);proj.deadline_auto=true;}
-  proj.standard_production_days=stdDays;
-  if(proj.start_date&&proj.deadline_date){const rushCalc=calculateRushFromTimeline(proj.start_date,proj.deadline_date,stdDays,projectWorkloadDeliverableCountFromItems(items));proj.rush_days_early=rushCalc.daysEarly;proj.rush_fee=rushCalc.fee;proj.rush_base_fee=rushCalc.baseFee;proj.rush_load_factor=rushCalc.loadFactor;proj.rush_project_workload=rushCalc.deliverableCount;}
-  const rush = Math.max(0, Number(proj.rush_fee || 0));
-  const workload=calculateWorkloadRushSurcharge(projectNumber(proj),rush,proj.id,proj.workload_at_booking);
-  proj.workload_rush_rate=workload.rate;proj.workload_rush_fee=workload.fee;if(!Number.isFinite(Number(proj.workload_at_booking)))proj.workload_at_booking=workload.active;
-  proj.total_amount = Math.max(0, subtotal - discount + rush + Number(workload.fee||0));proj.pending_amount = Math.max(0, getProjectInvoiceTotal(proj) - getProjectPaid(proj));
-  if(!proj.project_type){const cats=[...new Set(items.filter(i=>!['ADDON','REQUEST'].includes(String(i.type||'').toUpperCase())).map(i=>String(i.category||'').trim()).filter(Boolean))];proj.project_type=cats.length===1?cats[0]:(cats.length>1?'Mixed Services':'');}
-  proj.updated_at = new Date().toISOString();
+  const items=Array.isArray(proj.project_items)?proj.project_items:[];
+  const orderItems=items.filter(item=>!isRevisionChargeItem(item));
+  const grossSubtotal=orderItems.reduce((sum,item)=>sum+Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1)),0);
+  const itemDiscountTotal=orderItems.reduce((sum,item)=>{if(['PACKAGE','ADDON'].includes(String(item.type||'').toUpperCase()))return sum;const line=Math.max(0,Number(item.price||0))*Math.max(1,Number(item.qty||1));return sum+Math.min(line,Math.max(0,Number(item.item_discount||0)));},0);
+  const subtotal=Math.max(0,grossSubtotal-itemDiscountTotal);proj.subtotal_amount=subtotal;proj.item_discount_amount=itemDiscountTotal;
+  proj.system_maintenance_charge=orderItems.some(i=>String(i.type||'').toUpperCase()==='PACKAGE')?getFeeAmount('SYSTEM_MAINTENANCE',SYSTEM_MAINTENANCE_FEE):0;
+  const discount=Math.max(0,Number(proj.discount_amount||0)),stdDays=standardProductionDaysForProject(proj);
+  if(proj.start_date&&(!proj.deadline_date||proj.deadline_auto===true)){proj.deadline_date=addDaysToDateString(proj.start_date,stdDays);proj.deadline_auto=true;}proj.standard_production_days=stdDays;
+  if(proj.start_date&&proj.deadline_date){const rushCalc=calculateRushFromTimeline(proj.start_date,proj.deadline_date,stdDays,projectWorkloadDeliverableCountFromItems(orderItems));proj.rush_days_early=rushCalc.daysEarly;proj.rush_fee=rushCalc.fee;proj.rush_base_fee=rushCalc.baseFee;proj.rush_load_factor=rushCalc.loadFactor;proj.rush_project_workload=rushCalc.deliverableCount;}
+  const rush=Math.max(0,Number(proj.rush_fee||0)),workload=calculateWorkloadRushSurcharge(projectNumber(proj),rush,proj.id,proj.workload_at_booking);proj.workload_rush_rate=workload.rate;proj.workload_rush_fee=workload.fee;if(!Number.isFinite(Number(proj.workload_at_booking)))proj.workload_at_booking=workload.active;
+  proj.total_amount=Math.max(0,subtotal-discount+rush+Number(workload.fee||0));proj.pending_amount=Math.max(0,getProjectInvoiceTotal(proj)-getProjectPaid(proj));
+  if(!proj.project_type){const cats=[...new Set(orderItems.filter(i=>!['ADDON','REQUEST'].includes(String(i.type||'').toUpperCase())).map(i=>String(i.category||'').trim()).filter(Boolean))];proj.project_type=cats.length===1?cats[0]:(cats.length>1?'Mixed Services':'');}proj.updated_at=new Date().toISOString();
 }
       function syncProjectDeliverablesFromOrderItems(proj){
         if(!proj)return false;
@@ -2684,18 +2764,12 @@ function recalculateProjectFromOrderItems(proj) {
         proj.deliverables=[...fresh,...manual];proj.updated_at=new Date().toISOString();return true;
       }
 function renderProjectOrderItems(proj) {
-  const box=document.getElementById('projectOrderItemsList'); if(!box||!proj)return;
-  if(!Array.isArray(proj.project_items)) proj.project_items = Array.isArray(proj.items) ? proj.items : [];
-  const items=proj.project_items;
-  const rows=items.length ? items.map((item,index)=>{
-    const type=String(item.type||'').toUpperCase();
-    const rawCategory=String(item.category||'').trim();
-    const visibleCategory=type==='PACKAGE'?'Package':type==='ADDON'?(String(item.addon_type||'').toUpperCase()==='REVISION'?'Revision Request':String(item.addon_type||'').toUpperCase()==='PROJECT_FILE'?'Project File Request':'Additional Item'):(!rawCategory||['SOLO','SERVICE','ITEM'].includes(rawCategory.toUpperCase())?'Item':rawCategory);
-    const line=Number(item.price||0)*Math.max(1,Number(item.qty||1)),lineDisc=['PACKAGE','ADDON'].includes(type)?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-lineDisc,menuId=`orderItemMenu_${index}`;
-    return `<div class="order-item-row"><div class="order-item-main"><strong>${escapeHtml(item.name||'Untitled Item')}</strong><span>${escapeHtml(visibleCategory)}${item.source_item_name?` · ${escapeHtml(item.source_item_name)}`:''} · Qty ${Math.max(1,Number(item.qty||1))}${lineDisc?` · Discount ${formatCurrency(lineDisc)}`:''}</span></div><div class="order-item-price"><strong>${formatCurrency(net)}</strong><span>${formatCurrency(Number(item.price||0))} each</span></div><div class="order-item-actions"><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Order item options" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openProjectOrderItemModal(${index})">Edit Order Item</button><button class="popover-action text-danger" onclick="app.requestDeleteProjectOrderItem(${index},event)">Remove Order Item</button></div></div></div></div>`;
-  }).join('') : `<div class="text-muted py-4">No order items yet.</div>`;
-  const grossSubtotal=items.reduce((s,i)=>s+Number(i.price||0)*Math.max(1,Number(i.qty||1)),0),itemDisc=items.reduce((s,i)=>{const type=String(i.type||'').toUpperCase();if(['PACKAGE','ADDON'].includes(type))return s;const line=Number(i.price||0)*Math.max(1,Number(i.qty||1));return s+Math.min(line,Math.max(0,Number(i.item_discount||0)));},0),subtotal=Math.max(0,grossSubtotal-itemDisc),discount=Math.max(0,Number(proj.discount_amount||0)),baseRush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),combinedRush=baseRush+workloadFee,revisionFee=0,maintenance=getProjectMaintenanceFee(proj),displayTotal=Math.max(0,subtotal-discount+combinedRush+maintenance);
-  box.innerHTML=`<div class="project-order-items-list">${rows}</div><div class="project-items-summary"><div class="rush-line"><span>Item Subtotal</span><strong>${formatCurrency(grossSubtotal)}</strong></div>${itemDisc?`<div class="rush-line"><span>Item Discounts</span><strong>− ${formatCurrency(itemDisc)}</strong></div>`:''}${discount?`<div class="rush-line"><span>Project Discount</span><strong>− ${formatCurrency(discount)}</strong></div>`:''}${(combinedRush||revisionFee||maintenance)?`<div class="project-items-fee-label">Additional Fees <button type="button" class="inline-info-button" onclick="app.openFeeInfo('all')">i</button></div>`:''}${combinedRush?`<div class="rush-line compact-fee-row"><span>Rush Fee</span><strong>+ ${formatCurrency(combinedRush)}</strong></div>`:''}${revisionFee?`<div class="rush-line compact-fee-row"><span>Revision Fee</span><strong>+ ${formatCurrency(revisionFee)}</strong></div>`:''}${maintenance?`<div class="rush-line compact-fee-row"><span>System Maintenance Fee</span><strong>+ ${formatCurrency(maintenance)}</strong></div>`:''}<div class="project-items-grand-total"><span>Project Total</span><strong>${formatCurrency(displayTotal)}</strong></div></div>`;
+  const box=document.getElementById('projectOrderItemsList');if(!box||!proj)return;
+  if(!Array.isArray(proj.project_items))proj.project_items=Array.isArray(proj.items)?proj.items:[];
+  const allItems=proj.project_items,items=allItems.filter(item=>!isRevisionChargeItem(item));
+  const rows=items.map(item=>{const originalIndex=allItems.indexOf(item),type=String(item.type||'').toUpperCase(),addon=String(item.addon_type||'').toUpperCase(),rawCategory=String(item.category||'').trim(),visibleType=type==='PACKAGE'?'Package':addon==='PROJECT_FILE'?'Service':(!rawCategory||['SOLO','SERVICE','ITEM'].includes(rawCategory.toUpperCase())?'Item':titleCaseProductName(rawCategory));const qty=Math.max(1,Number(item.qty||1)),line=Math.max(0,Number(item.price||0))*qty,lineDisc=['PACKAGE','ADDON'].includes(type)?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-lineDisc,menuId=`orderItemMenu_${originalIndex}`;return `<div class="project-order-table-row"><div class="project-order-item-name"><strong>${escapeHtml(titleCaseProductName(item.name||'Untitled Item'))}</strong>${item.source_item_name?`<small>${escapeHtml(item.source_item_name)}</small>`:''}</div><div><span class="order-type-label">${escapeHtml(visibleType)}</span></div><div class="project-order-qty">${qty}</div><div class="project-order-amount"><strong>${formatCurrency(net)}</strong>${lineDisc?`<small>− ${formatCurrency(lineDisc)} discount</small>`:''}</div><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" title="Order item options" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openProjectOrderItemModal(${originalIndex})">Edit Order Item</button><button class="popover-action text-danger" onclick="app.requestDeleteProjectOrderItem(${originalIndex},event)">Remove Order Item</button></div></div></div>`;}).join('');
+  box.innerHTML=items.length?`<div class="project-order-table"><div class="project-order-table-head"><span>Item</span><span>Type</span><span>Qty</span><span>Amount</span><span></span></div>${rows}</div>`:`<div class="empty-compact-state"><strong>No order items yet</strong><span>Add a service, package, or Project File Request.</span></div>`;
+  renderProjectFinancialSummary(proj);renderProjectNotesPreview(proj);
 }
       function getProjectCatalogChoices(query=''){
         const q=String(query||'').trim().toLowerCase();
@@ -2892,15 +2966,18 @@ function openProjectOrderBatchModal(){
       }
 
 function renderPaymentTracker(proj) {
-  const overviewEl=document.getElementById('paymentOverview'),listEl=document.getElementById('paymentTransactions');if(!overviewEl||!proj)return;
-  const total=getProjectInvoiceTotal(proj),payments=[...(proj.payments||[])],totalPaid=payments.reduce((s,p)=>s+Number(p.amount_paid||p.amount||0),0),remaining=Math.max(0,total-totalPaid),status=getProjectPaymentStatus(proj);
-  overviewEl.innerHTML=`<div class="payment-metrics-grid"><div class="payment-metric-card"><div><span>Payment Status</span><strong>${escapeHtml(status)}</strong></div></div><div class="payment-metric-card"><div><span>Invoice Total</span><strong class="number-animate">${formatCurrency(total)}</strong></div></div><div class="payment-metric-card paid"><div><span>Total Paid</span><strong class="number-animate">${formatCurrency(totalPaid)}</strong></div></div><div class="payment-metric-card ${remaining>0?'due':'paid'}"><div><span>Balance Due</span><strong class="number-animate">${formatCurrency(remaining)}</strong></div></div></div>`;
-  if(listEl){
-    if(!payments.length){listEl.innerHTML='<div class="payment-history-empty"><strong>No payments recorded</strong><span>Recorded payments will appear here as transactions.</span></div>';animateNumbersIn(overviewEl);return;}
-    payments.sort((a,b)=>new Date(b.payment_date||b.created_at||0)-new Date(a.payment_date||a.created_at||0));
-    listEl.innerHTML=`<div class="payment-history-unified">${payments.map(p=>{const amount=Number(p.amount_paid||p.amount||0),date=parseDateSafe(p.payment_date||p.created_at),method=p.payment_method||p.method||'Payment',ref=p.reference_no||p.reference_number||'',notes=p.notes||'',menuId=`paymentMenu_${String(p.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,hasReceipt=!!p.receipt_data;return `<div class="payment-history-unified-row"><div class="payment-history-unified-main"><strong>${escapeHtml(method)}</strong><span>${ref?`Ref ${escapeHtml(ref)} · `:''}${date?date.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'No date'}${hasReceipt?' · Receipt attached':''}</span>${notes?`<small>${escapeHtml(notes)}</small>`:''}</div><div class="payment-history-unified-amount"><strong>${formatCurrency(amount)}</strong></div><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openRecordPaymentModal('${p.id}')">Edit Payment</button><button class="popover-action" onclick="app.attachReceiptToPayment('${p.id}')">${hasReceipt?'Replace':'Attach'} Receipt</button>${hasReceipt?`<button class="popover-action" onclick="app.viewPaymentReceipt('${p.id}')">View Receipt</button>`:''}</div></div></div>`}).join('')}</div>`;
+  const calcEl=document.getElementById('paymentCalculationsOverview'),balanceEl=document.getElementById('balanceSummaryCard'),listEl=document.getElementById('paymentHistoryList');if(!proj||!calcEl)return;
+  const f=getProjectFinancialBreakdown(proj),present=paymentStatusPresentation(f.status),payments=[...(proj.payments||[])];
+  calcEl.innerHTML=`<div class="payment-equation-v82"><div class="payment-equation-top"><div><span>Items Subtotal</span><strong>${formatCurrency(f.itemsSubtotal)}</strong></div><b>+</b><div><span>Additional Charges</span><strong>${formatCurrency(f.additionalCharges)}</strong></div><b>−</b><div><span>Discounts</span><strong>${formatCurrency(f.discount)}</strong></div><b>=</b><div class="equation-total"><span>Total</span><strong>${formatCurrency(f.total)}</strong></div></div><div class="payment-equation-bottom"><div><span>Total</span><strong>${formatCurrency(f.total)}</strong></div><b>−</b><div><span>Amount Paid</span><strong>${formatCurrency(f.paid)}</strong></div><b>=</b><div class="equation-balance"><span>Balance Due</span><strong>${formatCurrency(f.balance)}</strong></div></div></div>`;
+  if(balanceEl){
+    balanceEl.className=`card balance-summary-card-v82 ${present.className}`;
+    balanceEl.innerHTML=`<div class="balance-summary-inner"><span class="payment-status-pill ${present.className}">${escapeHtml(f.status)}</span><div class="balance-summary-label">Balance Due</div><strong class="balance-summary-amount">${formatCurrency(f.balance)}</strong><small>${present.helper}</small></div>`;
   }
-  animateNumbersIn(overviewEl);
+  if(listEl){
+    if(!payments.length){listEl.innerHTML='<div class="payment-history-empty-v82"><div class="empty-receipt-icon">▧</div><strong>No payments recorded yet.</strong><span>Record a payment to start tracking this project.</span></div>';return;}
+    payments.sort((a,b)=>new Date(b.payment_date||b.created_at||0)-new Date(a.payment_date||a.created_at||0));
+    listEl.innerHTML=`<div class="payment-history-table-v82"><div class="payment-history-head-v82"><span>Date</span><span>Method</span><span>Reference</span><span>Amount</span><span>Notes</span><span></span></div>${payments.map(p=>{const amount=Number(p.amount_paid||p.amount||0),date=parseDateSafe(p.payment_date||p.created_at),method=p.payment_method||p.method||'Payment',ref=p.reference_no||p.reference_number||'—',notes=p.notes||'—',menuId=`paymentMenu_${String(p.id).replace(/[^a-zA-Z0-9_-]/g,'')}`,hasReceipt=!!p.receipt_data;return `<div class="payment-history-row-v82"><span>${date?date.toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'—'}</span><strong>${escapeHtml(method)}</strong><span>${escapeHtml(ref)}</span><strong class="payment-history-amount-v82">${formatCurrency(amount)}</strong><span class="payment-history-notes-v82">${escapeHtml(notes)}</span><div class="popover-wrap" id="${menuId}"><button class="icon-more-button vertical-more" onclick="app.togglePopover('${menuId}',event)">⋮</button><div class="popover-panel client-row-menu"><button class="popover-action" onclick="app.openRecordPaymentModal('${p.id}')">Edit Payment</button><button class="popover-action" onclick="app.attachReceiptToPayment('${p.id}')">${hasReceipt?'Replace':'Attach'} Receipt</button>${hasReceipt?`<button class="popover-action" onclick="app.viewPaymentReceipt('${p.id}')">View Receipt</button>`:''}</div></div></div>`;}).join('')}</div>`;
+  }
 }
       /* ==========================================================================
          INVOICE GENERATOR & EMAIL REMINDERS
@@ -2914,14 +2991,11 @@ function openFeeInfo(type='all'){
 }
       function renderInvoicePaper(proj) {
         const paper=document.getElementById('invoicePaperPrintable');if(!paper||!proj)return;
-        const invoiceNo=ensureInvoiceNumber(proj),storedSubtotal=Math.max(0,Number(proj.subtotal_amount||0)),discount=Math.max(0,Number(proj.discount_amount||0));
-        const baseRush=Math.max(0,Number(proj.rush_fee||0)),workloadFee=Math.max(0,Number(proj.workload_rush_fee||0)),rush=baseRush+workloadFee,revisionFee=getProjectRevisionFee(proj),maintenance=Math.max(0,getProjectMaintenanceFee(proj));
-        const projectTotal=Math.max(0,Number(proj.total_amount||0)),inferredSubtotal=Math.max(0,projectTotal-baseRush-workloadFee+discount),subtotal=storedSubtotal>0?storedSubtotal:inferredSubtotal,additionalFees=rush+revisionFee+maintenance,invoiceTotal=Math.max(0,subtotal-discount+additionalFees);
-        const paid=(proj.payments||[]).reduce((sum,p)=>sum+Number(p.amount_paid||p.amount||0),0),balance=Math.max(0,invoiceTotal-paid),status=getInvoiceStatus({...proj,total_amount:invoiceTotal},balance);
-        const issue=getLocalDateString(new Date()),due=proj.invoice_due_date||proj.payment_due_date||proj.deadline_date||'',statusClass=status==='UNPAID'?'unpaid':status==='DOWNPAYMENT'?'partial':'paid',issueLabel=new Date(issue+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}),dueLabel=due?new Date(due+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'—';
-        const items=Array.isArray(proj.project_items)&&proj.project_items.length?proj.project_items:(Array.isArray(proj.items)?proj.items:[]);
-        const itemRows=items.map(item=>{const qty=Math.max(1,Number(item.qty||1)),unit=Math.max(0,Number(item.price||0)),line=qty*unit,itemDisc=String(item.type||'').toUpperCase()==='PACKAGE'?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-itemDisc;return `<tr><td><strong>${escapeHtml(item.name||'Item')}</strong>${itemDisc?`<small>Item discount −${formatCurrency(itemDisc)}</small>`:''}</td><td>${qty}</td><td>${formatCurrency(net)}</td></tr>`}).join('')||`<tr><td>Project Services</td><td>1</td><td>${formatCurrency(subtotal)}</td></tr>`;
-        paper.innerHTML=`<div class="invoice-header invoice-header-v68"><div class="invoice-brand-block"><h2>${escapeHtml(state.settings.businessName||'JUAN PROJECT')}</h2><div>${escapeHtml(state.ownerEmail||'')}</div><div>${escapeHtml(state.ownerPhone||'')}</div></div><div class="invoice-header-stack"><div class="invoice-label">Invoice</div><div class="invoice-number">${invoiceNo}</div><span class="invoice-status ${statusClass}">${status}</span><div class="invoice-issued-date">Issued ${issueLabel}</div></div></div><div class="invoice-meta-grid"><div><div class="invoice-label">Bill To</div><div class="font-bold">${escapeHtml(proj.client_name||'—')}</div><div class="text-sm text-secondary">${escapeHtml(proj.client_email||'')}</div></div><div><div class="invoice-label">Project</div><div class="font-bold">${escapeHtml(proj.title||'—')}</div><div class="text-sm text-secondary">Due ${dueLabel}</div></div></div><div class="invoice-items-wrap"><table class="invoice-items-table"><thead><tr><th>Order Item</th><th>Qty</th><th>Price</th></tr></thead><tbody>${itemRows}</tbody></table></div><div class="invoice-simple-summary"><div class="invoice-simple-row"><span>Subtotal</span><strong>${formatCurrency(subtotal)}</strong></div><div class="invoice-simple-row"><span>Discount</span><strong class="${discount?'text-danger':''}">${discount?`− ${formatCurrency(discount)}`:formatCurrency(0)}</strong></div>${additionalFees?`<div class="invoice-simple-section additional-fees-heading">Additional Fees <button type="button" class="mini-info-button screen-only" onclick="app.openFeeInfo('all')">i</button></div>${rush?`<div class="invoice-simple-row invoice-fee-row"><span>Rush Fee</span><strong>${formatCurrency(rush)}</strong></div>`:''}${revisionFee?`<div class="invoice-simple-row invoice-fee-row"><span>Revision Fee</span><strong>${formatCurrency(revisionFee)}</strong></div>`:''}${maintenance?`<div class="invoice-simple-row invoice-fee-row"><span>System Maintenance Fee</span><strong>${formatCurrency(maintenance)}</strong></div>`:''}<div class="invoice-simple-row invoice-additional-total"><span>Additional Fees</span><strong>${formatCurrency(additionalFees)}</strong></div>`:''}<div class="invoice-simple-row invoice-grand-total"><span>TOTAL</span><strong>${formatCurrency(invoiceTotal)}</strong></div><div class="invoice-simple-row"><span>Amount Paid</span><strong>${formatCurrency(paid)}</strong></div><div class="invoice-simple-row invoice-balance-row"><span>Balance</span><strong style="color:${balance?'var(--status-red)':'var(--status-green)'}">${formatCurrency(balance)}</strong></div></div><div class="text-sm text-tertiary invoice-thankyou">Thank you for choosing ${escapeHtml(state.settings.businessName||'JUAN PROJECT')}.</div>`;
+        const invoiceNo=ensureInvoiceNumber(proj),f=getProjectFinancialBreakdown(proj),present=paymentStatusPresentation(f.status);
+        const issue=proj.invoice_issue_date||getLocalDateString(new Date()),due=f.dueDate||'',issueLabel=new Date(issue+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}),dueLabel=due?new Date(due+'T00:00:00').toLocaleDateString('en-PH',{month:'short',day:'numeric',year:'numeric'}):'—';
+        const itemRows=f.items.map(item=>{const qty=Math.max(1,Number(item.qty||1)),unit=Math.max(0,Number(item.price||0)),line=qty*unit,type=String(item.type||'').toUpperCase(),itemDisc=['PACKAGE','ADDON'].includes(type)?0:Math.min(line,Math.max(0,Number(item.item_discount||0))),net=line-itemDisc;return `<tr><td><strong>${escapeHtml(titleCaseProductName(item.name||'Item'))}</strong>${itemDisc?`<small>Item discount −${formatCurrency(itemDisc)}</small>`:''}</td><td>${qty}</td><td>${formatCurrency(net)}</td></tr>`;}).join('')||`<tr><td>Project Services</td><td>1</td><td>${formatCurrency(f.itemsSubtotal)}</td></tr>`;
+        const chargeRows=[f.rushFee?`<div class="invoice-summary-row invoice-charge-row"><span>Rush Fee</span><strong>+ ${formatCurrency(f.rushFee)}</strong></div>`:'',f.revisionFee?`<div class="invoice-summary-row invoice-charge-row"><span>Revision Fee</span><strong>+ ${formatCurrency(f.revisionFee)}</strong></div>`:'',f.maintenanceFee?`<div class="invoice-summary-row invoice-charge-row"><span>System Maintenance Fee</span><strong>+ ${formatCurrency(f.maintenanceFee)}</strong></div>`:''].join('');
+        paper.innerHTML=`<div class="invoice-layout-v82"><div class="invoice-document-v82"><div class="invoice-header invoice-header-v82"><div class="invoice-brand-block"><h2>${escapeHtml(state.settings.businessName||'JUAN PROJECT')}</h2><div>${escapeHtml(state.ownerEmail||'')}</div><div>${escapeHtml(state.ownerPhone||'')}</div></div><div class="invoice-header-stack"><div class="invoice-label">Invoice</div><div class="invoice-number">${invoiceNo}</div><span class="invoice-status ${present.className}">${escapeHtml(f.status)}</span><div class="invoice-issued-date">Issued ${issueLabel}</div></div></div><div class="invoice-meta-grid invoice-meta-grid-v82"><div><div class="invoice-label">Bill To</div><div class="font-bold">${escapeHtml(proj.client_name||'—')}</div><div class="text-sm text-secondary">${escapeHtml(proj.client_email||'')}</div></div><div><div class="invoice-label">Project</div><div class="font-bold">${escapeHtml(proj.title||'—')}</div><div class="text-sm text-secondary">Due ${dueLabel}</div></div></div><div class="invoice-items-wrap invoice-items-wrap-v82"><table class="invoice-items-table"><thead><tr><th>Order Item</th><th>Qty</th><th>Amount</th></tr></thead><tbody>${itemRows}</tbody></table></div><div class="text-sm text-tertiary invoice-thankyou">Thank you for choosing ${escapeHtml(state.settings.businessName||'JUAN PROJECT')}.</div></div><aside class="invoice-summary-panel-v82"><div class="invoice-summary-row"><span>Items Subtotal</span><strong>${formatCurrency(f.itemsSubtotal)}</strong></div>${f.additionalCharges?`<div class="invoice-summary-section">Additional Charges</div>${chargeRows}`:''}${f.discount?`<div class="invoice-summary-row"><span>Discount</span><strong>− ${formatCurrency(f.discount)}</strong></div>`:''}<div class="invoice-summary-divider"></div><div class="invoice-summary-row invoice-total-row-v82"><span>Total</span><strong>${formatCurrency(f.total)}</strong></div><div class="invoice-summary-row invoice-paid-row-v82"><span>Amount Paid</span><strong>${formatCurrency(f.paid)}</strong></div><div class="invoice-balance-card-v82 ${present.className}"><span>Balance Due</span><strong>${formatCurrency(f.balance)}</strong><small>${present.helper}</small></div></aside></div>`;
       }
 
       function sendDeadlineReminderEmail(projId = null) {
@@ -3490,17 +3564,10 @@ function openFeeInfo(type='all'){
       }
 
       async function saveProjectNotes() {
-        if (!state.activeProjectId) return;
-        const proj = state.projects.find(p => p.id === state.activeProjectId);
-        if (!proj) return;
-        const notesEl=document.getElementById('projectNotesTextarea');enforceWordLimit(notesEl,120,'projectNotesWordCount');proj.notes = notesEl.value.trim();
-        proj.updated_at = new Date().toISOString();
-        persistProjectsState();
-        if (supabaseClient && state.isConnected) {
-          try { const {error}=await supabaseClient.from('projects').update({notes:proj.notes,updated_at:proj.updated_at}).eq('id',proj.id); if(error) throw error; }
-          catch(e){ console.warn('Notes database sync unavailable:',e.message); }
-        }
-        showToast("Notes saved.");
+        if (!state.activeProjectId) return;const proj=state.projects.find(p => p.id === state.activeProjectId);if (!proj) return;
+        const notesEl=document.getElementById('projectNotesTextarea');enforceWordLimit(notesEl,120,'projectNotesWordCount');proj.notes=notesEl.value.trim();proj.updated_at=new Date().toISOString();persistProjectsState();renderProjectNotesPreview(proj);renderProjectNotesTab(proj);
+        if (supabaseClient && state.isConnected) {try { const {error}=await supabaseClient.from('projects').update({notes:proj.notes,updated_at:proj.updated_at}).eq('id',proj.id); if(error) throw error; }catch(e){ console.warn('Notes database sync unavailable:',e.message); }}
+        showToast('Notes saved.');
       }
 
       function promptMarkAsDelivered() {
@@ -3636,7 +3703,11 @@ function openFeeInfo(type='all'){
       }
       function renderProjectFileRequestOptions(proj){const sel=document.getElementById('projectFileRequestItem');if(!sel)return;state.projectFileRequestChoices=getProjectFileRequestChoices(proj);sel.innerHTML=state.projectFileRequestChoices.length?state.projectFileRequestChoices.map((x,i)=>`<option value="${i}">${escapeHtml(x.name)} · ${formatCurrency(x.price)} → request ${formatCurrency(x.price*.5)}</option>`).join(''):'<option value="">No eligible item</option>';}
       function refreshProjectAfterRequest(proj){recalculateProjectFromOrderItems(proj);syncProjectDeliverablesFromOrderItems(proj);persistProjectsState();renderProjectOrderItems(proj);renderProjectDeliverablesList(proj);renderPaymentTracker(proj);renderInvoicePaper(proj);renderOverviewDashboard();}
-      function addProjectRevisionRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;if(!Array.isArray(proj.project_items))proj.project_items=[];const fee=REVISION_FEE_PER_REVISION;proj.project_items.push({id:`oi_${proj.id}_revision_${Date.now()}`,name:'Revision Request',qty:1,price:fee,type:'ADDON',addon_type:'REVISION',category:'Requests',item_discount:0});proj.revision_count=0;proj.revision_fee_per_revision=fee;refreshProjectAfterRequest(proj);showToast(`Revision request added · ${formatCurrency(fee)}.`);}
+      function addProjectRevisionRequest(){
+        const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;
+        const per=Math.max(0,getFeeAmount('REVISION',REVISION_FEE_PER_REVISION));proj.revision_count=Math.max(0,Math.floor(Number(proj.revision_count||0)))+1;proj.revision_fee_per_revision=per;proj.updated_at=new Date().toISOString();
+        refreshProjectAfterRequest(proj);showToast(`Revision fee added · ${formatCurrency(per)}.`);
+      }
       function removeProjectRevisionRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj||!Array.isArray(proj.project_items))return;const i=[...proj.project_items].map((x,idx)=>[x,idx]).reverse().find(([x])=>String(x.addon_type||'').toUpperCase()==='REVISION')?.[1];if(i===undefined)return;proj.project_items.splice(i,1);refreshProjectAfterRequest(proj);showToast('Revision request removed.');}
       function addProjectFileRequest(){const proj=state.projects.find(p=>p.id===state.activeProjectId);if(!proj)return;const idx=Number(document.getElementById('projectFileRequestItem')?.value),choice=(state.projectFileRequestChoices||[])[idx];if(!choice){showToast('Choose the item for the project file request.');return;}if(!Array.isArray(proj.project_items))proj.project_items=[];const price=Math.round(choice.price*.5*100)/100;proj.project_items.push({id:`oi_${proj.id}_file_${Date.now()}`,name:'Project File Request',source_item_name:choice.name,qty:1,price,type:'ADDON',addon_type:'PROJECT_FILE',product_code:null,source_product_code:choice.code||null,category:'Project Files',item_discount:0});refreshProjectAfterRequest(proj);renderProjectFileRequestOptions(proj);showToast(`Project file request added · ${formatCurrency(price)}.`);}
 
