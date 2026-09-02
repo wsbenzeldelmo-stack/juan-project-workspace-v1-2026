@@ -1,3 +1,12 @@
+# v8.3.0 — Seller / Shop Redesign
+
+- Rebuilt only the Seller / Shop page to match the approved catalog-management reference.
+- Added compact header actions, search + type/status/sort controls, 25/75 category/catalog layout, list/grid views, inline package inclusions, status badges, and row action menus.
+- Removed the full Additional Fees table from the main Shop canvas. Fee configuration now lives in the dedicated Additional Fees modal.
+- Preserved central fee/calculation behavior: System Maintenance Fee ₱21 once when applicable, Revision Fee ₱500 per additional revision, Rush Fee current rule, and Project File Request as an order item.
+- Added safe JSON catalog import that merges new IDs without resetting existing records.
+- Preserved offline-first local persistence and existing cloud/security pathways. No database schema migration required.
+
 # v8.2.0 — Project Details redesign + unified billing logic
 - Redesigned all Project Details tabs while preserving the existing JUAN PROJECT WORKSPACE sidebar, header, tab, spacing, card, and green-accent visual language.
 - Project Data now separates Client Information, Project Information, Order / Items, Financial Summary, and Notes preview with cleaner hierarchy.
